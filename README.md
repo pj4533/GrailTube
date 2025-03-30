@@ -70,17 +70,30 @@ GrailTube is a web application that helps you discover rare YouTube videos with 
 - Displays when you discovered videos and how many views they had at that time
 - Displays statistics on video view distributions (0 views, <10 views, <100 views, <1000 views)
 - Automatically tries multiple time periods to find rare content
+- Filters out commercial content, movie/TV trailers, and livestreams
 - Caches search results and video details to reduce API usage
 - Allows you to watch videos directly within the app
 - Clean, responsive interface with saved videos and search modes
 
 ## Technologies Used
 
-- Next.js
+- Next.js 14 with App Router
 - TypeScript
 - React Hooks
+- MySQL database
 - Tailwind CSS
 - YouTube Data API v3
+
+## Architecture
+
+The application follows a clean architecture with separation of concerns:
+
+- **UI Layer**: React components with Tailwind CSS
+- **Data Access Layer**: Custom hooks for data fetching and state management
+- **API Layer**: Next.js API routes for database operations
+- **Model Layer**: Database models and business logic
+- **Adapters**: Type conversion and data transformation
+- **Utilities**: Shared helper functions and constants
 
 ## License
 

@@ -20,22 +20,38 @@
 
 ## YouTube API Guidelines
 - Store API keys in .env.local (never commit)
-- Centralize API calls in src/lib/youtube.ts
+- Use the modular YouTube service structure (youtubeService, youtubeFilters, youtubeTypes)
 - Use caching mechanisms to reduce API quota usage
 - Track API call statistics for transparency
 - Always handle rate limiting and quota errors gracefully
-- Filter out live streams and misleading content when searching for rare videos
+- Filter out commercial content, live streams, and misleading content 
+
+## API and Data Guidelines
+- Use centralized error handling from src/lib/api.ts
+- Use shared fetch utilities for consistent API calling patterns
+- Follow data transformation patterns in adapters (videoAdapter.ts)
+- Prefer model abstractions for database operations
+- Handle loading, error, and success states consistently
+
+## Component Guidelines
+- Use shared UI components for common patterns (LoadingIndicator, ErrorDisplay, EmptyState)
+- Keep components focused on presentation, delegating data fetching to hooks
+- Follow consistent prop patterns across similar components
+- Use TypeScript interfaces for component props
+- Maintain consistent styling with Tailwind classes
 
 ## State Management
 - Use React hooks for local component state
-- Custom hooks for complex logic (e.g., useYouTubeSearch)
+- Custom hooks for complex logic (e.g., useYouTubeSearch, useSavedVideos)
 - Separate UI concerns from data fetching logic
-- Handle loading, error, and success states consistently
-- Provide clear status messages during search operations
+- Apply consistent patterns for state initialization and updates
+- Provide clear status messages during operations
 
 ## Project Structure
+- **/src/app**: Next.js app router pages and API routes
 - **/src/components**: Reusable UI components
-- **/src/hooks**: Custom React hooks 
-- **/src/lib**: Utility functions and API services
+  - **/src/components/ui**: Shared UI primitives and patterns
+- **/src/hooks**: Custom React hooks for data fetching and state
+- **/src/lib**: Utilities and services
+  - **/src/lib/models**: Database models and data access
 - **/src/types**: TypeScript type definitions
-- **/src/app**: Next.js app router pages and layouts
