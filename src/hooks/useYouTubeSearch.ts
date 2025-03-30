@@ -3,7 +3,8 @@ import {
   searchVideosInTimeWindow, 
   getVideoDetails, 
   filterRareVideos,
-  expandTimeWindow 
+  expandTimeWindow,
+  apiStats
 } from '@/lib/youtube';
 import { 
   getRandomPastDate,
@@ -120,6 +121,9 @@ export function useYouTubeSearch() {
     setVideos([]);
     setExpansionCount(0);
     
+    // Reset API call stats
+    apiStats.reset();
+    
     try {
       // Get a random date and create initial window
       const randomDate = getRandomPastDate();
@@ -142,6 +146,7 @@ export function useYouTubeSearch() {
     statusMessage,
     error,
     expansionCount,
+    apiStats,
     startSearch
   };
 }

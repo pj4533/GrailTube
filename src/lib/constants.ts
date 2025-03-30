@@ -7,8 +7,9 @@ export const STATUS_MESSAGE_DELAY_MS = 1200;
 
 // Search parameters
 export const RARE_VIEW_THRESHOLD = 5;
-export const DEFAULT_SEARCH_DURATION_MINUTES = 60;
+export const DEFAULT_SEARCH_DURATION_MINUTES = 720; // Start with 12 hours instead of 1 hour
 export const MIN_WINDOW_DURATION_MINUTES = 30;
+export const MAX_BATCH_SIZE = 50; // Maximum videos per API call
 
 // Search thresholds for adaptive window sizing
 export const BUSY_PERIOD_THRESHOLD = 200;

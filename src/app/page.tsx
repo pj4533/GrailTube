@@ -6,6 +6,7 @@ import { Video } from '@/types';
 import VideoGrid from '@/components/VideoGrid';
 import VideoPlayer from '@/components/VideoPlayer';
 import SearchStatus from '@/components/SearchStatus';
+import ApiStatsDisplay from '@/components/ApiStatsDisplay';
 
 export default function Home() {
   const [playingVideoId, setPlayingVideoId] = useState<string | null>(null);
@@ -15,6 +16,7 @@ export default function Home() {
     currentWindow, 
     statusMessage, 
     error, 
+    apiStats,
     startSearch 
   } = useYouTubeSearch();
 
@@ -48,6 +50,17 @@ export default function Home() {
 
       {!isLoading && (
         <VideoGrid videos={videos} onVideoClick={handleVideoClick} />
+      )}
+
+      {/* API Stats Display */}
+      {(apiStats.totalApiCalls > 0 || apiStats.cachedSearches > 0 || apiStats.cachedVideoDetails > 0) && (
+        <ApiStatsDisplay 
+          searchApiCalls={apiStats.searchApiCalls}
+          videoDetailApiCalls={apiStats.videoDetailApiCalls}
+          totalApiCalls={apiStats.totalApiCalls}
+          cachedSearches={apiStats.cachedSearches}
+          cachedVideoDetails={apiStats.cachedVideoDetails}
+        />
       )}
 
       {playingVideoId && (
