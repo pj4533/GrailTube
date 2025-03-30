@@ -26,14 +26,14 @@ export function formatTimeWindow(window: TimeWindow): string {
   return `${format(window.startDate, 'MMM d, yyyy h:mm a')} to ${format(window.endDate, 'h:mm a')} (${window.durationMinutes} mins)`;
 }
 
-// Create initial time window (10 minutes)
+// Create initial time window (30 minutes)
 export function createInitialTimeWindow(centerDate: Date): TimeWindow {
-  const startDate = subMinutes(centerDate, 5);
-  const endDate = addMinutes(centerDate, 5);
+  const startDate = subMinutes(centerDate, 15);
+  const endDate = addMinutes(centerDate, 15);
   return {
     startDate,
     endDate,
-    durationMinutes: 10
+    durationMinutes: 30
   };
 }
 

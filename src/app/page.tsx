@@ -49,7 +49,7 @@ export default function Home() {
   };
 
   const searchWithExpansion = async (timeWindow: TimeWindow) => {
-    setStatusMessage(`Searching for videos from ${formatTimeWindow(timeWindow)}`);
+    setStatusMessage(`Step ${expansionCount + 1}: Checking for videos in this timeframe`);
     
     // Search for videos in the current window
     const videoIds = await searchVideosInTimeWindow(timeWindow);
@@ -57,24 +57,24 @@ export default function Home() {
     if (videoIds.length === 0) {
       // No videos found, try expanding the time window
       if (expansionCount >= MAX_EXPANSIONS) {
-        setError('No rare videos found after several attempts. Try again!');
+        setError('No videos found after several attempts. Try a different time period!');
         setIsLoading(false);
         return;
       }
       
-      setStatusMessage(`No videos found. Expanding time window...`);
+      setStatusMessage(`No videos found in this window. Expanding search range...`);
       setExpansionCount(prev => prev + 1);
       
       // Expand the time window and try again
       const newWindow = expandTimeWindow(timeWindow);
-      setCurrentWindow(newWindow);
       
       // Small delay to show the expansion message
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1200));
+      setCurrentWindow(newWindow);
       await searchWithExpansion(newWindow);
     } else {
       // Videos found, get their details
-      setStatusMessage(`Found ${videoIds.length} videos. Checking view counts...`);
+      setStatusMessage(`Found ${videoIds.length} videos. Checking for rarities (< 5 views)...`);
       const videoDetails = await getVideoDetails(videoIds);
       
       // Filter for videos with less than 5 views
@@ -83,20 +83,20 @@ export default function Home() {
       if (rareVideos.length === 0) {
         // No rare videos found, try expanding the time window
         if (expansionCount >= MAX_EXPANSIONS) {
-          setError('Found videos, but none with less than 5 views. Try again!');
+          setError(`Found ${videoDetails.length} videos, but none with less than 5 views. Try again!`);
           setIsLoading(false);
           return;
         }
         
-        setStatusMessage(`Found ${videoDetails.length} videos, but none with less than 5 views. Expanding time window...`);
+        setStatusMessage(`Found ${videoDetails.length} videos, but none are rare enough. Expanding search...`);
         setExpansionCount(prev => prev + 1);
         
         // Expand the time window and try again
         const newWindow = expandTimeWindow(timeWindow);
-        setCurrentWindow(newWindow);
         
         // Small delay to show the expansion message
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 1200));
+        setCurrentWindow(newWindow);
         await searchWithExpansion(newWindow);
       } else {
         // Success! We found rare videos
@@ -127,19 +127,25 @@ export default function Home() {
         </button>
       </header>
 
-      {currentWindow && !isLoading && videos.length > 0 && (
+      {currentWindow && (
         <div className="text-center mb-8">
-          <p className="text-gray-600">
-            Found {videos.length} rare videos uploaded between{' '}
-            <span className="font-semibold">
-              {formatTimeWindow(currentWindow)}
-            </span>
-          </p>
+          {!isLoading && videos.length > 0 ? (
+            <p className="text-gray-600">
+              Found {videos.length} rare videos uploaded between{' '}
+              <span className="font-semibold">
+                {formatTimeWindow(currentWindow)}
+              </span>
+            </p>
+          ) : (
+            <p className="text-gray-600">
+              Searching time period: <span className="font-semibold">{formatTimeWindow(currentWindow)}</span>
+            </p>
+          )}
         </div>
       )}
 
       {statusMessage && isLoading && (
-        <div className="text-center mb-8">
+        <div className="text-center mb-4">
           <p className="text-blue-600">{statusMessage}</p>
         </div>
       )}
