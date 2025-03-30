@@ -46,7 +46,7 @@ export default function VideoGrid({
               description: video.description,
               thumbnailUrl: video.thumbnailUrl,
               publishedAt: video.publishedAt,
-              viewCount: video.viewCount,
+              viewCount: (video as SavedVideo).view_count_at_discovery || 0,
               channelTitle: video.channelTitle,
               duration: video.duration,
             }

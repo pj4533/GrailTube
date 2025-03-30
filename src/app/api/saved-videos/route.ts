@@ -16,9 +16,28 @@ export async function GET() {
   try {
     await ensureInitialized();
     
-    const videos = await query(
-      'SELECT * FROM saved_videos ORDER BY discovered_at DESC'
-    );
+    const results = await query(`
+      SELECT 
+        id,
+        video_id,
+        title,
+        description,
+        thumbnail_url AS thumbnailUrl,
+        channel_title AS channelTitle,
+        published_at AS publishedAt,
+        view_count_at_discovery,
+        discovered_at,
+        duration
+      FROM saved_videos 
+      ORDER BY discovered_at DESC
+    `);
+    
+    // Convert MySQL datetime strings to ISO format for consistency
+    const videos = (results as any[]).map(video => ({
+      ...video,
+      publishedAt: new Date(video.publishedAt).toISOString(),
+      discovered_at: new Date(video.discovered_at).toISOString()
+    }));
     
     return NextResponse.json({ videos });
   } catch (error) {
@@ -54,6 +73,16 @@ export async function POST(request: Request) {
     // Format the publishedAt date for MySQL
     const publishedAt = new Date(video.publishedAt).toISOString().slice(0, 19).replace('T', ' ');
     
+    // Debug the data
+    console.log('Saving video with details:', { 
+      id: video.id, 
+      thumbnailUrl: video.thumbnailUrl,
+      viewCount: video.viewCount
+    });
+
+    // Ensure the thumbnail URL is using HTTPS
+    const thumbnailUrl = video.thumbnailUrl ? video.thumbnailUrl.replace(/^http:/, 'https:') : '';
+    
     // Insert the new video
     await query(
       `INSERT INTO saved_videos (
@@ -64,10 +93,10 @@ export async function POST(request: Request) {
         video.id,
         video.title,
         video.description,
-        video.thumbnailUrl,
+        thumbnailUrl,
         video.channelTitle,
         publishedAt,
-        video.viewCount,
+        video.viewCount || 0,
         video.duration || null
       ]
     );

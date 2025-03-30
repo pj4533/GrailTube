@@ -52,12 +52,20 @@ export default function VideoCard({
         className="relative h-48 w-full cursor-pointer"
         onClick={() => onClick(video.id)}
       >
-        <Image
-          src={video.thumbnailUrl}
-          alt={video.title}
-          fill
-          className="object-cover"
-        />
+        {console.log('Rendering thumbnail for video:', video.id, 'URL:', video.thumbnailUrl)}
+        {video.thumbnailUrl ? (
+          <Image
+            src={video.thumbnailUrl}
+            alt={video.title}
+            fill
+            className="object-cover"
+            unoptimized={true} // Try without Next.js optimization
+          />
+        ) : (
+          <div className="h-full w-full bg-gray-200 flex items-center justify-center">
+            <span className="text-gray-500">No thumbnail</span>
+          </div>
+        )}
         {showSaveButton && (
           <button
             className={`absolute top-2 right-2 p-2 rounded-full ${
@@ -111,7 +119,7 @@ export default function VideoCard({
         {discoveredAt && (
           <div className="mt-2 text-xs text-gray-500 border-t pt-2">
             <p>Discovered: {new Date(discoveredAt).toLocaleDateString()}</p>
-            <p>Views when discovered: {viewCountAtDiscovery}</p>
+            <p>Views when discovered: {viewCountAtDiscovery || 0}</p>
           </div>
         )}
       </div>
