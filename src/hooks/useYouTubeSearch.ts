@@ -59,16 +59,16 @@ export function useYouTubeSearch() {
     // Adaptive window sizing based on video volume
     if (videoIds.length > BUSY_PERIOD_THRESHOLD) {
       // Very busy time period - contract slightly
-      setStatusMessage(`Found ${videoDetails.length} videos in a busy period. Refining search...`);
+      setStatusMessage(`Found ${videoDetails.length} videos but none with zero views. Busy period - refining search...`);
       const newDuration = Math.max(timeWindow.durationMinutes * CONTRACTION_FACTOR, MIN_WINDOW_DURATION_MINUTES);
       nextWindow = createTimeWindow(centerTime, newDuration);
     } else if (videoIds.length > MODERATE_PERIOD_THRESHOLD) {
       // Moderately busy - expand slower
-      setStatusMessage(`Found ${videoDetails.length} videos, but none are rare treasures yet. Expanding search moderately...`);
+      setStatusMessage(`Found ${videoDetails.length} videos, but none with zero views. Expanding search moderately...`);
       nextWindow = expandTimeWindow(timeWindow, MODERATE_EXPANSION_FACTOR);
     } else {
       // Not many videos - expand more aggressively
-      setStatusMessage(`Found ${videoDetails.length} videos, but none are rare treasures yet. Expanding search aggressively...`);
+      setStatusMessage(`Found ${videoDetails.length} videos, but none with zero views. Expanding search aggressively...`);
       nextWindow = expandTimeWindow(timeWindow);
     }
     
@@ -95,10 +95,10 @@ export function useYouTubeSearch() {
       await handleNextSearchStep(newWindow, nextStep);
     } else {
       // Videos found, get their details
-      setStatusMessage(`Found ${videoIds.length} videos! Analyzing view counts to find hidden gems...`);
+      setStatusMessage(`Found ${videoIds.length} videos! Checking for undiscovered gems with zero views...`);
       const videoDetails = await getVideoDetails(videoIds);
       
-      // Filter for rare videos
+      // Filter for videos with zero views
       const rareVideos = filterRareVideos(videoDetails);
       
       if (rareVideos.length === 0) {

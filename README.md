@@ -1,6 +1,6 @@
 # GrailTube
 
-GrailTube is a web application that helps you discover ultra-rare YouTube videos with less than 5 views. It randomly searches for videos uploaded during a 10-minute window from YouTube's past and shows you the ones that almost nobody has seen.
+GrailTube is a web application that helps you discover completely untouched YouTube videos with zero views. It randomly searches for videos uploaded during a specific time window from YouTube's past and shows you the ones that nobody has ever watched.
 
 ## Setup
 

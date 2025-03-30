@@ -146,7 +146,7 @@ export async function getVideoDetails(videoIds: string[]): Promise<Video[]> {
   }
 }
 
-// Find videos with less than the rare view threshold
+// Find videos with exactly zero views
 export function filterRareVideos(videos: Video[]): Video[] {
-  return videos.filter(video => video.viewCount < RARE_VIEW_THRESHOLD);
+  return videos.filter(video => video.viewCount === RARE_VIEW_THRESHOLD); // RARE_VIEW_THRESHOLD is set to 0
 }

@@ -29,7 +29,7 @@ export default function Home() {
       <header className="text-center mb-12">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">GrailTube</h1>
         <p className="text-xl text-gray-600 mb-6">
-          Discover ultra-rare YouTube videos with less than 5 views
+          Discover untouched YouTube videos with zero views
         </p>
         <button
           onClick={startSearch}

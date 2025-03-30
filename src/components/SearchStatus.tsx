@@ -22,7 +22,7 @@ export default function SearchStatus({
         <div className="text-center mb-8">
           {!isLoading && videos.length > 0 ? (
             <p className="text-gray-600">
-              Found {videos.length} rare videos uploaded between{' '}
+              Found {videos.length} untouched videos (0 views) uploaded between{' '}
               <span className="font-semibold">
                 {formatTimeWindow(currentWindow)}
               </span>

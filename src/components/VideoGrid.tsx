@@ -10,7 +10,7 @@ export default function VideoGrid({ videos, onVideoClick }: VideoGridProps) {
   if (videos.length === 0) {
     return (
       <div className="text-center py-10">
-        <p className="text-gray-500">No rare videos found. Try again!</p>
+        <p className="text-gray-500">No videos with zero views found. Try again!</p>
       </div>
     );
   }

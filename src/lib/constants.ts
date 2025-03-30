@@ -6,7 +6,7 @@ export const YOUTUBE_FOUNDING_DATE = new Date(2005, 1, 14);
 export const STATUS_MESSAGE_DELAY_MS = 1200;
 
 // Search parameters
-export const RARE_VIEW_THRESHOLD = 5;
+export const RARE_VIEW_THRESHOLD = 0; // Only true treasures with 0 views
 export const DEFAULT_SEARCH_DURATION_MINUTES = 720; // Start with 12 hours instead of 1 hour
 export const MIN_WINDOW_DURATION_MINUTES = 30;
 export const MAX_BATCH_SIZE = 50; // Maximum videos per API call
