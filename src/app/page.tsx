@@ -5,10 +5,11 @@ import { useYouTubeSearch } from '@/hooks/useYouTubeSearch';
 import { Video } from '@/types';
 import SearchStatus from '@/components/SearchStatus';
 import ApiStatsDisplay from '@/components/ApiStatsDisplay';
-import AutoPlayVideo from '@/components/AutoPlayVideo';
+import VideoGrid from '@/components/VideoGrid';
+import VideoPlayer from '@/components/VideoPlayer';
 
 export default function Home() {
-  const [currentVideoIndex, setCurrentVideoIndex] = useState<number>(0);
+  const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
   const { 
     isLoading, 
     videos, 
@@ -20,32 +21,32 @@ export default function Home() {
     startSearch 
   } = useYouTubeSearch();
 
-  const handleNextVideo = () => {
-    if (currentVideoIndex < videos.length - 1) {
-      setCurrentVideoIndex(currentVideoIndex + 1);
-    }
+  const handleVideoClick = (videoId: string) => {
+    setSelectedVideoId(videoId);
+  };
+
+  const handleClosePlayer = () => {
+    setSelectedVideoId(null);
   };
 
   const hasFoundVideos = !isLoading && videos.length > 0;
-  const currentVideo = hasFoundVideos ? videos[currentVideoIndex] : null;
-  const hasMoreVideos = hasFoundVideos && currentVideoIndex < videos.length - 1;
 
   return (
     <div className="container mx-auto px-4 py-8">
       <header className="text-center mb-12">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">GrailTube</h1>
         <p className="text-xl text-gray-600 mb-6">
-          Discover untouched YouTube videos with zero views
+          Discover rare YouTube videos with less than 10 views
         </p>
         <button
           onClick={() => {
-            setCurrentVideoIndex(0);
+            setSelectedVideoId(null);
             startSearch();
           }}
           disabled={isLoading}
           className="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isLoading ? 'Searching...' : 'Find Untouched Videos'}
+          {isLoading ? 'Searching...' : 'Find Rare Videos'}
         </button>
       </header>
 
@@ -61,13 +62,17 @@ export default function Home() {
         />
       )}
 
-      {/* Automatically show the first video when found */}
-      {currentVideo && (
-        <AutoPlayVideo 
-          video={currentVideo}
-          onNextVideo={handleNextVideo}
-          hasMoreVideos={hasMoreVideos}
-        />
+      {/* Show video grid when videos are found */}
+      {hasFoundVideos && !isLoading && (
+        <div className="my-8">
+          <h2 className="text-2xl font-semibold mb-4 text-center">Videos with less than 10 views</h2>
+          <VideoGrid videos={videos} onVideoClick={handleVideoClick} />
+        </div>
+      )}
+
+      {/* Video player modal */}
+      {selectedVideoId && (
+        <VideoPlayer videoId={selectedVideoId} onClose={handleClosePlayer} />
       )}
 
       {/* API Stats Display */}
@@ -81,10 +86,10 @@ export default function Home() {
         />
       )}
 
-      {/* Show result count if multiple videos are found */}
-      {hasFoundVideos && videos.length > 1 && (
+      {/* Show result count */}
+      {hasFoundVideos && !isLoading && (
         <div className="text-center mt-6 text-gray-600">
-          <p>Video {currentVideoIndex + 1} of {videos.length} untouched videos</p>
+          <p>Found {videos.length} videos with less than 10 views</p>
         </div>
       )}
     </div>

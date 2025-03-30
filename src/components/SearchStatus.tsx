@@ -24,7 +24,7 @@ export default function SearchStatus({
         <div className="text-center mb-8">
           {!isLoading && videos.length > 0 ? (
             <p className="text-gray-600">
-              Found {videos.length} untouched videos (0 views) uploaded during{' '}
+              Found {videos.length} rare videos (less than 10 views) uploaded during{' '}
               <span className="font-semibold">
                 {formatTimeWindow(currentWindow)}
               </span>

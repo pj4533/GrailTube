@@ -283,12 +283,12 @@ class YouTubeApiService {
   }
   
   /**
-   * Filter videos with exactly zero views and not streams
+   * Filter videos with less than 10 views and not streams
    */
   filterRareVideos(videos: Video[]): Video[] {
     return videos.filter(video => {
-      // Must have exactly zero views
-      if (video.viewCount !== RARE_VIEW_THRESHOLD) return false;
+      // Must have less than 10 views
+      if (video.viewCount >= 10) return false;
       
       // Filter out live streams and upcoming streams
       if (video.isLiveStream || video.isUpcoming) return false;

@@ -69,11 +69,11 @@ export function useYouTubeSearch() {
       const stats = getViewStats(videoDetails);
       setViewStats(stats);
       
-      // Filter for videos with zero views
+      // Filter for videos with less than 10 views
       const rareVideos = filterRareVideos(videoDetails);
       
       if (rareVideos.length === 0) {
-        // No videos with exactly zero views found
+        // No videos with less than 10 views found
         // Show the stats in the status message
         setStatusMessage(`Found ${stats.totalVideos} videos: ${stats.zeroViews} with 0 views, ${stats.underTenViews} with <10 views, ${stats.underHundredViews} with <100 views, ${stats.underThousandViews} with <1000 views`);
         
@@ -81,8 +81,10 @@ export function useYouTubeSearch() {
         await delay(STATUS_MESSAGE_DELAY_MS * 2);
         await performReroll();
       } else {
-        // Success! We found rare videos
-        setVideos(rareVideos);
+        // Success! We found rare videos with <10 views
+        // Sort by viewCount (lowest first)
+        const sortedVideos = [...rareVideos].sort((a, b) => a.viewCount - b.viewCount);
+        setVideos(sortedVideos);
         setStatusMessage(null);
         setIsLoading(false);
       }
