@@ -38,7 +38,7 @@ export function getRandomPastDate(): Date {
 
 // Format a time window for display
 export function formatTimeWindow(window: TimeWindow): string {
-  return `48-hour period starting ${format(window.startDate, 'MMM d, yyyy h:mm a')}`;
+  return `96-hour period starting ${format(window.startDate, 'MMM d, yyyy h:mm a')}`;
 }
 
 // Get center time from a window
@@ -56,10 +56,10 @@ export function createTimeWindow(centerTime: Date, durationMinutes: number): Tim
   };
 }
 
-// Create initial 48-hour time window
+// Create initial 96-hour time window
 export function createInitialTimeWindow(centerDate: Date): TimeWindow {
-  // Always use 48 hours (2880 minutes)
-  return createTimeWindow(centerDate, 2880);
+  // Always use 96 hours (5760 minutes)
+  return createTimeWindow(centerDate, 5760);
 }
 
 // Add delay (useful for UI updates)
