@@ -1,4 +1,4 @@
-import { TimeWindow, Video } from '@/types';
+import { TimeWindow, Video, ViewStats } from '@/types';
 import { formatTimeWindow } from '@/lib/utils';
 
 interface SearchStatusProps {
@@ -7,6 +7,7 @@ interface SearchStatusProps {
   currentWindow: TimeWindow | null;
   statusMessage: string | null;
   error: string | null;
+  viewStats: ViewStats | null;
 }
 
 export default function SearchStatus({ 
@@ -14,7 +15,8 @@ export default function SearchStatus({
   videos, 
   currentWindow, 
   statusMessage, 
-  error 
+  error,
+  viewStats
 }: SearchStatusProps) {
   return (
     <>
@@ -44,6 +46,28 @@ export default function SearchStatus({
       {error && (
         <div className="text-center mb-8">
           <p className="text-red-500">{error}</p>
+        </div>
+      )}
+      
+      {viewStats && isLoading && (
+        <div className="text-center mb-4 bg-gray-100 p-4 rounded-lg max-w-lg mx-auto">
+          <h3 className="font-medium text-gray-700 mb-2">Video Stats</h3>
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <div className="text-right text-gray-600">Total videos:</div>
+            <div className="text-left font-medium">{viewStats.totalVideos}</div>
+            
+            <div className="text-right text-gray-600">0 views:</div>
+            <div className="text-left font-medium">{viewStats.zeroViews}</div>
+            
+            <div className="text-right text-gray-600">Under 10 views:</div>
+            <div className="text-left font-medium">{viewStats.underTenViews}</div>
+            
+            <div className="text-right text-gray-600">Under 100 views:</div>
+            <div className="text-left font-medium">{viewStats.underHundredViews}</div>
+            
+            <div className="text-right text-gray-600">Under 1000 views:</div>
+            <div className="text-left font-medium">{viewStats.underThousandViews}</div>
+          </div>
         </div>
       )}
 

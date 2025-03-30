@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
-import { Video, TimeWindow } from '@/types';
+import { Video, TimeWindow, ViewStats } from '@/types';
 import { 
   YOUTUBE_API_URL, 
   RARE_VIEW_THRESHOLD
@@ -241,6 +241,48 @@ class YouTubeApiService {
   }
   
   /**
+   * Get view statistics from the video collection
+   */
+  getViewStats(videos: Video[]): ViewStats {
+    // Count different view categories
+    let underTenViews = 0;
+    let underHundredViews = 0;
+    let underThousandViews = 0;
+    let zeroViews = 0;
+    
+    // Filter out live streams and announcements first
+    const filteredVideos = videos.filter(video => {
+      // Filter out live streams and upcoming streams
+      if (video.isLiveStream || video.isUpcoming) return false;
+      
+      // Filter out videos with "stream" or "live" in the title (often stream announcements)
+      const lowerTitle = video.title.toLowerCase();
+      if (lowerTitle.includes('stream') || 
+          lowerTitle.includes('live') || 
+          lowerTitle.includes('premiere')) return false;
+      
+      // Include this video
+      return true;
+    });
+    
+    // Count videos by view thresholds
+    filteredVideos.forEach(video => {
+      if (video.viewCount === 0) zeroViews++;
+      if (video.viewCount < 10) underTenViews++;
+      if (video.viewCount < 100) underHundredViews++;
+      if (video.viewCount < 1000) underThousandViews++;
+    });
+    
+    return {
+      totalVideos: filteredVideos.length,
+      zeroViews,
+      underTenViews,
+      underHundredViews,
+      underThousandViews
+    };
+  }
+  
+  /**
    * Filter videos with exactly zero views and not streams
    */
   filterRareVideos(videos: Video[]): Video[] {
@@ -275,3 +317,6 @@ export const getVideoDetails = (videoIds: string[]): Promise<Video[]> =>
 
 export const filterRareVideos = (videos: Video[]): Video[] => 
   youtubeApiService.filterRareVideos(videos);
+  
+export const getViewStats = (videos: Video[]): ViewStats =>
+  youtubeApiService.getViewStats(videos);

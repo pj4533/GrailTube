@@ -3,6 +3,7 @@ import {
   searchVideosInTimeWindow, 
   getVideoDetails, 
   filterRareVideos,
+  getViewStats,
   apiStats,
   YouTubeRateLimitError
 } from '@/lib/youtube';
@@ -11,7 +12,7 @@ import {
   createInitialTimeWindow,
   delay
 } from '@/lib/utils';
-import { Video, TimeWindow } from '@/types';
+import { Video, TimeWindow, ViewStats } from '@/types';
 import {
   MAX_REROLLS,
   STATUS_MESSAGE_DELAY_MS
@@ -27,6 +28,7 @@ export function useYouTubeSearch() {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [rerollCount, setRerollCount] = useState<number>(0);
+  const [viewStats, setViewStats] = useState<ViewStats | null>(null);
 
   /**
    * Handle errors consistently throughout the hook
@@ -60,14 +62,23 @@ export function useYouTubeSearch() {
       }
       
       // Videos found, get their details
-      setStatusMessage(`Found ${videoIds.length} videos! Checking for undiscovered gems with zero views...`);
+      setStatusMessage(`Found ${videoIds.length} videos! Analyzing view counts...`);
       const videoDetails = await getVideoDetails(videoIds);
+      
+      // Get view statistics
+      const stats = getViewStats(videoDetails);
+      setViewStats(stats);
       
       // Filter for videos with zero views
       const rareVideos = filterRareVideos(videoDetails);
       
       if (rareVideos.length === 0) {
-        // No rare videos found, reroll to a different date
+        // No videos with exactly zero views found
+        // Show the stats in the status message
+        setStatusMessage(`Found ${stats.totalVideos} videos: ${stats.zeroViews} with 0 views, ${stats.underTenViews} with <10 views, ${stats.underHundredViews} with <100 views, ${stats.underThousandViews} with <1000 views`);
+        
+        // No rare videos found, reroll to a different date after showing stats
+        await delay(STATUS_MESSAGE_DELAY_MS * 2);
         await performReroll();
       } else {
         // Success! We found rare videos
@@ -146,6 +157,7 @@ export function useYouTubeSearch() {
     currentWindow,
     statusMessage,
     error,
+    viewStats,
     apiStats,
     startSearch
   };

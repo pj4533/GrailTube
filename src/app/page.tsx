@@ -14,7 +14,8 @@ export default function Home() {
     videos, 
     currentWindow, 
     statusMessage, 
-    error, 
+    error,
+    viewStats,
     apiStats,
     startSearch 
   } = useYouTubeSearch();
@@ -56,6 +57,7 @@ export default function Home() {
           currentWindow={currentWindow}
           statusMessage={statusMessage}
           error={error}
+          viewStats={viewStats}
         />
       )}
 
