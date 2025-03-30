@@ -17,6 +17,9 @@ import {
   STATUS_MESSAGE_DELAY_MS
 } from '@/lib/constants';
 
+/**
+ * Custom hook to handle YouTube search for rare videos
+ */
 export function useYouTubeSearch() {
   const [isLoading, setIsLoading] = useState(false);
   const [videos, setVideos] = useState<Video[]>([]);
@@ -25,7 +28,22 @@ export function useYouTubeSearch() {
   const [error, setError] = useState<string | null>(null);
   const [rerollCount, setRerollCount] = useState<number>(0);
 
-  // Perform a search on a single 24-hour window and reroll if no videos found
+  /**
+   * Handle errors consistently throughout the hook
+   */
+  const handleError = (err: unknown, context: string): void => {
+    if (err instanceof YouTubeRateLimitError) {
+      setError(`YouTube API rate limit reached: ${err.message}. Please try again later.`);
+    } else {
+      console.error(`Error during ${context}:`, err);
+      setError('An unexpected error occurred. Please try again later.');
+    }
+    setIsLoading(false);
+  };
+
+  /**
+   * Perform a search on a single 24-hour window and reroll if no videos found
+   */
   const performSearch = async (timeWindow: TimeWindow): Promise<void> => {
     try {
       setStatusMessage(`Scanning YouTube videos from ${timeWindow.startDate.toLocaleDateString()} (24-hour window)`);
@@ -58,21 +76,13 @@ export function useYouTubeSearch() {
         setIsLoading(false);
       }
     } catch (error) {
-      // Handle rate limit errors specifically
-      if (error instanceof YouTubeRateLimitError) {
-        setError(`YouTube API rate limit reached: ${error.message}. Please try again later.`);
-        setIsLoading(false);
-        return;
-      }
-      
-      // Handle other errors
-      console.error('Error during search:', error);
-      setError('An unexpected error occurred. Please try again later.');
-      setIsLoading(false);
+      handleError(error, 'search');
     }
   };
 
-  // Start a completely new search with a random time period
+  /**
+   * Start a completely new search with a random time period
+   */
   const performReroll = async (): Promise<void> => {
     try {
       // Increment reroll count
@@ -99,22 +109,15 @@ export function useYouTubeSearch() {
       // Search with the new window
       await performSearch(newWindow);
     } catch (error) {
-      // Handle rate limit errors specifically
-      if (error instanceof YouTubeRateLimitError) {
-        setError(`YouTube API rate limit reached: ${error.message}. Please try again later.`);
-        setIsLoading(false);
-        return;
-      }
-      
-      // Handle other errors
-      console.error('Error during reroll:', error);
-      setError('An unexpected error occurred. Please try again later.');
-      setIsLoading(false);
+      handleError(error, 'reroll');
     }
   };
 
-  // Start search from a random date
+  /**
+   * Start search from a random date
+   */
   const startSearch = async (): Promise<void> => {
+    // Reset all state
     setIsLoading(true);
     setError(null);
     setStatusMessage(null);
@@ -133,14 +136,7 @@ export function useYouTubeSearch() {
       // Start the search process
       await performSearch(initialWindow);
     } catch (err) {
-      // Handle rate limit errors specifically
-      if (err instanceof YouTubeRateLimitError) {
-        setError(`YouTube API rate limit reached: ${err.message}. Please try again later.`);
-      } else {
-        setError('An unexpected error occurred. Please try again later.');
-        console.error(err);
-      }
-      setIsLoading(false);
+      handleError(err, 'initial search');
     }
   };
 

@@ -1,17 +1,17 @@
-import axios from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 import { Video, TimeWindow } from '@/types';
 import { 
   YOUTUBE_API_URL, 
   RARE_VIEW_THRESHOLD
 } from './constants';
 
-const API_KEY = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
-const MAX_RESULTS_PER_REQUEST = 50;
-const MAX_IDS_PER_REQUEST = 50;
-
-// Simple in-memory cache for API calls
-const videoCache: Record<string, Video> = {};
-const searchCache: Record<string, string[]> = {};
+// Error type for YouTube API rate limits
+export class YouTubeRateLimitError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'YouTubeRateLimitError';
+  }
+}
 
 // API call stats for monitoring
 export const apiStats = {
@@ -29,205 +29,249 @@ export const apiStats = {
   }
 };
 
-// Error type for YouTube API rate limits
-export class YouTubeRateLimitError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'YouTubeRateLimitError';
-  }
-}
-
-// Generate cache key for a time window
-function getSearchCacheKey(window: TimeWindow): string {
-  return `${window.startDate.toISOString()}_${window.endDate.toISOString()}`;
-}
-
-// Get videos uploaded in a time window with caching
-export async function searchVideosInTimeWindow(window: TimeWindow): Promise<string[]> {
-  // Import the founding date
-  const { YOUTUBE_FOUNDING_DATE } = require('./constants');
+/**
+ * YouTube API Service - Encapsulates all YouTube API interactions
+ */
+class YouTubeApiService {
+  private readonly apiKey: string;
+  private readonly maxResultsPerRequest: number;
+  private readonly maxIdsPerRequest: number;
   
-  // Ensure we never search before YouTube's founding
-  let searchWindow = {...window};
-  if (searchWindow.startDate < YOUTUBE_FOUNDING_DATE) {
-    searchWindow.startDate = new Date(YOUTUBE_FOUNDING_DATE);
-    console.log('Adjusted search window to start at YouTube founding date');
+  // Simple in-memory cache
+  private videoCache: Record<string, Video> = {};
+  private searchCache: Record<string, string[]> = {};
+  
+  constructor() {
+    this.apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY || '';
+    this.maxResultsPerRequest = 50;
+    this.maxIdsPerRequest = 50;
   }
   
-  const cacheKey = getSearchCacheKey(searchWindow);
-  
-  // Check if we already have this search cached
-  if (searchCache[cacheKey]) {
-    console.log(`Using cached search results for ${cacheKey}`);
-    apiStats.cachedSearches++;
-    return searchCache[cacheKey];
+  /**
+   * Check if the API error is a rate limit error
+   */
+  private isRateLimitError(error: AxiosError): boolean {
+    if (!error.response || !error.response.data) return false;
+    
+    const errorDetails = error.response.data as any;
+    const status = error.response.status;
+    
+    // Direct quota/rate limit errors
+    if (status === 403 && errorDetails.error?.errors?.some((e: any) => 
+        e.reason === 'quotaExceeded' || e.reason === 'rateLimitExceeded')) {
+      return true;
+    }
+    
+    // Other potential rate limiting responses
+    return (status === 429 || status === 403);
   }
   
-  try {
-    // Increment API call stats
-    apiStats.searchApiCalls++;
-    apiStats.totalApiCalls++;
-    
-    const response = await axios.get(`${YOUTUBE_API_URL}/search`, {
-      params: {
-        part: 'snippet',
-        maxResults: MAX_RESULTS_PER_REQUEST,
-        type: 'video',
-        publishedAfter: searchWindow.startDate.toISOString(),
-        publishedBefore: searchWindow.endDate.toISOString(),
-        key: API_KEY,
-      },
-    });
-    
-    const videoIds = response.data.items.map((item: any) => item.id.videoId);
-    
-    // Cache the results
-    searchCache[cacheKey] = videoIds;
-    
-    return videoIds;
-  } catch (error: any) {
-    // Check for specific rate limiting error codes from YouTube API
-    if (error.response && error.response.data) {
-      const errorDetails = error.response.data;
+  /**
+   * Handle API errors consistently
+   */
+  private handleApiError(error: any, context: string): never {
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError;
       
-      // YouTube API quota exceeded (403 with specific error codes)
-      if (error.response.status === 403 && 
-          (errorDetails.error?.errors?.some((e: any) => 
-            e.reason === 'quotaExceeded' || e.reason === 'rateLimitExceeded'))) {
-        console.error('YouTube API quota exceeded:', errorDetails);
+      if (this.isRateLimitError(axiosError)) {
+        console.error(`YouTube API rate limit reached during ${context}:`, axiosError.response?.data);
         throw new YouTubeRateLimitError('YouTube API quota exceeded. Please try again later.');
-      }
-      
-      // Other 403 or 429 errors that might indicate rate limiting
-      if (error.response.status === 429 || error.response.status === 403) {
-        console.error('Possible rate limiting from YouTube API:', errorDetails);
-        throw new YouTubeRateLimitError('YouTube API rate limit reached. Please try again later.');
       }
     }
     
-    // Log other errors but don't stop the search process for non-rate-limit errors
-    console.error('Error searching videos:', error);
-    return [];
-  }
-}
-
-// Get detailed information for multiple videos with batching and caching
-export async function getVideoDetails(videoIds: string[]): Promise<Video[]> {
-  if (!videoIds.length) return [];
-  
-  // Filter out video IDs that are already cached
-  const uncachedIds = videoIds.filter(id => !videoCache[id]);
-  
-  // If all videos are cached, return from cache
-  if (uncachedIds.length === 0) {
-    apiStats.cachedVideoDetails += videoIds.length;
-    return videoIds.map(id => videoCache[id]);
+    console.error(`Error during ${context}:`, error);
+    throw error;
   }
   
-  // Split IDs into batches of MAX_IDS_PER_REQUEST
-  const batches = [];
-  for (let i = 0; i < uncachedIds.length; i += MAX_IDS_PER_REQUEST) {
-    batches.push(uncachedIds.slice(i, i + MAX_IDS_PER_REQUEST));
+  /**
+   * Generate cache key for a time window
+   */
+  private getSearchCacheKey(window: TimeWindow): string {
+    return `${window.startDate.toISOString()}_${window.endDate.toISOString()}`;
   }
   
-  try {
-    // Process all batches in parallel
-    const batchPromises = batches.map(async (batchIds) => {
+  /**
+   * Search for videos in a specific time window
+   */
+  async searchVideosInTimeWindow(window: TimeWindow): Promise<string[]> {
+    // Import the founding date
+    const { YOUTUBE_FOUNDING_DATE } = require('./constants');
+    
+    // Ensure we never search before YouTube's founding
+    let searchWindow = {...window};
+    if (searchWindow.startDate < YOUTUBE_FOUNDING_DATE) {
+      searchWindow.startDate = new Date(YOUTUBE_FOUNDING_DATE);
+      console.log('Adjusted search window to start at YouTube founding date');
+    }
+    
+    const cacheKey = this.getSearchCacheKey(searchWindow);
+    
+    // Check if we already have this search cached
+    if (this.searchCache[cacheKey]) {
+      console.log(`Using cached search results for ${cacheKey}`);
+      apiStats.cachedSearches++;
+      return this.searchCache[cacheKey];
+    }
+    
+    try {
+      // Increment API call stats
+      apiStats.searchApiCalls++;
+      apiStats.totalApiCalls++;
+      
+      const response = await axios.get(`${YOUTUBE_API_URL}/search`, {
+        params: {
+          part: 'snippet',
+          maxResults: this.maxResultsPerRequest,
+          type: 'video',
+          publishedAfter: searchWindow.startDate.toISOString(),
+          publishedBefore: searchWindow.endDate.toISOString(),
+          key: this.apiKey,
+        },
+      });
+      
+      const videoIds = response.data.items.map((item: any) => item.id.videoId);
+      
+      // Cache the results
+      this.searchCache[cacheKey] = videoIds;
+      
+      return videoIds;
+    } catch (error) {
+      try {
+        this.handleApiError(error, 'video search');
+      } catch (e) {
+        if (e instanceof YouTubeRateLimitError) {
+          throw e;
+        }
+        // For other errors, log and return empty array
+        console.error('Error searching videos:', error);
+        return [];
+      }
+      return []; // This should never be reached
+    }
+  }
+  
+  /**
+   * Get detailed information for a batch of videos
+   */
+  private async fetchVideoBatch(batchIds: string[]): Promise<any[]> {
+    try {
       // Increment API call stats
       apiStats.videoDetailApiCalls++;
       apiStats.totalApiCalls++;
       
-      try {
-        const response = await axios.get(`${YOUTUBE_API_URL}/videos`, {
-          params: {
-            part: 'snippet,statistics,contentDetails,liveStreamingDetails',
-            id: batchIds.join(','),
-            key: API_KEY,
-          },
-        });
-        
-        return response.data.items || [];
-      } catch (error: any) {
-        // Check for rate limiting errors
-        if (error.response && error.response.data) {
-          const errorDetails = error.response.data;
-          
-          // Handle quota or rate limit errors
-          if (error.response.status === 403 && 
-              (errorDetails.error?.errors?.some((e: any) => 
-                e.reason === 'quotaExceeded' || e.reason === 'rateLimitExceeded'))) {
-            throw new YouTubeRateLimitError('YouTube API quota exceeded. Please try again later.');
-          }
-          
-          // Other 403 or 429 errors that might indicate rate limiting
-          if (error.response.status === 429 || error.response.status === 403) {
-            throw new YouTubeRateLimitError('YouTube API rate limit reached. Please try again later.');
-          }
-        }
-        
-        // For other errors, log and return an empty array
-        console.error('Error fetching batch of video details:', error);
-        return [];
-      }
-    });
-    
-    const batchResults = await Promise.all(batchPromises);
-    const allItems = batchResults.flat();
-    
-    // Process and cache results
-    allItems.forEach((item: any) => {
-      // Additional information about the video
-      const isLiveStream = !!item.liveStreamingDetails;
-      const isUpcoming = item.liveStreamingDetails?.scheduledStartTime && !item.liveStreamingDetails?.actualEndTime;
-      const duration = item.contentDetails?.duration || '';
+      const response = await axios.get(`${YOUTUBE_API_URL}/videos`, {
+        params: {
+          part: 'snippet,statistics,contentDetails,liveStreamingDetails',
+          id: batchIds.join(','),
+          key: this.apiKey,
+        },
+      });
       
-      const video: Video = {
-        id: item.id,
-        title: item.snippet.title,
-        description: item.snippet.description,
-        thumbnailUrl: item.snippet.thumbnails.medium.url,
-        publishedAt: item.snippet.publishedAt,
-        viewCount: parseInt(item.statistics.viewCount, 10),
-        channelTitle: item.snippet.channelTitle,
-        isLiveStream,
-        isUpcoming,
-        duration
-      };
-      
-      // Cache the video details
-      videoCache[item.id] = video;
-    });
+      return response.data.items || [];
+    } catch (error) {
+      this.handleApiError(error, 'fetching video details');
+      return []; // This should never be reached
+    }
+  }
+  
+  /**
+   * Get detailed video information
+   */
+  async getVideoDetails(videoIds: string[]): Promise<Video[]> {
+    if (!videoIds.length) return [];
     
-    // Return all videos (including previously cached ones)
-    return videoIds.map(id => videoCache[id]).filter(Boolean);
-  } catch (error) {
-    // If this is a rate limit error, propagate it up
-    if (error instanceof YouTubeRateLimitError) {
-      throw error; // Rethrow to be caught by the calling function
+    // Filter out video IDs that are already cached
+    const uncachedIds = videoIds.filter(id => !this.videoCache[id]);
+    
+    // If all videos are cached, return from cache
+    if (uncachedIds.length === 0) {
+      apiStats.cachedVideoDetails += videoIds.length;
+      return videoIds.map(id => this.videoCache[id]);
     }
     
-    console.error('Error getting video details:', error);
-    // Return any cached videos we have for non-rate-limit errors
-    return videoIds.map(id => videoCache[id]).filter(Boolean);
+    // Split IDs into batches of maxIdsPerRequest
+    const batches = [];
+    for (let i = 0; i < uncachedIds.length; i += this.maxIdsPerRequest) {
+      batches.push(uncachedIds.slice(i, i + this.maxIdsPerRequest));
+    }
+    
+    try {
+      // Process all batches in parallel
+      const batchPromises = batches.map(batchIds => this.fetchVideoBatch(batchIds));
+      const batchResults = await Promise.all(batchPromises);
+      const allItems = batchResults.flat();
+      
+      // Process and cache results
+      allItems.forEach((item: any) => {
+        // Additional information about the video
+        const isLiveStream = !!item.liveStreamingDetails;
+        const isUpcoming = item.liveStreamingDetails?.scheduledStartTime && 
+                         !item.liveStreamingDetails?.actualEndTime;
+        const duration = item.contentDetails?.duration || '';
+        
+        const video: Video = {
+          id: item.id,
+          title: item.snippet.title,
+          description: item.snippet.description,
+          thumbnailUrl: item.snippet.thumbnails.medium.url,
+          publishedAt: item.snippet.publishedAt,
+          viewCount: parseInt(item.statistics.viewCount, 10),
+          channelTitle: item.snippet.channelTitle,
+          isLiveStream,
+          isUpcoming,
+          duration
+        };
+        
+        // Cache the video details
+        this.videoCache[item.id] = video;
+      });
+      
+      // Return all videos (including previously cached ones)
+      return videoIds.map(id => this.videoCache[id]).filter(Boolean);
+    } catch (error) {
+      // If this is a rate limit error, propagate it up
+      if (error instanceof YouTubeRateLimitError) {
+        throw error; // Rethrow to be caught by the calling function
+      }
+      
+      console.error('Error getting video details:', error);
+      // Return any cached videos we have for non-rate-limit errors
+      return videoIds.map(id => this.videoCache[id]).filter(Boolean);
+    }
+  }
+  
+  /**
+   * Filter videos with exactly zero views and not streams
+   */
+  filterRareVideos(videos: Video[]): Video[] {
+    return videos.filter(video => {
+      // Must have exactly zero views
+      if (video.viewCount !== RARE_VIEW_THRESHOLD) return false;
+      
+      // Filter out live streams and upcoming streams
+      if (video.isLiveStream || video.isUpcoming) return false;
+      
+      // Filter out videos with "stream" or "live" in the title (often stream announcements)
+      const lowerTitle = video.title.toLowerCase();
+      if (lowerTitle.includes('stream') || 
+          lowerTitle.includes('live') || 
+          lowerTitle.includes('premiere')) return false;
+      
+      // Include this video (keeping short videos as they can be interesting!)
+      return true;
+    });
   }
 }
 
-// Find videos with exactly zero views that are not live streams or upcoming streams
-export function filterRareVideos(videos: Video[]): Video[] {
-  return videos.filter(video => {
-    // Must have exactly zero views
-    if (video.viewCount !== RARE_VIEW_THRESHOLD) return false;
-    
-    // Filter out live streams and upcoming streams
-    if (video.isLiveStream || video.isUpcoming) return false;
-    
-    // Filter out videos with "stream" or "live" in the title (often stream announcements)
-    const lowerTitle = video.title.toLowerCase();
-    if (lowerTitle.includes('stream') || 
-        lowerTitle.includes('live') || 
-        lowerTitle.includes('premiere')) return false;
-    
-    // Include this video (keeping short videos as they can be interesting!)
-    return true;
-  });
-}
+// Create a singleton instance of the YouTube API service
+const youtubeApiService = new YouTubeApiService();
+
+// Export methods for use elsewhere
+export const searchVideosInTimeWindow = (window: TimeWindow): Promise<string[]> => 
+  youtubeApiService.searchVideosInTimeWindow(window);
+
+export const getVideoDetails = (videoIds: string[]): Promise<Video[]> => 
+  youtubeApiService.getVideoDetails(videoIds);
+
+export const filterRareVideos = (videos: Video[]): Video[] => 
+  youtubeApiService.filterRareVideos(videos);
