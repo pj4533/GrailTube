@@ -2,10 +2,14 @@
 
 import { useState } from 'react';
 import { 
-  getRandomPastDate, 
+  getRandomPastDate,
+  createInitialTimeWindow, 
   searchVideosInTimeWindow, 
   getVideoDetails, 
-  filterRareVideos 
+  filterRareVideos,
+  expandTimeWindow,
+  formatTimeWindow,
+  TimeWindow 
 } from '@/lib/youtube';
 import { Video } from '@/types';
 import VideoGrid from '@/components/VideoGrid';
@@ -14,41 +18,92 @@ import VideoPlayer from '@/components/VideoPlayer';
 export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [videos, setVideos] = useState<Video[]>([]);
-  const [searchDate, setSearchDate] = useState<Date | null>(null);
+  const [currentWindow, setCurrentWindow] = useState<TimeWindow | null>(null);
   const [playingVideoId, setPlayingVideoId] = useState<string | null>(null);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [expansionCount, setExpansionCount] = useState<number>(0);
+  const MAX_EXPANSIONS = 5; // Limit the number of time window expansions
 
   const handleSearch = async () => {
     setIsLoading(true);
     setError(null);
+    setStatusMessage(null);
     setVideos([]);
+    setExpansionCount(0);
     
     try {
-      // Get a random date
+      // Get a random date and create initial 10-minute window
       const randomDate = getRandomPastDate();
-      setSearchDate(randomDate);
+      const initialWindow = createInitialTimeWindow(randomDate);
+      setCurrentWindow(initialWindow);
       
-      // Search for videos in a 10-minute window
-      const videoIds = await searchVideosInTimeWindow(randomDate);
+      // Start the search process
+      await searchWithExpansion(initialWindow);
       
-      if (videoIds.length === 0) {
-        setError('No videos found in the selected time window. Try again!');
+    } catch (err) {
+      setError('An error occurred. Please try again.');
+      console.error(err);
+      setIsLoading(false);
+    }
+  };
+
+  const searchWithExpansion = async (timeWindow: TimeWindow) => {
+    setStatusMessage(`Searching for videos from ${formatTimeWindow(timeWindow)}`);
+    
+    // Search for videos in the current window
+    const videoIds = await searchVideosInTimeWindow(timeWindow);
+    
+    if (videoIds.length === 0) {
+      // No videos found, try expanding the time window
+      if (expansionCount >= MAX_EXPANSIONS) {
+        setError('No rare videos found after several attempts. Try again!');
         setIsLoading(false);
         return;
       }
       
-      // Get video details
+      setStatusMessage(`No videos found. Expanding time window...`);
+      setExpansionCount(prev => prev + 1);
+      
+      // Expand the time window and try again
+      const newWindow = expandTimeWindow(timeWindow);
+      setCurrentWindow(newWindow);
+      
+      // Small delay to show the expansion message
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      await searchWithExpansion(newWindow);
+    } else {
+      // Videos found, get their details
+      setStatusMessage(`Found ${videoIds.length} videos. Checking view counts...`);
       const videoDetails = await getVideoDetails(videoIds);
       
       // Filter for videos with less than 5 views
       const rareVideos = filterRareVideos(videoDetails);
       
-      setVideos(rareVideos);
-    } catch (err) {
-      setError('An error occurred. Please try again.');
-      console.error(err);
-    } finally {
-      setIsLoading(false);
+      if (rareVideos.length === 0) {
+        // No rare videos found, try expanding the time window
+        if (expansionCount >= MAX_EXPANSIONS) {
+          setError('Found videos, but none with less than 5 views. Try again!');
+          setIsLoading(false);
+          return;
+        }
+        
+        setStatusMessage(`Found ${videoDetails.length} videos, but none with less than 5 views. Expanding time window...`);
+        setExpansionCount(prev => prev + 1);
+        
+        // Expand the time window and try again
+        const newWindow = expandTimeWindow(timeWindow);
+        setCurrentWindow(newWindow);
+        
+        // Small delay to show the expansion message
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        await searchWithExpansion(newWindow);
+      } else {
+        // Success! We found rare videos
+        setVideos(rareVideos);
+        setStatusMessage(null);
+        setIsLoading(false);
+      }
     }
   };
 
@@ -72,17 +127,20 @@ export default function Home() {
         </button>
       </header>
 
-      {searchDate && !isLoading && videos.length > 0 && (
+      {currentWindow && !isLoading && videos.length > 0 && (
         <div className="text-center mb-8">
           <p className="text-gray-600">
-            Found {videos.length} rare videos uploaded around{' '}
+            Found {videos.length} rare videos uploaded between{' '}
             <span className="font-semibold">
-              {searchDate.toLocaleString('en-US', {
-                dateStyle: 'medium',
-                timeStyle: 'short',
-              })}
+              {formatTimeWindow(currentWindow)}
             </span>
           </p>
+        </div>
+      )}
+
+      {statusMessage && isLoading && (
+        <div className="text-center mb-8">
+          <p className="text-blue-600">{statusMessage}</p>
         </div>
       )}
 

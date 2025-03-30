@@ -1,9 +1,16 @@
 import axios from 'axios';
-import { addMinutes, subDays } from 'date-fns';
+import { addMinutes, subMinutes, subDays, addHours, format } from 'date-fns';
 import { Video } from '@/types';
 
 const API_KEY = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
 const API_URL = 'https://www.googleapis.com/youtube/v3';
+
+// Time window expansion strategy
+export type TimeWindow = {
+  startDate: Date;
+  endDate: Date;
+  durationMinutes: number;
+};
 
 // Get a random date between 2005 (YouTube's founding) and today
 export function getRandomPastDate(): Date {
@@ -14,18 +21,45 @@ export function getRandomPastDate(): Date {
   return new Date(randomTimestamp);
 }
 
-// Get videos uploaded in a specific 10-minute window
-export async function searchVideosInTimeWindow(startDate: Date): Promise<string[]> {
-  const endDate = addMinutes(startDate, 10);
+// Format a time window for display
+export function formatTimeWindow(window: TimeWindow): string {
+  return `${format(window.startDate, 'MMM d, yyyy h:mm a')} to ${format(window.endDate, 'h:mm a')} (${window.durationMinutes} mins)`;
+}
+
+// Create initial time window (10 minutes)
+export function createInitialTimeWindow(centerDate: Date): TimeWindow {
+  const startDate = subMinutes(centerDate, 5);
+  const endDate = addMinutes(centerDate, 5);
+  return {
+    startDate,
+    endDate,
+    durationMinutes: 10
+  };
+}
+
+// Expand time window
+export function expandTimeWindow(window: TimeWindow): TimeWindow {
+  const centerTime = new Date((window.startDate.getTime() + window.endDate.getTime()) / 2);
+  const newDuration = Math.min(window.durationMinutes * 2, 1440); // Double duration, max 24 hours (1440 minutes)
+  const halfDuration = newDuration / 2;
   
+  return {
+    startDate: subMinutes(centerTime, halfDuration),
+    endDate: addMinutes(centerTime, halfDuration),
+    durationMinutes: newDuration
+  };
+}
+
+// Get videos uploaded in a time window
+export async function searchVideosInTimeWindow(window: TimeWindow): Promise<string[]> {
   try {
     const response = await axios.get(`${API_URL}/search`, {
       params: {
         part: 'snippet',
         maxResults: 50,
         type: 'video',
-        publishedAfter: startDate.toISOString(),
-        publishedBefore: endDate.toISOString(),
+        publishedAfter: window.startDate.toISOString(),
+        publishedBefore: window.endDate.toISOString(),
         key: API_KEY,
       },
     });
