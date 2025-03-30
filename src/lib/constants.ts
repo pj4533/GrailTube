@@ -2,7 +2,7 @@
 export const YOUTUBE_API_URL = 'https://www.googleapis.com/youtube/v3';
 
 // Time-related constants
-export const YOUTUBE_FOUNDING_DATE = new Date(2005, 1, 14);
+export const YOUTUBE_FOUNDING_DATE = new Date(2005, 3, 23); // April 23, 2005 - when YouTube was first launched
 export const STATUS_MESSAGE_DELAY_MS = 1200;
 
 // Search parameters
