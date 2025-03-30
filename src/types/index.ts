@@ -11,6 +11,12 @@ export interface Video {
   duration?: string;
 }
 
+export interface SavedVideo extends Omit<Video, 'id'> {
+  video_id: string;
+  view_count_at_discovery: number;
+  discovered_at: string;
+}
+
 export interface ViewStats {
   totalVideos: number;
   underTenViews: number;

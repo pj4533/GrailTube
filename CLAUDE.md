@@ -18,7 +18,24 @@
 - Use Tailwind for styling with semantic class names
 - Ensure responsive design on all components
 
-## API Standards
+## YouTube API Guidelines
 - Store API keys in .env.local (never commit)
-- Centralize API calls in src/lib modules
-- Always handle loading, success, and error states
+- Centralize API calls in src/lib/youtube.ts
+- Use caching mechanisms to reduce API quota usage
+- Track API call statistics for transparency
+- Always handle rate limiting and quota errors gracefully
+- Filter out live streams and misleading content when searching for rare videos
+
+## State Management
+- Use React hooks for local component state
+- Custom hooks for complex logic (e.g., useYouTubeSearch)
+- Separate UI concerns from data fetching logic
+- Handle loading, error, and success states consistently
+- Provide clear status messages during search operations
+
+## Project Structure
+- **/src/components**: Reusable UI components
+- **/src/hooks**: Custom React hooks 
+- **/src/lib**: Utility functions and API services
+- **/src/types**: TypeScript type definitions
+- **/src/app**: Next.js app router pages and layouts
