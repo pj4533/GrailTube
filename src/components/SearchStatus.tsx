@@ -22,14 +22,14 @@ export default function SearchStatus({
         <div className="text-center mb-8">
           {!isLoading && videos.length > 0 ? (
             <p className="text-gray-600">
-              Found {videos.length} untouched videos (0 views) uploaded between{' '}
+              Found {videos.length} untouched videos (0 views) uploaded during{' '}
               <span className="font-semibold">
                 {formatTimeWindow(currentWindow)}
               </span>
             </p>
           ) : (
             <p className="text-gray-600">
-              Searching time period: <span className="font-semibold">{formatTimeWindow(currentWindow)}</span>
+              Searching: <span className="font-semibold">{formatTimeWindow(currentWindow)}</span>
             </p>
           )}
         </div>

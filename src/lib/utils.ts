@@ -41,6 +41,12 @@ export function getRandomPastDate(): Date {
 
 // Format a time window for display
 export function formatTimeWindow(window: TimeWindow): string {
+  // For 24-hour windows, show a simplified format
+  if (window.durationMinutes === 1440) { // 24 hours = 1440 minutes
+    return `24-hour period starting ${format(window.startDate, 'MMM d, yyyy h:mm a')}`;
+  }
+  
+  // For other durations, use the original format
   return `${format(window.startDate, 'MMM d, yyyy h:mm a')} to ${format(window.endDate, 'h:mm a')} (${window.durationMinutes} mins)`;
 }
 
