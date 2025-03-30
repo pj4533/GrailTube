@@ -1,9 +1,6 @@
 import { format, addMinutes, subMinutes, subDays } from 'date-fns';
 import { TimeWindow } from '@/types';
-import { 
-  YOUTUBE_FOUNDING_DATE, 
-  DEFAULT_SEARCH_DURATION_MINUTES 
-} from './constants';
+import { YOUTUBE_FOUNDING_DATE } from './constants';
 
 // Format date for display
 export function formatDate(date: string): string {
@@ -41,13 +38,7 @@ export function getRandomPastDate(): Date {
 
 // Format a time window for display
 export function formatTimeWindow(window: TimeWindow): string {
-  // For 24-hour windows, show a simplified format
-  if (window.durationMinutes === 1440) { // 24 hours = 1440 minutes
-    return `24-hour period starting ${format(window.startDate, 'MMM d, yyyy h:mm a')}`;
-  }
-  
-  // For other durations, use the original format
-  return `${format(window.startDate, 'MMM d, yyyy h:mm a')} to ${format(window.endDate, 'h:mm a')} (${window.durationMinutes} mins)`;
+  return `24-hour period starting ${format(window.startDate, 'MMM d, yyyy h:mm a')}`;
 }
 
 // Get center time from a window
@@ -65,9 +56,10 @@ export function createTimeWindow(centerTime: Date, durationMinutes: number): Tim
   };
 }
 
-// Create initial time window 
+// Create initial 24-hour time window
 export function createInitialTimeWindow(centerDate: Date): TimeWindow {
-  return createTimeWindow(centerDate, DEFAULT_SEARCH_DURATION_MINUTES);
+  // Always use 24 hours (1440 minutes)
+  return createTimeWindow(centerDate, 1440);
 }
 
 // Add delay (useful for UI updates)
