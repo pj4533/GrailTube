@@ -1,60 +1,25 @@
 import axios from 'axios';
-import { addMinutes, subMinutes, subDays, addHours, format } from 'date-fns';
-import { Video } from '@/types';
+import { Video, TimeWindow } from '@/types';
+import { createTimeWindow, getWindowCenter } from './utils';
+import { 
+  YOUTUBE_API_URL, 
+  RARE_VIEW_THRESHOLD,
+  AGGRESSIVE_EXPANSION_FACTOR
+} from './constants';
 
 const API_KEY = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
-const API_URL = 'https://www.googleapis.com/youtube/v3';
 
-// Time window expansion strategy
-export type TimeWindow = {
-  startDate: Date;
-  endDate: Date;
-  durationMinutes: number;
-};
-
-// Get a random date between 2005 (YouTube's founding) and today
-export function getRandomPastDate(): Date {
-  const start = new Date(2005, 1, 14); // YouTube's founding date
-  const end = subDays(new Date(), 1); // Yesterday
-  
-  const randomTimestamp = start.getTime() + Math.random() * (end.getTime() - start.getTime());
-  return new Date(randomTimestamp);
-}
-
-// Format a time window for display
-export function formatTimeWindow(window: TimeWindow): string {
-  return `${format(window.startDate, 'MMM d, yyyy h:mm a')} to ${format(window.endDate, 'h:mm a')} (${window.durationMinutes} mins)`;
-}
-
-// Create initial time window (60 minutes)
-export function createInitialTimeWindow(centerDate: Date): TimeWindow {
-  const startDate = subMinutes(centerDate, 30);
-  const endDate = addMinutes(centerDate, 30);
-  return {
-    startDate,
-    endDate,
-    durationMinutes: 60
-  };
-}
-
-// Expand time window more aggressively with no time limit
-export function expandTimeWindow(window: TimeWindow): TimeWindow {
-  const centerTime = new Date((window.startDate.getTime() + window.endDate.getTime()) / 2);
-  // Triple the duration each time with no upper limit
-  const newDuration = window.durationMinutes * 3;
-  const halfDuration = newDuration / 2;
-  
-  return {
-    startDate: subMinutes(centerTime, halfDuration),
-    endDate: addMinutes(centerTime, halfDuration),
-    durationMinutes: newDuration
-  };
+// Expand time window with given expansion factor
+export function expandTimeWindow(window: TimeWindow, factor = AGGRESSIVE_EXPANSION_FACTOR): TimeWindow {
+  const centerTime = getWindowCenter(window);
+  const newDuration = window.durationMinutes * factor;
+  return createTimeWindow(centerTime, newDuration);
 }
 
 // Get videos uploaded in a time window
 export async function searchVideosInTimeWindow(window: TimeWindow): Promise<string[]> {
   try {
-    const response = await axios.get(`${API_URL}/search`, {
+    const response = await axios.get(`${YOUTUBE_API_URL}/search`, {
       params: {
         part: 'snippet',
         maxResults: 50,
@@ -77,7 +42,7 @@ export async function getVideoDetails(videoIds: string[]): Promise<Video[]> {
   if (!videoIds.length) return [];
   
   try {
-    const response = await axios.get(`${API_URL}/videos`, {
+    const response = await axios.get(`${YOUTUBE_API_URL}/videos`, {
       params: {
         part: 'snippet,statistics,contentDetails',
         id: videoIds.join(','),
@@ -100,7 +65,7 @@ export async function getVideoDetails(videoIds: string[]): Promise<Video[]> {
   }
 }
 
-// Find videos with less than 5 views
+// Find videos with less than the rare view threshold
 export function filterRareVideos(videos: Video[]): Video[] {
-  return videos.filter(video => video.viewCount < 5);
+  return videos.filter(video => video.viewCount < RARE_VIEW_THRESHOLD);
 }

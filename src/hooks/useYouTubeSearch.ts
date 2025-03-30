@@ -1,15 +1,26 @@
 import { useState } from 'react';
-import { addMinutes, subMinutes } from 'date-fns';
 import { 
-  getRandomPastDate,
-  createInitialTimeWindow, 
   searchVideosInTimeWindow, 
   getVideoDetails, 
   filterRareVideos,
-  expandTimeWindow,
-  TimeWindow 
+  expandTimeWindow 
 } from '@/lib/youtube';
-import { Video } from '@/types';
+import { 
+  getRandomPastDate,
+  createInitialTimeWindow,
+  createTimeWindow,
+  getWindowCenter,
+  delay
+} from '@/lib/utils';
+import { Video, TimeWindow } from '@/types';
+import {
+  BUSY_PERIOD_THRESHOLD,
+  MODERATE_PERIOD_THRESHOLD,
+  CONTRACTION_FACTOR,
+  MODERATE_EXPANSION_FACTOR,
+  MIN_WINDOW_DURATION_MINUTES,
+  STATUS_MESSAGE_DELAY_MS
+} from '@/lib/constants';
 
 export function useYouTubeSearch() {
   const [isLoading, setIsLoading] = useState(false);
@@ -19,14 +30,18 @@ export function useYouTubeSearch() {
   const [error, setError] = useState<string | null>(null);
   const [expansionCount, setExpansionCount] = useState<number>(0);
 
-  // Creates a new time window with given parameters
-  const createTimeWindow = (centerTime: Date, durationMinutes: number): TimeWindow => {
-    const halfDuration = durationMinutes / 2;
-    return {
-      startDate: subMinutes(centerTime, halfDuration),
-      endDate: addMinutes(centerTime, halfDuration),
-      durationMinutes
-    };
+  // Handle the next step in search expansion
+  const handleNextSearchStep = async (
+    nextWindow: TimeWindow, 
+    nextStep: number
+  ): Promise<void> => {
+    // Update state
+    setExpansionCount(nextStep - 1);
+    
+    // Small delay to show the expansion message
+    await delay(STATUS_MESSAGE_DELAY_MS);
+    setCurrentWindow(nextWindow);
+    await searchWithExpansion(nextWindow, nextStep);
   };
 
   // Process search results adaptively based on video count
@@ -35,47 +50,40 @@ export function useYouTubeSearch() {
     videoDetails: Video[], 
     timeWindow: TimeWindow, 
     currentStep: number
-  ) => {
-    let nextExpansionStep: TimeWindow;
-    const centerTime = new Date((timeWindow.startDate.getTime() + timeWindow.endDate.getTime()) / 2);
+  ): Promise<void> => {
+    let nextWindow: TimeWindow;
+    const centerTime = getWindowCenter(timeWindow);
+    const nextStep = currentStep + 1;
     
     // Adaptive window sizing based on video volume
-    if (videoIds.length > 200) {
+    if (videoIds.length > BUSY_PERIOD_THRESHOLD) {
       // Very busy time period - contract slightly
       setStatusMessage(`Found ${videoDetails.length} videos in a busy period. Refining search...`);
-      const newDuration = Math.max(timeWindow.durationMinutes * 0.8, 30);
-      nextExpansionStep = createTimeWindow(centerTime, newDuration);
-    } else if (videoIds.length > 50) {
+      const newDuration = Math.max(timeWindow.durationMinutes * CONTRACTION_FACTOR, MIN_WINDOW_DURATION_MINUTES);
+      nextWindow = createTimeWindow(centerTime, newDuration);
+    } else if (videoIds.length > MODERATE_PERIOD_THRESHOLD) {
       // Moderately busy - expand slower
       setStatusMessage(`Found ${videoDetails.length} videos, but none are rare treasures yet. Expanding search moderately...`);
-      const newDuration = timeWindow.durationMinutes * 1.5;
-      nextExpansionStep = createTimeWindow(centerTime, newDuration);
+      nextWindow = expandTimeWindow(timeWindow, MODERATE_EXPANSION_FACTOR);
     } else {
       // Not many videos - expand more aggressively
       setStatusMessage(`Found ${videoDetails.length} videos, but none are rare treasures yet. Expanding search aggressively...`);
-      nextExpansionStep = expandTimeWindow(timeWindow);
+      nextWindow = expandTimeWindow(timeWindow);
     }
     
-    const nextStep = currentStep + 1;
-    setExpansionCount(nextStep - 1);
-    
-    // Small delay to show the expansion message
-    await new Promise(resolve => setTimeout(resolve, 1200));
-    setCurrentWindow(nextExpansionStep);
-    await searchWithExpansion(nextExpansionStep, nextStep);
+    await handleNextSearchStep(nextWindow, nextStep);
   };
 
   // Main search function with recursive expansion
-  const searchWithExpansion = async (timeWindow: TimeWindow, currentStep: number = 1) => {
+  const searchWithExpansion = async (timeWindow: TimeWindow, currentStep: number = 1): Promise<void> => {
     setStatusMessage(`Step ${currentStep}: Scanning for videos in this ${timeWindow.durationMinutes} min window`);
     
     // Search for videos in the current window
     const videoIds = await searchVideosInTimeWindow(timeWindow);
     
     if (videoIds.length === 0) {
-      // No videos found, keep expanding the time window with no max limit
+      // No videos found, keep expanding the time window
       const nextStep = currentStep + 1;
-      setExpansionCount(nextStep - 1);
       
       // Calculate next window size for status message
       const newWindow = expandTimeWindow(timeWindow);
@@ -83,16 +91,13 @@ export function useYouTubeSearch() {
       
       setStatusMessage(`No videos found. Expanding search range ${expansionFactor}x to ${newWindow.durationMinutes} minutes...`);
       
-      // Small delay to show the expansion message
-      await new Promise(resolve => setTimeout(resolve, 1200));
-      setCurrentWindow(newWindow);
-      await searchWithExpansion(newWindow, nextStep);
+      await handleNextSearchStep(newWindow, nextStep);
     } else {
       // Videos found, get their details
       setStatusMessage(`Found ${videoIds.length} videos! Analyzing view counts to find hidden gems...`);
       const videoDetails = await getVideoDetails(videoIds);
       
-      // Filter for videos with less than 5 views
+      // Filter for rare videos
       const rareVideos = filterRareVideos(videoDetails);
       
       if (rareVideos.length === 0) {
@@ -108,7 +113,7 @@ export function useYouTubeSearch() {
   };
 
   // Start search from a random date
-  const startSearch = async () => {
+  const startSearch = async (): Promise<void> => {
     setIsLoading(true);
     setError(null);
     setStatusMessage(null);
@@ -116,7 +121,7 @@ export function useYouTubeSearch() {
     setExpansionCount(0);
     
     try {
-      // Get a random date and create initial 60-minute window
+      // Get a random date and create initial window
       const randomDate = getRandomPastDate();
       const initialWindow = createInitialTimeWindow(randomDate);
       setCurrentWindow(initialWindow);

@@ -7,3 +7,9 @@ export interface Video {
   viewCount: number;
   channelTitle: string;
 }
+
+export interface TimeWindow {
+  startDate: Date;
+  endDate: Date;
+  durationMinutes: number;
+}

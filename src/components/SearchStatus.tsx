@@ -1,9 +1,9 @@
-import { TimeWindow } from '@/lib/youtube';
-import { formatTimeWindow } from '@/lib/youtube';
+import { TimeWindow, Video } from '@/types';
+import { formatTimeWindow } from '@/lib/utils';
 
 interface SearchStatusProps {
   isLoading: boolean;
-  videos: Array<any>;
+  videos: Video[];
   currentWindow: TimeWindow | null;
   statusMessage: string | null;
   error: string | null;
