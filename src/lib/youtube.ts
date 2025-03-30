@@ -169,23 +169,7 @@ export function filterRareVideos(videos: Video[]): Video[] {
         lowerTitle.includes('live') || 
         lowerTitle.includes('premiere')) return false;
     
-    // Keep videos with actual content (exclude extremely short clips that might be tests)
-    // This logic requires parsing the duration from ISO 8601 duration format (PT1M30S = 1 min 30 sec)
-    // Simple check for videos longer than 30 seconds
-    if (video.duration) {
-      const durationMatch = video.duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
-      if (durationMatch) {
-        const hours = parseInt(durationMatch[1] || '0', 10);
-        const minutes = parseInt(durationMatch[2] || '0', 10);
-        const seconds = parseInt(durationMatch[3] || '0', 10);
-        const totalSeconds = hours * 3600 + minutes * 60 + seconds;
-        
-        // Filter out extremely short clips (less than 30 seconds)
-        if (totalSeconds < 30) return false;
-      }
-    }
-    
-    // Include this video
+    // Include this video (keeping short videos as they can be interesting!)
     return true;
   });
 }
