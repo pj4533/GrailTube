@@ -37,11 +37,11 @@ export function createInitialTimeWindow(centerDate: Date): TimeWindow {
   };
 }
 
-// Expand time window more aggressively
+// Expand time window more aggressively with no time limit
 export function expandTimeWindow(window: TimeWindow): TimeWindow {
   const centerTime = new Date((window.startDate.getTime() + window.endDate.getTime()) / 2);
-  // Triple the duration each time, max 24 hours (1440 minutes)
-  const newDuration = Math.min(window.durationMinutes * 3, 1440);
+  // Triple the duration each time with no upper limit
+  const newDuration = window.durationMinutes * 3;
   const halfDuration = newDuration / 2;
   
   return {

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { addMinutes, subMinutes } from 'date-fns';
 import { 
   getRandomPastDate,
   createInitialTimeWindow, 
@@ -23,7 +24,7 @@ export default function Home() {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [expansionCount, setExpansionCount] = useState<number>(0);
-  const MAX_EXPANSIONS = 6; // Allow up to 6 expansions to maximize chances of finding videos
+  // No more MAX_EXPANSIONS limit - we'll keep going until we find results
 
   const handleSearch = async () => {
     setIsLoading(true);
@@ -55,13 +56,7 @@ export default function Home() {
     const videoIds = await searchVideosInTimeWindow(timeWindow);
     
     if (videoIds.length === 0) {
-      // No videos found, try expanding the time window
-      if (currentStep >= MAX_EXPANSIONS) {
-        setError('No videos found after extensive searching. Try a different random time!');
-        setIsLoading(false);
-        return;
-      }
-      
+      // No videos found, keep expanding the time window with no max limit
       const nextStep = currentStep + 1;
       setExpansionCount(nextStep - 1);
       
@@ -84,26 +79,49 @@ export default function Home() {
       const rareVideos = filterRareVideos(videoDetails);
       
       if (rareVideos.length === 0) {
-        // No rare videos found, try expanding the time window
-        if (currentStep >= MAX_EXPANSIONS) {
-          setError(`Found ${videoDetails.length} videos, but none with less than 5 views. Try again for rarer content!`);
-          setIsLoading(false);
-          return;
+        // Adaptive behavior: If we found too many videos, use a smaller expansion factor
+        let nextExpansionStep;
+        
+        // Adaptive window sizing based on video volume
+        if (videoIds.length > 200) {
+          // Very busy time period - use smaller expansion or even contract
+          setStatusMessage(`Found ${videoDetails.length} videos in a busy period. Refining search...`);
+          // Contract the window slightly but not below 30 min
+          const newDuration = Math.max(timeWindow.durationMinutes * 0.8, 30);
+          const centerTime = new Date((timeWindow.startDate.getTime() + timeWindow.endDate.getTime()) / 2);
+          const halfDuration = newDuration / 2;
+          
+          nextExpansionStep = {
+            startDate: subMinutes(centerTime, halfDuration),
+            endDate: addMinutes(centerTime, halfDuration),
+            durationMinutes: newDuration
+          };
+        } else if (videoIds.length > 50) {
+          // Moderately busy - expand slower
+          setStatusMessage(`Found ${videoDetails.length} videos, but none are rare treasures yet. Expanding search moderately...`);
+          const newDuration = timeWindow.durationMinutes * 1.5; // Slower expansion
+          const centerTime = new Date((timeWindow.startDate.getTime() + timeWindow.endDate.getTime()) / 2);
+          const halfDuration = newDuration / 2;
+          
+          nextExpansionStep = {
+            startDate: subMinutes(centerTime, halfDuration),
+            endDate: addMinutes(centerTime, halfDuration),
+            durationMinutes: newDuration
+          };
+        } else {
+          // Not many videos - expand more aggressively
+          setStatusMessage(`Found ${videoDetails.length} videos, but none are rare treasures yet. Expanding search aggressively...`);
+          // Use the normal 3x expansion
+          nextExpansionStep = expandTimeWindow(timeWindow);
         }
         
         const nextStep = currentStep + 1;
         setExpansionCount(nextStep - 1);
         
-        // Calculate next window size for status message
-        const newWindow = expandTimeWindow(timeWindow);
-        const expansionFactor = Math.round(newWindow.durationMinutes / timeWindow.durationMinutes);
-        
-        setStatusMessage(`Found ${videoDetails.length} videos, but none are rare treasures yet. Expanding search ${expansionFactor}x...`);
-        
         // Small delay to show the expansion message
         await new Promise(resolve => setTimeout(resolve, 1200));
-        setCurrentWindow(newWindow);
-        await searchWithExpansion(newWindow, nextStep);
+        setCurrentWindow(nextExpansionStep);
+        await searchWithExpansion(nextExpansionStep, nextStep);
       } else {
         // Success! We found rare videos
         setVideos(rareVideos);
