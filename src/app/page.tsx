@@ -152,7 +152,7 @@ export default function Home() {
               </div>
             ) : savedVideos.length === 0 ? (
               <div className="text-center py-10 bg-gray-100 rounded-lg">
-                <p className="text-gray-500">No videos have been saved yet. Click "Find Videos" to discover rare gems!</p>
+                <p className="text-gray-500">No videos have been saved yet. Click &quot;Find Videos&quot; to discover rare gems!</p>
               </div>
             ) : (
               <VideoGrid 

@@ -52,7 +52,6 @@ export default function VideoCard({
         className="relative h-48 w-full cursor-pointer"
         onClick={() => onClick(video.id)}
       >
-        {console.log('Rendering thumbnail for video:', video.id, 'URL:', video.thumbnailUrl)}
         {video.thumbnailUrl ? (
           <Image
             src={video.thumbnailUrl}

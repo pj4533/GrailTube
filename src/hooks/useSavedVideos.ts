@@ -19,7 +19,6 @@ export function useSavedVideos() {
       }
       
       const data = await response.json();
-      console.log('Saved videos data from server:', data.videos);
       setSavedVideos(data.videos || []);
     } catch (err) {
       console.error('Error fetching saved videos:', err);
