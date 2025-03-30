@@ -2,7 +2,8 @@ import axios, { AxiosError, AxiosResponse } from 'axios';
 import { Video, TimeWindow, ViewStats } from '@/types';
 import { 
   YOUTUBE_API_URL, 
-  RARE_VIEW_THRESHOLD
+  RARE_VIEW_THRESHOLD,
+  EXCLUDED_CATEGORIES
 } from './constants';
 
 // Error type for YouTube API rate limits
@@ -41,10 +42,30 @@ class YouTubeApiService {
   private videoCache: Record<string, Video> = {};
   private searchCache: Record<string, string[]> = {};
   
+  // Random search terms to diversify results and avoid commercial content
+  private readonly searchTerms: string[] = [
+    'random', 'interesting', 'cool', 'fun', 'amazing', 
+    'wow', 'look', 'check', 'see', 'watch', 'observe',
+    'nature', 'outdoor', 'adventure', 'daily', 'life',
+    'hobby', 'craft', 'diy', 'homemade', 'amateur',
+    'family', 'kids', 'pet', 'dog', 'cat', 'animal',
+    'travel', 'trip', 'journey', 'vacation', 'holiday',
+    'food', 'cooking', 'recipe', 'baking', 'meal',
+    'game', 'play', 'fun', 'adventure', 'explore'
+  ];
+  
   constructor() {
     this.apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY || '';
     this.maxResultsPerRequest = 50;
     this.maxIdsPerRequest = 50;
+  }
+  
+  /**
+   * Get a random search term to diversify results
+   */
+  private getRandomSearchTerm(): string {
+    const randomIndex = Math.floor(Math.random() * this.searchTerms.length);
+    return this.searchTerms[randomIndex];
   }
   
   /**
@@ -118,6 +139,10 @@ class YouTubeApiService {
       apiStats.searchApiCalls++;
       apiStats.totalApiCalls++;
       
+      // Construct videoCategoryId parameter to exclude unwanted categories
+      // Note: YouTube API doesn't directly support excluding categories, 
+      // so we'll need to filter out unwanted categories after fetching details
+      
       const response = await axios.get(`${YOUTUBE_API_URL}/search`, {
         params: {
           part: 'snippet',
@@ -125,6 +150,8 @@ class YouTubeApiService {
           type: 'video',
           publishedAfter: searchWindow.startDate.toISOString(),
           publishedBefore: searchWindow.endDate.toISOString(),
+          // Add random search query parameter to get more diverse results
+          q: this.getRandomSearchTerm(),
           key: this.apiKey,
         },
       });
@@ -161,7 +188,7 @@ class YouTubeApiService {
       
       const response = await axios.get(`${YOUTUBE_API_URL}/videos`, {
         params: {
-          part: 'snippet,statistics,contentDetails,liveStreamingDetails',
+          part: 'snippet,statistics,contentDetails,liveStreamingDetails,topicDetails,status',
           id: batchIds.join(','),
           key: this.apiKey,
         },
@@ -201,13 +228,29 @@ class YouTubeApiService {
       const batchResults = await Promise.all(batchPromises);
       const allItems = batchResults.flat();
       
+      // Filter out excluded categories and process results
+      const filteredItems = allItems.filter((item: any) => {
+        // Check if the video is in an excluded category
+        const categoryId = item.snippet?.categoryId;
+        if (categoryId && EXCLUDED_CATEGORIES.includes(categoryId)) {
+          console.log(`Filtered out video in excluded category: "${item.snippet.title}" (category: ${categoryId})`);
+          return false;
+        }
+        
+        // Include videos that don't have a category or aren't in excluded categories
+        return true;
+      });
+      
       // Process and cache results
-      allItems.forEach((item: any) => {
+      filteredItems.forEach((item: any) => {
         // Additional information about the video
         const isLiveStream = !!item.liveStreamingDetails;
         const isUpcoming = item.liveStreamingDetails?.scheduledStartTime && 
                          !item.liveStreamingDetails?.actualEndTime;
         const duration = item.contentDetails?.duration || '';
+        
+        // Check license
+        const isLicensed = item.status?.license === 'youtube' ? false : true;
         
         const video: Video = {
           id: item.id,
@@ -215,11 +258,13 @@ class YouTubeApiService {
           description: item.snippet.description,
           thumbnailUrl: item.snippet.thumbnails.medium.url,
           publishedAt: item.snippet.publishedAt,
-          viewCount: parseInt(item.statistics.viewCount, 10),
+          viewCount: parseInt(item.statistics.viewCount || '0', 10),
           channelTitle: item.snippet.channelTitle,
+          categoryId: item.snippet.categoryId,
           isLiveStream,
           isUpcoming,
-          duration
+          duration,
+          isLicensed
         };
         
         // Cache the video details
@@ -283,9 +328,28 @@ class YouTubeApiService {
   }
   
   /**
-   * Filter videos with less than 10 views and not streams
+   * Filter videos with less than 10 views and not streams or commercial content
    */
   filterRareVideos(videos: Video[]): Video[] {
+    // Define keywords that indicate commercial movie/TV purchase content
+    const commercialKeywords = [
+      // Movie/TV purchase indicators
+      'buy', 'rent', 'purchase', 'trailer', 'official', 'hd', '4k',
+      // Movie studio references
+      'warner', 'disney', 'paramount', 'sony', 'universal', 'mgm', 'lionsgate',
+      // Streaming services
+      'netflix', 'hulu', 'amazon', 'prime video', 'hbo', 'max', 'disney+',
+      // Common commercial phrases
+      'now available', 'digital', 'bluray', 'blu-ray', 'dvd', 
+      'full movie', 'full episode', 'season', 'episode'
+    ];
+    
+    // Extended TV show indicators
+    const tvShowKeywords = [
+      'tv series', 'tv show', 'television', 'episode', 'season',
+      'watch now', 'streaming now', 'now streaming'
+    ];
+    
     return videos.filter(video => {
       // Must have less than 10 views
       if (video.viewCount >= 10) return false;
@@ -293,13 +357,41 @@ class YouTubeApiService {
       // Filter out live streams and upcoming streams
       if (video.isLiveStream || video.isUpcoming) return false;
       
-      // Filter out videos with "stream" or "live" in the title (often stream announcements)
+      // Convert title and description to lowercase for case-insensitive matching
       const lowerTitle = video.title.toLowerCase();
+      const lowerDescription = video.description?.toLowerCase() || '';
+      
+      // Filter out videos with "stream" or "live" in the title (often stream announcements)
       if (lowerTitle.includes('stream') || 
           lowerTitle.includes('live') || 
           lowerTitle.includes('premiere')) return false;
       
-      // Include this video (keeping short videos as they can be interesting!)
+      // Check for commercial keywords in title or description
+      for (const keyword of commercialKeywords) {
+        if (lowerTitle.includes(keyword) || lowerDescription.includes(keyword)) {
+          console.log(`Filtered out commercial video: "${video.title}" (matched keyword: ${keyword})`);
+          return false;
+        }
+      }
+      
+      // Check for TV show indicators
+      for (const keyword of tvShowKeywords) {
+        if (lowerTitle.includes(keyword) || lowerDescription.includes(keyword)) {
+          console.log(`Filtered out TV show video: "${video.title}" (matched keyword: ${keyword})`);
+          return false;
+        }
+      }
+      
+      // Filter videos with high production value indicators
+      if (video.title.includes('©') || 
+          video.description?.includes('©') || 
+          video.title.includes('™') || 
+          video.description?.includes('™')) {
+        console.log(`Filtered out commercial video: "${video.title}" (matched copyright/trademark)`);
+        return false;
+      }
+      
+      // Include this video (passed all filter checks)
       return true;
     });
   }

@@ -6,8 +6,10 @@ export interface Video {
   publishedAt: string;
   viewCount: number;
   channelTitle: string;
+  categoryId?: string;
   isLiveStream?: boolean;
   isUpcoming?: boolean;
+  isLicensed?: boolean;
   duration?: string;
 }
 
