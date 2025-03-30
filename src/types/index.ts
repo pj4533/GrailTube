@@ -6,6 +6,9 @@ export interface Video {
   publishedAt: string;
   viewCount: number;
   channelTitle: string;
+  isLiveStream?: boolean;
+  isUpcoming?: boolean;
+  duration?: string;
 }
 
 export interface TimeWindow {

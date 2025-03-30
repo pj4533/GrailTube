@@ -110,7 +110,7 @@ export async function getVideoDetails(videoIds: string[]): Promise<Video[]> {
       
       const response = await axios.get(`${YOUTUBE_API_URL}/videos`, {
         params: {
-          part: 'snippet,statistics,contentDetails',
+          part: 'snippet,statistics,contentDetails,liveStreamingDetails',
           id: batchIds.join(','),
           key: API_KEY,
         },
@@ -124,6 +124,11 @@ export async function getVideoDetails(videoIds: string[]): Promise<Video[]> {
     
     // Process and cache results
     allItems.forEach((item: any) => {
+      // Additional information about the video
+      const isLiveStream = !!item.liveStreamingDetails;
+      const isUpcoming = item.liveStreamingDetails?.scheduledStartTime && !item.liveStreamingDetails?.actualEndTime;
+      const duration = item.contentDetails?.duration || '';
+      
       const video: Video = {
         id: item.id,
         title: item.snippet.title,
@@ -132,6 +137,9 @@ export async function getVideoDetails(videoIds: string[]): Promise<Video[]> {
         publishedAt: item.snippet.publishedAt,
         viewCount: parseInt(item.statistics.viewCount, 10),
         channelTitle: item.snippet.channelTitle,
+        isLiveStream,
+        isUpcoming,
+        duration
       };
       
       // Cache the video details
@@ -146,7 +154,38 @@ export async function getVideoDetails(videoIds: string[]): Promise<Video[]> {
   }
 }
 
-// Find videos with exactly zero views
+// Find videos with exactly zero views that are not live streams or upcoming streams
 export function filterRareVideos(videos: Video[]): Video[] {
-  return videos.filter(video => video.viewCount === RARE_VIEW_THRESHOLD); // RARE_VIEW_THRESHOLD is set to 0
+  return videos.filter(video => {
+    // Must have exactly zero views
+    if (video.viewCount !== RARE_VIEW_THRESHOLD) return false;
+    
+    // Filter out live streams and upcoming streams
+    if (video.isLiveStream || video.isUpcoming) return false;
+    
+    // Filter out videos with "stream" or "live" in the title (often stream announcements)
+    const lowerTitle = video.title.toLowerCase();
+    if (lowerTitle.includes('stream') || 
+        lowerTitle.includes('live') || 
+        lowerTitle.includes('premiere')) return false;
+    
+    // Keep videos with actual content (exclude extremely short clips that might be tests)
+    // This logic requires parsing the duration from ISO 8601 duration format (PT1M30S = 1 min 30 sec)
+    // Simple check for videos longer than 30 seconds
+    if (video.duration) {
+      const durationMatch = video.duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+      if (durationMatch) {
+        const hours = parseInt(durationMatch[1] || '0', 10);
+        const minutes = parseInt(durationMatch[2] || '0', 10);
+        const seconds = parseInt(durationMatch[3] || '0', 10);
+        const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+        
+        // Filter out extremely short clips (less than 30 seconds)
+        if (totalSeconds < 30) return false;
+      }
+    }
+    
+    // Include this video
+    return true;
+  });
 }
