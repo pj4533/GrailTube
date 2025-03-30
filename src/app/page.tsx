@@ -3,13 +3,12 @@
 import { useState } from 'react';
 import { useYouTubeSearch } from '@/hooks/useYouTubeSearch';
 import { Video } from '@/types';
-import VideoGrid from '@/components/VideoGrid';
-import VideoPlayer from '@/components/VideoPlayer';
 import SearchStatus from '@/components/SearchStatus';
 import ApiStatsDisplay from '@/components/ApiStatsDisplay';
+import AutoPlayVideo from '@/components/AutoPlayVideo';
 
 export default function Home() {
-  const [playingVideoId, setPlayingVideoId] = useState<string | null>(null);
+  const [currentVideoIndex, setCurrentVideoIndex] = useState<number>(0);
   const { 
     isLoading, 
     videos, 
@@ -20,9 +19,15 @@ export default function Home() {
     startSearch 
   } = useYouTubeSearch();
 
-  const handleVideoClick = (videoId: string) => {
-    setPlayingVideoId(videoId);
+  const handleNextVideo = () => {
+    if (currentVideoIndex < videos.length - 1) {
+      setCurrentVideoIndex(currentVideoIndex + 1);
+    }
   };
+
+  const hasFoundVideos = !isLoading && videos.length > 0;
+  const currentVideo = hasFoundVideos ? videos[currentVideoIndex] : null;
+  const hasMoreVideos = hasFoundVideos && currentVideoIndex < videos.length - 1;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -32,24 +37,35 @@ export default function Home() {
           Discover untouched YouTube videos with zero views
         </p>
         <button
-          onClick={startSearch}
+          onClick={() => {
+            setCurrentVideoIndex(0);
+            startSearch();
+          }}
           disabled={isLoading}
           className="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isLoading ? 'Searching...' : 'Find Rare Gems'}
+          {isLoading ? 'Searching...' : 'Find Untouched Videos'}
         </button>
       </header>
 
-      <SearchStatus
-        isLoading={isLoading}
-        videos={videos}
-        currentWindow={currentWindow}
-        statusMessage={statusMessage}
-        error={error}
-      />
+      {/* Show search status during loading */}
+      {(!hasFoundVideos || isLoading) && (
+        <SearchStatus
+          isLoading={isLoading}
+          videos={videos}
+          currentWindow={currentWindow}
+          statusMessage={statusMessage}
+          error={error}
+        />
+      )}
 
-      {!isLoading && (
-        <VideoGrid videos={videos} onVideoClick={handleVideoClick} />
+      {/* Automatically show the first video when found */}
+      {currentVideo && (
+        <AutoPlayVideo 
+          video={currentVideo}
+          onNextVideo={handleNextVideo}
+          hasMoreVideos={hasMoreVideos}
+        />
       )}
 
       {/* API Stats Display */}
@@ -63,11 +79,11 @@ export default function Home() {
         />
       )}
 
-      {playingVideoId && (
-        <VideoPlayer
-          videoId={playingVideoId}
-          onClose={() => setPlayingVideoId(null)}
-        />
+      {/* Show result count if multiple videos are found */}
+      {hasFoundVideos && videos.length > 1 && (
+        <div className="text-center mt-6 text-gray-600">
+          <p>Video {currentVideoIndex + 1} of {videos.length} untouched videos</p>
+        </div>
       )}
     </div>
   );
