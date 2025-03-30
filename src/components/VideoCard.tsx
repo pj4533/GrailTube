@@ -112,7 +112,8 @@ export default function VideoCard({
         <p className="text-sm text-gray-500 mt-1">{video.channelTitle}</p>
         <div className="flex justify-between items-center mt-2 text-xs text-gray-500">
           <span>{formatDate(video.publishedAt)}</span>
-          <span>{video.viewCount} views</span>
+          {/* Only show view count for search results, not saved videos */}
+          {!discoveredAt && <span>{video.viewCount} views</span>}
         </div>
         
         {/* Show discovery info for saved videos */}
