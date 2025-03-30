@@ -1,10 +1,8 @@
 import axios from 'axios';
 import { Video, TimeWindow } from '@/types';
-import { createTimeWindow, getWindowCenter } from './utils';
 import { 
   YOUTUBE_API_URL, 
-  RARE_VIEW_THRESHOLD,
-  AGGRESSIVE_EXPANSION_FACTOR
+  RARE_VIEW_THRESHOLD
 } from './constants';
 
 const API_KEY = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
@@ -31,45 +29,17 @@ export const apiStats = {
   }
 };
 
-// Expand time window with given expansion factor
-export function expandTimeWindow(window: TimeWindow, factor = AGGRESSIVE_EXPANSION_FACTOR): TimeWindow {
-  // Import constants
-  const { YOUTUBE_FOUNDING_DATE, MAX_WINDOW_DURATION_MINUTES } = require('./constants');
-  
-  // Calculate new duration, but cap it to prevent excessive expansion
-  const newDuration = Math.min(window.durationMinutes * factor, MAX_WINDOW_DURATION_MINUTES);
-  
-  // Get center time
-  const centerTime = getWindowCenter(window);
-  
-  // Create the new time window
-  let newWindow = createTimeWindow(centerTime, newDuration);
-  
-  // If start date is before YouTube's founding, adjust the window
-  if (newWindow.startDate < YOUTUBE_FOUNDING_DATE) {
-    // Calculate how much we're below the founding date
-    const underflow = YOUTUBE_FOUNDING_DATE.getTime() - newWindow.startDate.getTime();
-    
-    // Create an adjusted window starting from YouTube's founding date
-    // We keep the same duration but shift the center forward
-    const adjustedCenter = new Date(centerTime.getTime() + underflow);
-    return createTimeWindow(adjustedCenter, newDuration);
-  }
-  
-  return newWindow;
-}
-
-// Generate cache key for a time window
-function getSearchCacheKey(window: TimeWindow): string {
-  return `${window.startDate.toISOString()}_${window.endDate.toISOString()}`;
-}
-
 // Error type for YouTube API rate limits
 export class YouTubeRateLimitError extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'YouTubeRateLimitError';
   }
+}
+
+// Generate cache key for a time window
+function getSearchCacheKey(window: TimeWindow): string {
+  return `${window.startDate.toISOString()}_${window.endDate.toISOString()}`;
 }
 
 // Get videos uploaded in a time window with caching
