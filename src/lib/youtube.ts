@@ -26,21 +26,22 @@ export function formatTimeWindow(window: TimeWindow): string {
   return `${format(window.startDate, 'MMM d, yyyy h:mm a')} to ${format(window.endDate, 'h:mm a')} (${window.durationMinutes} mins)`;
 }
 
-// Create initial time window (30 minutes)
+// Create initial time window (60 minutes)
 export function createInitialTimeWindow(centerDate: Date): TimeWindow {
-  const startDate = subMinutes(centerDate, 15);
-  const endDate = addMinutes(centerDate, 15);
+  const startDate = subMinutes(centerDate, 30);
+  const endDate = addMinutes(centerDate, 30);
   return {
     startDate,
     endDate,
-    durationMinutes: 30
+    durationMinutes: 60
   };
 }
 
-// Expand time window
+// Expand time window more aggressively
 export function expandTimeWindow(window: TimeWindow): TimeWindow {
   const centerTime = new Date((window.startDate.getTime() + window.endDate.getTime()) / 2);
-  const newDuration = Math.min(window.durationMinutes * 2, 1440); // Double duration, max 24 hours (1440 minutes)
+  // Triple the duration each time, max 24 hours (1440 minutes)
+  const newDuration = Math.min(window.durationMinutes * 3, 1440);
   const halfDuration = newDuration / 2;
   
   return {
