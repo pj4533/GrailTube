@@ -33,13 +33,13 @@ export default function Home() {
     setExpansionCount(0);
     
     try {
-      // Get a random date and create initial 10-minute window
+      // Get a random date and create initial 30-minute window
       const randomDate = getRandomPastDate();
       const initialWindow = createInitialTimeWindow(randomDate);
       setCurrentWindow(initialWindow);
       
-      // Start the search process
-      await searchWithExpansion(initialWindow);
+      // Start the search process with step 1
+      await searchWithExpansion(initialWindow, 1);
       
     } catch (err) {
       setError('An error occurred. Please try again.');
@@ -48,22 +48,23 @@ export default function Home() {
     }
   };
 
-  const searchWithExpansion = async (timeWindow: TimeWindow) => {
-    setStatusMessage(`Step ${expansionCount + 1}: Checking for videos in this timeframe`);
+  const searchWithExpansion = async (timeWindow: TimeWindow, currentStep: number = 1) => {
+    setStatusMessage(`Step ${currentStep}: Checking for videos in this timeframe`);
     
     // Search for videos in the current window
     const videoIds = await searchVideosInTimeWindow(timeWindow);
     
     if (videoIds.length === 0) {
       // No videos found, try expanding the time window
-      if (expansionCount >= MAX_EXPANSIONS) {
+      if (currentStep >= MAX_EXPANSIONS) {
         setError('No videos found after several attempts. Try a different time period!');
         setIsLoading(false);
         return;
       }
       
       setStatusMessage(`No videos found in this window. Expanding search range...`);
-      setExpansionCount(prev => prev + 1);
+      const nextStep = currentStep + 1;
+      setExpansionCount(nextStep - 1);
       
       // Expand the time window and try again
       const newWindow = expandTimeWindow(timeWindow);
@@ -71,7 +72,7 @@ export default function Home() {
       // Small delay to show the expansion message
       await new Promise(resolve => setTimeout(resolve, 1200));
       setCurrentWindow(newWindow);
-      await searchWithExpansion(newWindow);
+      await searchWithExpansion(newWindow, nextStep);
     } else {
       // Videos found, get their details
       setStatusMessage(`Found ${videoIds.length} videos. Checking for rarities (< 5 views)...`);
@@ -82,14 +83,15 @@ export default function Home() {
       
       if (rareVideos.length === 0) {
         // No rare videos found, try expanding the time window
-        if (expansionCount >= MAX_EXPANSIONS) {
+        if (currentStep >= MAX_EXPANSIONS) {
           setError(`Found ${videoDetails.length} videos, but none with less than 5 views. Try again!`);
           setIsLoading(false);
           return;
         }
         
         setStatusMessage(`Found ${videoDetails.length} videos, but none are rare enough. Expanding search...`);
-        setExpansionCount(prev => prev + 1);
+        const nextStep = currentStep + 1;
+        setExpansionCount(nextStep - 1);
         
         // Expand the time window and try again
         const newWindow = expandTimeWindow(timeWindow);
@@ -97,7 +99,7 @@ export default function Home() {
         // Small delay to show the expansion message
         await new Promise(resolve => setTimeout(resolve, 1200));
         setCurrentWindow(newWindow);
-        await searchWithExpansion(newWindow);
+        await searchWithExpansion(newWindow, nextStep);
       } else {
         // Success! We found rare videos
         setVideos(rareVideos);
