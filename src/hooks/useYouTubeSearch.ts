@@ -17,6 +17,8 @@ import { Video, TimeWindow } from '@/types';
 import {
   BUSY_PERIOD_THRESHOLD,
   MODERATE_PERIOD_THRESHOLD,
+  REROLL_THRESHOLD,
+  MAX_REROLLS,
   CONTRACTION_FACTOR,
   MODERATE_EXPANSION_FACTOR,
   MIN_WINDOW_DURATION_MINUTES,
@@ -30,6 +32,7 @@ export function useYouTubeSearch() {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [expansionCount, setExpansionCount] = useState<number>(0);
+  const [rerollCount, setRerollCount] = useState<number>(0);
 
   // Handle the next step in search expansion
   const handleNextSearchStep = async (
@@ -45,6 +48,36 @@ export function useYouTubeSearch() {
     await searchWithExpansion(nextWindow, nextStep);
   };
 
+  // Start a completely new search with a random time period
+  const performReroll = async (): Promise<void> => {
+    // Increment reroll count
+    const newRerollCount = rerollCount + 1;
+    setRerollCount(newRerollCount);
+    
+    // Check if we've reached the maximum number of rerolls
+    if (newRerollCount > MAX_REROLLS) {
+      setError(`After ${MAX_REROLLS} different time periods, couldn't find any videos with zero views. Try again later!`);
+      setIsLoading(false);
+      return;
+    }
+    
+    setStatusMessage(`Reroll #${newRerollCount}: Found videos but none with zero views. Trying a completely different time period...`);
+    
+    // Reset expansion count since we're starting fresh
+    setExpansionCount(0);
+    
+    // Brief delay to show the reroll message
+    await delay(STATUS_MESSAGE_DELAY_MS);
+    
+    // Get a fresh random date and create a new window
+    const randomDate = getRandomPastDate();
+    const newWindow = createInitialTimeWindow(randomDate);
+    setCurrentWindow(newWindow);
+    
+    // Start a new search with the new window
+    await searchWithExpansion(newWindow, 1);
+  };
+
   // Process search results adaptively based on video count
   const processAdaptiveSearch = async (
     videoIds: string[], 
@@ -52,11 +85,18 @@ export function useYouTubeSearch() {
     timeWindow: TimeWindow, 
     currentStep: number
   ): Promise<void> => {
+    // If we hit the reroll threshold (50+ videos but none with 0 views),
+    // completely reroll with a new time period instead of expanding
+    if (videoIds.length >= REROLL_THRESHOLD) {
+      await performReroll();
+      return;
+    }
+    
+    // Otherwise, adapt the window size based on video volume
     let nextWindow: TimeWindow;
     const centerTime = getWindowCenter(timeWindow);
     const nextStep = currentStep + 1;
     
-    // Adaptive window sizing based on video volume
     if (videoIds.length > BUSY_PERIOD_THRESHOLD) {
       // Very busy time period - contract slightly
       setStatusMessage(`Found ${videoDetails.length} videos but none with zero views. Busy period - refining search...`);
@@ -120,6 +160,7 @@ export function useYouTubeSearch() {
     setStatusMessage(null);
     setVideos([]);
     setExpansionCount(0);
+    setRerollCount(0);
     
     // Reset API call stats
     apiStats.reset();

@@ -14,6 +14,8 @@ export const MAX_BATCH_SIZE = 50; // Maximum videos per API call
 // Search thresholds for adaptive window sizing
 export const BUSY_PERIOD_THRESHOLD = 200;
 export const MODERATE_PERIOD_THRESHOLD = 50;
+export const REROLL_THRESHOLD = 50;  // When to choose a new random time period
+export const MAX_REROLLS = 5;  // Maximum number of rerolls before giving up
 
 // Expansion factors
 export const AGGRESSIVE_EXPANSION_FACTOR = 3;
