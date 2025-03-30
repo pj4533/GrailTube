@@ -33,9 +33,30 @@ export const apiStats = {
 
 // Expand time window with given expansion factor
 export function expandTimeWindow(window: TimeWindow, factor = AGGRESSIVE_EXPANSION_FACTOR): TimeWindow {
+  // Import constants
+  const { YOUTUBE_FOUNDING_DATE, MAX_WINDOW_DURATION_MINUTES } = require('./constants');
+  
+  // Calculate new duration, but cap it to prevent excessive expansion
+  const newDuration = Math.min(window.durationMinutes * factor, MAX_WINDOW_DURATION_MINUTES);
+  
+  // Get center time
   const centerTime = getWindowCenter(window);
-  const newDuration = window.durationMinutes * factor;
-  return createTimeWindow(centerTime, newDuration);
+  
+  // Create the new time window
+  let newWindow = createTimeWindow(centerTime, newDuration);
+  
+  // If start date is before YouTube's founding, adjust the window
+  if (newWindow.startDate < YOUTUBE_FOUNDING_DATE) {
+    // Calculate how much we're below the founding date
+    const underflow = YOUTUBE_FOUNDING_DATE.getTime() - newWindow.startDate.getTime();
+    
+    // Create an adjusted window starting from YouTube's founding date
+    // We keep the same duration but shift the center forward
+    const adjustedCenter = new Date(centerTime.getTime() + underflow);
+    return createTimeWindow(adjustedCenter, newDuration);
+  }
+  
+  return newWindow;
 }
 
 // Generate cache key for a time window
@@ -43,9 +64,27 @@ function getSearchCacheKey(window: TimeWindow): string {
   return `${window.startDate.toISOString()}_${window.endDate.toISOString()}`;
 }
 
+// Error type for YouTube API rate limits
+export class YouTubeRateLimitError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'YouTubeRateLimitError';
+  }
+}
+
 // Get videos uploaded in a time window with caching
 export async function searchVideosInTimeWindow(window: TimeWindow): Promise<string[]> {
-  const cacheKey = getSearchCacheKey(window);
+  // Import the founding date
+  const { YOUTUBE_FOUNDING_DATE } = require('./constants');
+  
+  // Ensure we never search before YouTube's founding
+  let searchWindow = {...window};
+  if (searchWindow.startDate < YOUTUBE_FOUNDING_DATE) {
+    searchWindow.startDate = new Date(YOUTUBE_FOUNDING_DATE);
+    console.log('Adjusted search window to start at YouTube founding date');
+  }
+  
+  const cacheKey = getSearchCacheKey(searchWindow);
   
   // Check if we already have this search cached
   if (searchCache[cacheKey]) {
@@ -64,8 +103,8 @@ export async function searchVideosInTimeWindow(window: TimeWindow): Promise<stri
         part: 'snippet',
         maxResults: MAX_RESULTS_PER_REQUEST,
         type: 'video',
-        publishedAfter: window.startDate.toISOString(),
-        publishedBefore: window.endDate.toISOString(),
+        publishedAfter: searchWindow.startDate.toISOString(),
+        publishedBefore: searchWindow.endDate.toISOString(),
         key: API_KEY,
       },
     });
@@ -76,7 +115,27 @@ export async function searchVideosInTimeWindow(window: TimeWindow): Promise<stri
     searchCache[cacheKey] = videoIds;
     
     return videoIds;
-  } catch (error) {
+  } catch (error: any) {
+    // Check for specific rate limiting error codes from YouTube API
+    if (error.response && error.response.data) {
+      const errorDetails = error.response.data;
+      
+      // YouTube API quota exceeded (403 with specific error codes)
+      if (error.response.status === 403 && 
+          (errorDetails.error?.errors?.some((e: any) => 
+            e.reason === 'quotaExceeded' || e.reason === 'rateLimitExceeded'))) {
+        console.error('YouTube API quota exceeded:', errorDetails);
+        throw new YouTubeRateLimitError('YouTube API quota exceeded. Please try again later.');
+      }
+      
+      // Other 403 or 429 errors that might indicate rate limiting
+      if (error.response.status === 429 || error.response.status === 403) {
+        console.error('Possible rate limiting from YouTube API:', errorDetails);
+        throw new YouTubeRateLimitError('YouTube API rate limit reached. Please try again later.');
+      }
+    }
+    
+    // Log other errors but don't stop the search process for non-rate-limit errors
     console.error('Error searching videos:', error);
     return [];
   }
@@ -108,15 +167,38 @@ export async function getVideoDetails(videoIds: string[]): Promise<Video[]> {
       apiStats.videoDetailApiCalls++;
       apiStats.totalApiCalls++;
       
-      const response = await axios.get(`${YOUTUBE_API_URL}/videos`, {
-        params: {
-          part: 'snippet,statistics,contentDetails,liveStreamingDetails',
-          id: batchIds.join(','),
-          key: API_KEY,
-        },
-      });
-      
-      return response.data.items || [];
+      try {
+        const response = await axios.get(`${YOUTUBE_API_URL}/videos`, {
+          params: {
+            part: 'snippet,statistics,contentDetails,liveStreamingDetails',
+            id: batchIds.join(','),
+            key: API_KEY,
+          },
+        });
+        
+        return response.data.items || [];
+      } catch (error: any) {
+        // Check for rate limiting errors
+        if (error.response && error.response.data) {
+          const errorDetails = error.response.data;
+          
+          // Handle quota or rate limit errors
+          if (error.response.status === 403 && 
+              (errorDetails.error?.errors?.some((e: any) => 
+                e.reason === 'quotaExceeded' || e.reason === 'rateLimitExceeded'))) {
+            throw new YouTubeRateLimitError('YouTube API quota exceeded. Please try again later.');
+          }
+          
+          // Other 403 or 429 errors that might indicate rate limiting
+          if (error.response.status === 429 || error.response.status === 403) {
+            throw new YouTubeRateLimitError('YouTube API rate limit reached. Please try again later.');
+          }
+        }
+        
+        // For other errors, log and return an empty array
+        console.error('Error fetching batch of video details:', error);
+        return [];
+      }
     });
     
     const batchResults = await Promise.all(batchPromises);
@@ -149,8 +231,14 @@ export async function getVideoDetails(videoIds: string[]): Promise<Video[]> {
     // Return all videos (including previously cached ones)
     return videoIds.map(id => videoCache[id]).filter(Boolean);
   } catch (error) {
+    // If this is a rate limit error, propagate it up
+    if (error instanceof YouTubeRateLimitError) {
+      throw error; // Rethrow to be caught by the calling function
+    }
+    
     console.error('Error getting video details:', error);
-    return videoIds.map(id => videoCache[id]).filter(Boolean); // Return any cached videos we have
+    // Return any cached videos we have for non-rate-limit errors
+    return videoIds.map(id => videoCache[id]).filter(Boolean);
   }
 }
 

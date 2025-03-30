@@ -21,3 +21,4 @@ export const MAX_REROLLS = 5;  // Maximum number of rerolls before giving up
 export const AGGRESSIVE_EXPANSION_FACTOR = 3;
 export const MODERATE_EXPANSION_FACTOR = 1.5;
 export const CONTRACTION_FACTOR = 0.8;
+export const MAX_WINDOW_DURATION_MINUTES = 60 * 24 * 7; // Maximum 1 week of search
