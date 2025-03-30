@@ -25,7 +25,7 @@ export default function VideoGrid({
       <div className="text-center py-10">
         <p className="text-gray-500">
           {isSavedVideosView 
-            ? "You haven't saved any videos yet. Find some rare gems!"
+            ? "No videos have been saved yet. Find some rare gems!"
             : "No videos with less than 10 views found. Try again!"}
         </p>
       </div>
