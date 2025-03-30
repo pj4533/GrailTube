@@ -1,6 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { SavedVideo, Video } from '@/types';
+import { fetchApi, ApiError } from '@/lib/api';
 
+/**
+ * Hook for managing saved videos
+ * Uses the shared fetchApi utility for consistent error handling
+ */
 export function useSavedVideos() {
   const [savedVideos, setSavedVideos] = useState<SavedVideo[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -12,17 +17,11 @@ export function useSavedVideos() {
       setIsLoading(true);
       setError(null);
       
-      const response = await fetch('/api/saved-videos');
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch saved videos');
-      }
-      
-      const data = await response.json();
+      const data = await fetchApi<{ videos: SavedVideo[] }>('/api/saved-videos');
       setSavedVideos(data.videos || []);
     } catch (err) {
-      console.error('Error fetching saved videos:', err);
-      setError('Failed to load saved videos');
+      const message = err instanceof ApiError ? err.message : 'Failed to load saved videos';
+      setError(message);
     } finally {
       setIsLoading(false);
     }
@@ -31,25 +30,17 @@ export function useSavedVideos() {
   // Save a video
   const saveVideo = useCallback(async (video: Video) => {
     try {
-      const response = await fetch('/api/saved-videos', {
+      await fetchApi('/api/saved-videos', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({ video }),
       });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to save video');
-      }
       
       // Refresh the list after saving
       await fetchSavedVideos();
       return true;
-    } catch (err: any) {
-      console.error('Error saving video:', err);
-      setError(err.message || 'Failed to save video');
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : 'Failed to save video';
+      setError(message);
       return false;
     }
   }, [fetchSavedVideos]);
@@ -57,20 +48,16 @@ export function useSavedVideos() {
   // Remove a saved video
   const removeVideo = useCallback(async (videoId: string) => {
     try {
-      const response = await fetch(`/api/saved-videos/${videoId}`, {
+      await fetchApi(`/api/saved-videos/${videoId}`, {
         method: 'DELETE',
       });
-      
-      if (!response.ok) {
-        throw new Error('Failed to remove video');
-      }
       
       // Refresh the list after removing
       await fetchSavedVideos();
       return true;
     } catch (err) {
-      console.error('Error removing video:', err);
-      setError('Failed to remove video');
+      const message = err instanceof ApiError ? err.message : 'Failed to remove video';
+      setError(message);
       return false;
     }
   }, [fetchSavedVideos]);

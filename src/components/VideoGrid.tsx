@@ -1,5 +1,7 @@
 import { SavedVideo, Video } from '@/types';
 import VideoCard from './VideoCard';
+import EmptyState from './ui/EmptyState';
+import { adaptSavedVideoToVideo, isSavedVideo } from '@/lib/videoAdapter';
 
 interface VideoGridProps {
   videos: Video[] | SavedVideo[];
@@ -11,6 +13,9 @@ interface VideoGridProps {
   isSavedVideosView?: boolean;
 }
 
+/**
+ * Displays a grid of videos, handling both regular Video and SavedVideo types
+ */
 export default function VideoGrid({ 
   videos, 
   onVideoClick,
@@ -22,38 +27,29 @@ export default function VideoGrid({
 }: VideoGridProps) {
   if (videos.length === 0) {
     return (
-      <div className="text-center py-10">
-        <p className="text-gray-500">
-          {isSavedVideosView 
+      <EmptyState 
+        message={
+          isSavedVideosView 
             ? "No videos have been saved yet. Find some rare gems!"
-            : "No videos with less than 10 views found. Try again!"}
-        </p>
-      </div>
+            : "No videos with less than 10 views found. Try again!"
+        }
+      />
     );
   }
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {videos.map((video) => {
-        // Check if we're dealing with a SavedVideo
-        const isSavedVideo = 'video_id' in video;
+        // Determine if it's a saved video and adapt accordingly
+        const videoIsSaved = isSavedVideo(video);
         
-        // For saved videos, we need to adapt the structure to work with VideoCard
-        const videoForCard: Video = isSavedVideo 
-          ? {
-              id: (video as SavedVideo).video_id,
-              title: video.title,
-              description: video.description,
-              thumbnailUrl: video.thumbnailUrl,
-              publishedAt: video.publishedAt,
-              viewCount: (video as SavedVideo).view_count_at_discovery || 0,
-              channelTitle: video.channelTitle,
-              duration: video.duration,
-            }
+        // Convert to standard Video format if needed
+        const videoForCard: Video = videoIsSaved
+          ? adaptSavedVideoToVideo(video)
           : video as Video;
         
-        const videoId = isSavedVideo ? (video as SavedVideo).video_id : (video as Video).id;
-        const isSaved = isVideoSaved ? isVideoSaved(videoId) : isSavedVideo;
+        const videoId = videoIsSaved ? video.video_id : (video as Video).id;
+        const savedStatus = isVideoSaved ? isVideoSaved(videoId) : videoIsSaved;
         
         return (
           <VideoCard 
@@ -62,10 +58,10 @@ export default function VideoGrid({
             onClick={onVideoClick} 
             onSave={onSaveVideo}
             onRemove={onRemoveVideo}
-            isSaved={isSaved}
+            isSaved={savedStatus}
             showSaveButton={showSaveButtons}
-            discoveredAt={isSavedVideo ? (video as SavedVideo).discovered_at : undefined}
-            viewCountAtDiscovery={isSavedVideo ? (video as SavedVideo).view_count_at_discovery : undefined}
+            discoveredAt={videoIsSaved ? video.discovered_at : undefined}
+            viewCountAtDiscovery={videoIsSaved ? video.view_count_at_discovery : undefined}
           />
         );
       })}

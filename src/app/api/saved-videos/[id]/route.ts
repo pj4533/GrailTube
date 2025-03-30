@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
-import { query } from '@/lib/db';
+import { VideoModel } from '@/lib/models/videoModel';
+import { handleApiError } from '@/lib/api';
 
-// DELETE /api/saved-videos/[id] - Remove a saved video
+/**
+ * DELETE /api/saved-videos/[id] - Remove a saved video
+ */
 export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
@@ -10,12 +13,9 @@ export async function DELETE(
     const videoId = params.id;
     
     // Delete the video
-    const result = await query(
-      'DELETE FROM saved_videos WHERE video_id = ?',
-      [videoId]
-    ) as any;
+    const removed = await VideoModel.remove(videoId);
     
-    if (result.affectedRows === 0) {
+    if (!removed) {
       return NextResponse.json(
         { error: 'Video not found' },
         { status: 404 }
@@ -24,10 +24,7 @@ export async function DELETE(
     
     return NextResponse.json({ success: true, message: 'Video removed successfully' });
   } catch (error) {
-    console.error('Error removing video:', error);
-    return NextResponse.json(
-      { error: 'Failed to remove video' },
-      { status: 500 }
-    );
+    const { error: errorMessage, status } = handleApiError(error, 'removing video');
+    return NextResponse.json({ error: errorMessage }, { status });
   }
 }

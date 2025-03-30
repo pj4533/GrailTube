@@ -8,6 +8,9 @@ import SearchStatus from '@/components/SearchStatus';
 import ApiStatsDisplay from '@/components/ApiStatsDisplay';
 import VideoGrid from '@/components/VideoGrid';
 import VideoPlayer from '@/components/VideoPlayer';
+import LoadingIndicator from '@/components/ui/LoadingIndicator';
+import ErrorDisplay from '@/components/ui/ErrorDisplay';
+import EmptyState from '@/components/ui/EmptyState';
 
 // Type for app modes
 type AppMode = 'savedVideos' | 'search';
@@ -143,17 +146,11 @@ export default function Home() {
           <div className="mb-8">
             <h2 className="text-xl font-semibold mb-4 border-b pb-2">Community Saved Videos</h2>
             {isSavedVideosLoading ? (
-              <div className="text-center py-10">
-                <p className="text-gray-500">Loading saved videos...</p>
-              </div>
+              <LoadingIndicator message="Loading saved videos..." />
             ) : savedVideosError ? (
-              <div className="text-center py-10">
-                <p className="text-red-500">{savedVideosError}</p>
-              </div>
+              <ErrorDisplay message={savedVideosError} />
             ) : savedVideos.length === 0 ? (
-              <div className="text-center py-10 bg-gray-100 rounded-lg">
-                <p className="text-gray-500">No videos have been saved yet. Click &quot;Find Videos&quot; to discover rare gems!</p>
-              </div>
+              <EmptyState message="No videos have been saved yet. Click &quot;Find Videos&quot; to discover rare gems!" />
             ) : (
               <VideoGrid 
                 videos={savedVideos} 
