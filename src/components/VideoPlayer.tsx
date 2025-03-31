@@ -1,3 +1,6 @@
+import { Icon } from './ui/Icon';
+import YouTubeEmbed from './YouTubeEmbed';
+
 interface VideoPlayerProps {
   videoId: string;
   onClose: () => void;
@@ -13,18 +16,15 @@ export default function VideoPlayer({ videoId, onClose }: VideoPlayerProps) {
             className="text-gray-400 hover:text-white focus:outline-none p-1"
             aria-label="Close video player"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <Icon.Close className="h-6 w-6" />
           </button>
         </div>
         <div className="relative pb-[56.25%] h-0">
-          <iframe
-            src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            className="absolute top-0 left-0 w-full h-full"
-          ></iframe>
+          <YouTubeEmbed 
+            videoId={videoId} 
+            autoplay={true}
+            className="absolute top-0 left-0 w-full h-full" 
+          />
         </div>
       </div>
     </div>

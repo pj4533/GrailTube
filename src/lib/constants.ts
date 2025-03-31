@@ -1,5 +1,6 @@
 // API configuration
 export const YOUTUBE_API_URL = 'https://www.googleapis.com/youtube/v3';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '/api';
 
 // Time-related constants
 export const YOUTUBE_FOUNDING_DATE = new Date(2005, 3, 23); // April 23, 2005 - when YouTube was first launched

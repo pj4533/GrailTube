@@ -1,5 +1,9 @@
 import { TimeWindow, Video, ViewStats, SearchType } from '@/types';
 import { formatTimeWindow } from '@/lib/utils';
+import SearchTypeIndicator from './SearchTypeIndicator';
+import { Icon } from './ui/Icon';
+import LoadingIndicator from './ui/LoadingIndicator';
+import ErrorDisplay from './ui/ErrorDisplay';
 
 interface SearchStatusProps {
   isLoading: boolean;
@@ -11,6 +15,9 @@ interface SearchStatusProps {
   searchType?: SearchType;
 }
 
+/**
+ * Component to display search status, progress, and statistics
+ */
 export default function SearchStatus({ 
   isLoading, 
   videos, 
@@ -30,53 +37,13 @@ export default function SearchStatus({
               <span className="font-semibold">
                 {formatTimeWindow(currentWindow)}
               </span>
-              <span className={`ml-2 text-xs px-2 py-0.5 rounded-full font-medium inline-flex items-center ${
-                searchType === SearchType.RandomTime 
-                  ? 'bg-indigo-100 text-indigo-800' 
-                  : 'bg-emerald-100 text-emerald-800'
-              }`}>
-                {searchType === SearchType.RandomTime ? (
-                  <>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Random Time
-                  </>
-                ) : (
-                  <>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    </svg>
-                    Unedited Videos
-                  </>
-                )}
-              </span>
+              <SearchTypeIndicator searchType={searchType} size="sm" className="ml-2" />
             </p>
           ) : (
             <p className="text-gray-600">
               Searching for {searchType === SearchType.Unedited ? 'unedited videos' : 'rare videos'} in{' '}
               <span className="font-semibold">{formatTimeWindow(currentWindow)}</span>
-              <span className={`ml-2 text-xs px-2 py-0.5 rounded-full font-medium inline-flex items-center ${
-                searchType === SearchType.RandomTime 
-                  ? 'bg-indigo-100 text-indigo-800' 
-                  : 'bg-emerald-100 text-emerald-800'
-              }`}>
-                {searchType === SearchType.RandomTime ? (
-                  <>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Random Time
-                  </>
-                ) : (
-                  <>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    </svg>
-                    Unedited Videos
-                  </>
-                )}
-              </span>
+              <SearchTypeIndicator searchType={searchType} size="sm" className="ml-2" />
             </p>
           )}
         </div>
@@ -89,9 +56,7 @@ export default function SearchStatus({
       )}
 
       {error && (
-        <div className="text-center mb-8">
-          <p className="text-red-500">{error}</p>
-        </div>
+        <ErrorDisplay message={error} className="text-center mb-8" />
       )}
       
       {viewStats && isLoading && (
@@ -117,9 +82,7 @@ export default function SearchStatus({
       )}
 
       {isLoading && (
-        <div className="flex justify-center my-16">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-600"></div>
-        </div>
+        <LoadingIndicator className="my-16" size="lg" />
       )}
     </>
   );

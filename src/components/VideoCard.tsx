@@ -2,6 +2,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { Video } from '@/types';
 import { formatDate } from '@/lib/utils';
+import { Icon } from './ui/Icon';
 
 interface VideoCardProps {
   video: Video;
@@ -77,29 +78,7 @@ export default function VideoCard({
             onClick={handleSaveClick}
             disabled={isSaving}
           >
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              className="h-5 w-5" 
-              fill="none" 
-              viewBox="0 0 24 24" 
-              stroke="currentColor"
-            >
-              {isSaved ? (
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" 
-                />
-              ) : (
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M7 7h.01M7 3h5a2 2 0 012 2v5M5 8a1 1 0 011-1h1m4 0a1 1 0 011 1v1" 
-                />
-              )}
-            </svg>
+{isSaved ? <Icon.Trash className="h-5 w-5" /> : <Icon.BookmarkOutline className="h-5 w-5" />}
           </button>
         )}
       </div>

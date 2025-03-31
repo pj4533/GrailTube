@@ -1,46 +1,48 @@
 import { useState, useEffect, useCallback } from 'react';
 import { SavedVideo, Video } from '@/types';
-import { fetchApi, ApiError } from '@/lib/api';
+import apiClient from '@/lib/apiClient';
+import useAsync from './useAsync';
 
 /**
  * Hook for managing saved videos
- * Uses the shared fetchApi utility for consistent error handling
+ * Uses the apiClient and useAsync for consistent data fetching patterns
  */
 export function useSavedVideos() {
-  const [savedVideos, setSavedVideos] = useState<SavedVideo[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  // Use the useAsync hook to manage fetch state
+  const { 
+    data: savedVideosData,
+    isLoading, 
+    error,
+    execute: fetchSavedVideos,
+    setData: setSavedVideosData
+  } = useAsync<{ videos: SavedVideo[] }>(
+    async () => {
+      const response = await apiClient.get<{ videos: SavedVideo[] }>('/saved-videos');
+      if (response.error) {
+        throw new Error(response.error);
+      }
+      return response.data || { videos: [] };
+    },
+    { immediate: true }
+  );
 
-  // Fetch all saved videos
-  const fetchSavedVideos = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      const data = await fetchApi<{ videos: SavedVideo[] }>('/api/saved-videos');
-      setSavedVideos(data.videos || []);
-    } catch (err) {
-      const message = err instanceof ApiError ? err.message : 'Failed to load saved videos';
-      setError(message);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  // Derived state for convenience
+  const savedVideos = savedVideosData?.videos || [];
 
   // Save a video
   const saveVideo = useCallback(async (video: Video) => {
     try {
-      await fetchApi('/api/saved-videos', {
-        method: 'POST',
-        body: JSON.stringify({ video }),
-      });
+      const response = await apiClient.post<{ success: boolean }>('/saved-videos', { video });
+      
+      if (response.error) {
+        throw new Error(response.error);
+      }
       
       // Refresh the list after saving
       await fetchSavedVideos();
       return true;
-    } catch (err) {
-      const message = err instanceof ApiError ? err.message : 'Failed to save video';
-      setError(message);
+    } catch (error) {
+      console.error('Failed to save video:', error);
       return false;
     }
   }, [fetchSavedVideos]);
@@ -48,34 +50,36 @@ export function useSavedVideos() {
   // Remove a saved video
   const removeVideo = useCallback(async (videoId: string) => {
     try {
-      await fetchApi(`/api/saved-videos/${videoId}`, {
-        method: 'DELETE',
-      });
+      const response = await apiClient.delete<{ success: boolean }>(`/saved-videos/${videoId}`);
       
-      // Refresh the list after removing
-      await fetchSavedVideos();
+      if (response.error) {
+        throw new Error(response.error);
+      }
+      
+      // Local state update for immediate UI response
+      if (savedVideosData) {
+        const updatedVideos = savedVideosData.videos.filter(v => v.video_id !== videoId);
+        setSavedVideosData({ ...savedVideosData, videos: updatedVideos });
+      }
+      
+      // Refresh the list to ensure server sync
+      fetchSavedVideos();
       return true;
-    } catch (err) {
-      const message = err instanceof ApiError ? err.message : 'Failed to remove video';
-      setError(message);
+    } catch (error) {
+      console.error('Failed to remove video:', error);
       return false;
     }
-  }, [fetchSavedVideos]);
+  }, [fetchSavedVideos, savedVideosData, setSavedVideosData]);
 
   // Check if a video is already saved
   const isVideoSaved = useCallback((videoId: string) => {
     return savedVideos.some(video => video.video_id === videoId);
   }, [savedVideos]);
 
-  // Initial load
-  useEffect(() => {
-    fetchSavedVideos();
-  }, [fetchSavedVideos]);
-
   return {
     savedVideos,
     isLoading,
-    error,
+    error: error || null,
     saveVideo,
     removeVideo,
     isVideoSaved,
