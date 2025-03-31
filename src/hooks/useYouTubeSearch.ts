@@ -30,6 +30,7 @@ export function useYouTubeSearch() {
   const [rerollCount, setRerollCount] = useState<number>(0);
   const [viewStats, setViewStats] = useState<ViewStats | null>(null);
   const [searchType, setSearchType] = useState<SearchType>(SearchType.RandomTime);
+  const [keyword, setKeyword] = useState<string>('');
 
   /**
    * Handle errors consistently throughout the hook
@@ -49,14 +50,20 @@ export function useYouTubeSearch() {
    */
   const performSearch = async (timeWindow: TimeWindow): Promise<void> => {
     try {
-      const windowDescription = searchType === SearchType.Unedited 
-        ? '1-week window' 
-        : '96-hour window';
+      // Determine window description based on search type
+      let windowDescription = '96-hour window';
+      if (searchType === SearchType.Unedited || searchType === SearchType.Keyword) {
+        windowDescription = '1-week window';
+      }
         
       setStatusMessage(`Scanning YouTube videos from ${timeWindow.startDate.toLocaleDateString()} (${windowDescription})`);
       
       // Search for videos in the current window with current search type
-      const videoIds = await searchVideosInTimeWindow(timeWindow, searchType);
+      const videoIds = await searchVideosInTimeWindow(
+        timeWindow, 
+        searchType,
+        searchType === SearchType.Keyword ? keyword : undefined
+      );
       
       if (videoIds.length === 0) {
         // No videos found at all, immediately reroll to a new date
@@ -67,7 +74,10 @@ export function useYouTubeSearch() {
       }
       
       // Videos found, get their details
-      const searchTypeLabel = searchType === SearchType.Unedited ? 'unedited ' : '';
+      let searchTypeLabel = '';
+      if (searchType === SearchType.Unedited) searchTypeLabel = 'unedited ';
+      else if (searchType === SearchType.Keyword) searchTypeLabel = 'keyword ';
+      
       setStatusMessage(`Found ${videoIds.length} potential ${searchTypeLabel}videos! Analyzing view counts...`);
       const videoDetails = await getVideoDetails(videoIds);
       
@@ -176,6 +186,11 @@ export function useYouTubeSearch() {
       setError(null);
       setViewStats(null);
       setCurrentWindow(null);
+      
+      // Reset keyword field if switching away from Keyword search type
+      if (type !== SearchType.Keyword) {
+        setKeyword('');
+      }
     }
   };
 
@@ -188,6 +203,8 @@ export function useYouTubeSearch() {
     viewStats,
     apiStats,
     searchType,
+    keyword,
+    setKeyword,
     startSearch,
     changeSearchType
   };

@@ -5,7 +5,7 @@
 
 // Import from service
 import { 
-  searchVideosInTimeWindow as search,
+  searchVideosInTimeWindow as searchImpl,
   getVideoDetails as details,
   filterRareVideos as filter,
   getViewStats as stats
@@ -20,8 +20,10 @@ import {
 
 import { TimeWindow, SearchType } from '@/types';
 
-// Re-export everything with consistent naming
-export const searchVideosInTimeWindow = search;
+// Re-export everything with consistent naming, with explicit function signatures
+export const searchVideosInTimeWindow = (window: TimeWindow, searchType?: SearchType, userKeyword?: string): Promise<string[]> => {
+  return searchImpl(window, searchType, userKeyword);
+};
 export const getVideoDetails = details;
 export const filterRareVideos = filter;
 export const getViewStats = stats;

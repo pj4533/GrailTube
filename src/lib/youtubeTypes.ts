@@ -65,7 +65,7 @@ export const apiStats = {
  * Interface for the YouTube API service
  */
 export interface YouTubeServiceInterface {
-  searchVideosInTimeWindow(window: TimeWindow, searchType?: SearchType): Promise<string[]>;
+  searchVideosInTimeWindow(window: TimeWindow, searchType?: SearchType, userKeyword?: string): Promise<string[]>;
   getVideoDetails(videoIds: string[]): Promise<Video[]>;
   filterRareVideos(videos: Video[]): Video[];
   getViewStats(videos: Video[]): ViewStats;

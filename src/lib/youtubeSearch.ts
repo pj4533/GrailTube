@@ -43,12 +43,14 @@ export function getRandomCameraPattern(): string {
 /**
  * Get search query based on search type
  */
-export function getSearchQuery(searchType: SearchType): string {
+export function getSearchQuery(searchType: SearchType, userKeyword?: string): string {
   switch (searchType) {
     case SearchType.RandomTime:
       return getRandomSearchTerm();
     case SearchType.Unedited:
       return getRandomCameraPattern();
+    case SearchType.Keyword:
+      return userKeyword || getRandomSearchTerm(); // Use provided keyword or fall back to random
     default:
       return getRandomSearchTerm();
   }
@@ -87,7 +89,8 @@ export async function performYouTubeSearch(
   apiKey: string,
   searchWindow: TimeWindow,
   searchType: SearchType,
-  maxResults: number
+  maxResults: number,
+  userKeyword?: string
 ): Promise<string[]> {
   try {
     // Increment API call stats
@@ -102,7 +105,7 @@ export async function performYouTubeSearch(
         publishedAfter: searchWindow.startDate.toISOString(),
         publishedBefore: searchWindow.endDate.toISOString(),
         // Add search query parameter based on search type
-        q: getSearchQuery(searchType),
+        q: getSearchQuery(searchType, userKeyword),
         key: apiKey,
       },
     });

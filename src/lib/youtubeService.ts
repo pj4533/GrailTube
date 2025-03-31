@@ -33,13 +33,14 @@ class YouTubeApiService implements YouTubeServiceInterface {
   /**
    * Search for videos in a specific time window with a specific search type
    */
-  async searchVideosInTimeWindow(window: TimeWindow, searchType: SearchType = SearchType.RandomTime): Promise<string[]> {
+  async searchVideosInTimeWindow(window: TimeWindow, searchType: SearchType = SearchType.RandomTime, userKeyword?: string): Promise<string[]> {
     // Import the founding date
     const { YOUTUBE_FOUNDING_DATE } = require('./constants');
     
     // Determine the appropriate time window based on search type
     let searchWindow = {...window};
-    if (searchType === SearchType.Unedited) {
+    // Use larger time window for Unedited or Keyword search types
+    if (searchType === SearchType.Unedited || searchType === SearchType.Keyword) {
       searchWindow = getLargeTimeWindow(window);
     }
     
@@ -49,7 +50,9 @@ class YouTubeApiService implements YouTubeServiceInterface {
       console.log('Adjusted search window to start at YouTube founding date');
     }
     
-    const cacheKey = getSearchCacheKey(searchWindow, searchType);
+    // Include keyword in cache key if present
+    const keywordSuffix = searchType === SearchType.Keyword && userKeyword ? `_${userKeyword}` : '';
+    const cacheKey = getSearchCacheKey(searchWindow, searchType) + keywordSuffix;
     
     // Check if we already have this search cached
     if (this.searchCache[cacheKey]) {
@@ -64,7 +67,8 @@ class YouTubeApiService implements YouTubeServiceInterface {
         this.apiKey, 
         searchWindow, 
         searchType, 
-        this.maxResultsPerRequest
+        this.maxResultsPerRequest,
+        userKeyword
       );
       
       // Cache the results
@@ -135,8 +139,8 @@ class YouTubeApiService implements YouTubeServiceInterface {
 const youtubeApiService = new YouTubeApiService();
 
 // Export methods for use elsewhere
-export const searchVideosInTimeWindow = (window: TimeWindow, searchType?: SearchType): Promise<string[]> => 
-  youtubeApiService.searchVideosInTimeWindow(window, searchType);
+export const searchVideosInTimeWindow = (window: TimeWindow, searchType?: SearchType, userKeyword?: string): Promise<string[]> => 
+  youtubeApiService.searchVideosInTimeWindow(window, searchType, userKeyword);
 
 export const getVideoDetails = (videoIds: string[]): Promise<Video[]> => 
   youtubeApiService.getVideoDetails(videoIds);

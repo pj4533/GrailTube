@@ -8,6 +8,7 @@ import SearchStatus from '@/components/SearchStatus';
 import ApiStatsDisplay from '@/components/ApiStatsDisplay';
 import VideoGrid from '@/components/VideoGrid';
 import VideoPlayer from '@/components/VideoPlayer';
+import SearchTypeIndicator from '@/components/SearchTypeIndicator';
 import LoadingIndicator from '@/components/ui/LoadingIndicator';
 import ErrorDisplay from '@/components/ui/ErrorDisplay';
 import EmptyState from '@/components/ui/EmptyState';
@@ -29,6 +30,8 @@ export default function Home() {
     viewStats,
     apiStats,
     searchType,
+    keyword,
+    setKeyword,
     startSearch,
     changeSearchType
   } = useYouTubeSearch();
@@ -98,31 +101,59 @@ export default function Home() {
               </button>
               
               <div className="flex items-center space-x-3">
-                <div className="relative group">
-                  <select
-                    value={searchType}
-                    onChange={(e) => changeSearchType(e.target.value as SearchType)}
-                    disabled={isSearchLoading}
-                    className="appearance-none bg-gray-800 text-white text-sm rounded-md px-3 py-2 pr-8 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-all cursor-pointer hover:bg-gray-700"
-                  >
-                    <option value={SearchType.RandomTime}>Random Time</option>
-                    <option value={SearchType.Unedited}>Unedited</option>
-                  </select>
-                  <div className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
+                <div className="flex space-x-2">
+                  <div className="relative group">
+                    <select
+                      value={searchType}
+                      onChange={(e) => changeSearchType(e.target.value as SearchType)}
+                      disabled={isSearchLoading}
+                      className="appearance-none bg-gray-800 text-white text-sm rounded-md px-3 py-2 pr-8 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-all cursor-pointer hover:bg-gray-700"
+                    >
+                      <option value={SearchType.RandomTime}>Random Time</option>
+                      <option value={SearchType.Unedited}>Unedited</option>
+                      <option value={SearchType.Keyword}>Keyword</option>
+                    </select>
+                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
                   </div>
+                  
+                  {/* Keyword input field - only show when SearchType.Keyword is selected */}
+                  {searchType === SearchType.Keyword && (
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={keyword}
+                        onChange={(e) => setKeyword(e.target.value)}
+                        placeholder="Enter keywords..."
+                        disabled={isSearchLoading}
+                        className="bg-gray-800 text-white text-sm rounded-md px-3 py-2 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-all w-40 md:w-56"
+                      />
+                      {keyword && (
+                        <button 
+                          onClick={() => setKeyword('')}
+                          className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300"
+                          title="Clear"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
                 
                 <button
                   onClick={handleStartSearch}
-                  disabled={isSearchLoading}
+                  disabled={isSearchLoading || (searchType === SearchType.Keyword && !keyword)}
                   className={`px-4 py-2 rounded-md transition-all duration-200 flex items-center space-x-1 font-medium shadow-sm ${
                     appMode === 'search'
                       ? 'bg-red-600 text-white hover:bg-red-700' 
                       : 'text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700'
-                  } ${isSearchLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                  } ${isSearchLoading || (searchType === SearchType.Keyword && !keyword) ? 'opacity-70 cursor-not-allowed' : ''}`}
                 >
                   {isSearchLoading ? (
                     <>
@@ -167,27 +198,7 @@ export default function Home() {
           <div className="mb-8">
             <h2 className="text-xl font-semibold mb-4 border-b pb-2 flex items-center">
               <span>Recently Discovered Videos</span>
-              <span className={`ml-3 text-xs px-2 py-1 rounded-full font-medium inline-flex items-center ${
-                searchType === SearchType.RandomTime 
-                  ? 'bg-indigo-100 text-indigo-800' 
-                  : 'bg-emerald-100 text-emerald-800'
-              }`}>
-                {searchType === SearchType.RandomTime ? (
-                  <>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Random Time
-                  </>
-                ) : (
-                  <>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    </svg>
-                    Unedited Videos
-                  </>
-                )}
-              </span>
+              <SearchTypeIndicator searchType={searchType} size="sm" className="ml-3" />
             </h2>
             <VideoGrid 
               videos={searchResults} 

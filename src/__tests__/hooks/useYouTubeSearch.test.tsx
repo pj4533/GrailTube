@@ -117,7 +117,7 @@ describe('useYouTubeSearch Hook', () => {
     
     expect(getRandomPastDate).toHaveBeenCalled();
     expect(createInitialTimeWindow).toHaveBeenCalledWith(mockDate, false);
-    expect(searchVideosInTimeWindow).toHaveBeenCalledWith(mockTimeWindow, SearchType.RandomTime);
+    expect(searchVideosInTimeWindow).toHaveBeenCalledWith(mockTimeWindow, SearchType.RandomTime, undefined);
     expect(getVideoDetails).toHaveBeenCalledWith(mockVideoIds);
     expect(filterRareVideos).toHaveBeenCalledWith(mockVideoDetails);
     

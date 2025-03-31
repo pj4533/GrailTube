@@ -83,7 +83,8 @@ describe('YouTube Facade', () => {
       
       expect(youtubeService.searchVideosInTimeWindow).toHaveBeenCalledWith(
         mockTimeWindow, 
-        SearchType.RandomTime
+        SearchType.RandomTime,
+        undefined
       );
     });
 

@@ -12,6 +12,9 @@ jest.mock('@/components/ui/Icon', () => ({
     ),
     Camera: ({ className }: any) => (
       <span data-testid="camera-icon" className={className}>Camera Icon</span>
+    ),
+    Search: ({ className }: any) => (
+      <span data-testid="search-icon" className={className}>Search Icon</span>
     )
   }
 }));
@@ -30,6 +33,13 @@ describe('SearchTypeIndicator Component', () => {
     expect(screen.getByText('Unedited Videos')).toBeInTheDocument();
     expect(screen.getByTestId('camera-icon')).toBeInTheDocument();
   });
+  
+  it('displays "Keyword Search" text for Keyword search type', () => {
+    render(<SearchTypeIndicator searchType={SearchType.Keyword} />);
+    
+    expect(screen.getByText('Keyword Search')).toBeInTheDocument();
+    expect(screen.getByTestId('search-icon')).toBeInTheDocument();
+  });
 
   it('applies correct color classes for RandomTime search type', () => {
     const { container } = render(<SearchTypeIndicator searchType={SearchType.RandomTime} />);
@@ -45,6 +55,14 @@ describe('SearchTypeIndicator Component', () => {
     const badgeElement = container.firstChild as HTMLElement;
     expect(badgeElement).toHaveClass('bg-emerald-100');
     expect(badgeElement).toHaveClass('text-emerald-800');
+  });
+  
+  it('applies correct color classes for Keyword search type', () => {
+    const { container } = render(<SearchTypeIndicator searchType={SearchType.Keyword} />);
+    
+    const badgeElement = container.firstChild as HTMLElement;
+    expect(badgeElement).toHaveClass('bg-amber-100');
+    expect(badgeElement).toHaveClass('text-amber-800');
   });
 
   it('applies small size classes when size="sm"', () => {
