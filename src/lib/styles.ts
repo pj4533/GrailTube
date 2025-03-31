@@ -46,19 +46,12 @@ export const navStyles = {
   tabBase: 'px-4 py-1 text-sm font-medium transition-all duration-200 border-b-2',
 };
 
-// Common animations
-export const animationStyles = {
-  spin: 'animate-spin',
-  pulse: 'animate-pulse',
-  fadeIn: 'animate-fadeIn',
-};
 
 // Form element styles
 export const formStyles = {
   input: 'bg-gray-800 text-white text-sm rounded-md px-3 py-2 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-all',
   select: 'bg-gray-800 text-white text-sm rounded-md px-3 py-2 pr-8 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-all cursor-pointer hover:bg-gray-700',
-  // We include a separate class to normalize styling across browsers
-  selectNormalized: 'appearance-none -webkit-appearance-none -moz-appearance-none',
+  // Styling for selects is applied inline - see documentation below
   // Documentation for select style (we need to use inline styles due to type constraints)
   // style={{
   //   WebkitAppearance: "none",
@@ -69,15 +62,6 @@ export const formStyles = {
   // }}
 };
 
-// Common color styles
-export const colorStyles = {
-  primary: 'bg-blue-600 text-white hover:bg-blue-700',
-  secondary: 'bg-gray-600 text-white hover:bg-gray-700',
-  danger: 'bg-red-600 text-white hover:bg-red-700',
-  success: 'bg-emerald-600 text-white hover:bg-emerald-700',
-  warning: 'bg-amber-500 text-white hover:bg-amber-600',
-  info: 'bg-sky-500 text-white hover:bg-sky-600',
-};
 
 // Text styles
 export const textStyles = {
@@ -98,9 +82,7 @@ const styles = {
   media: mediaStyles,
   layout: layoutStyles,
   nav: navStyles,
-  animation: animationStyles,
   form: formStyles,
-  color: colorStyles,
   text: textStyles,
 };
 

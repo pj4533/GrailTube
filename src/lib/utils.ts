@@ -55,13 +55,8 @@ export function formatTimeWindow(window: TimeWindow): string {
   return `${periodDescription} starting ${format(window.startDate, 'MMM d, yyyy h:mm a')}`;
 }
 
-// Get center time from a window
-export function getWindowCenter(window: TimeWindow): Date {
-  return new Date((window.startDate.getTime() + window.endDate.getTime()) / 2);
-}
-
 // Create a time window from center time and duration
-export function createTimeWindow(centerTime: Date, durationMinutes: number): TimeWindow {
+function createTimeWindow(centerTime: Date, durationMinutes: number): TimeWindow {
   const halfDuration = durationMinutes / 2;
   return {
     startDate: subMinutes(centerTime, halfDuration),

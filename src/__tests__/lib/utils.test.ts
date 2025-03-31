@@ -3,14 +3,27 @@ import {
   formatDuration,
   getRandomPastDate,
   formatTimeWindow,
-  getWindowCenter,
-  createTimeWindow,
   createInitialTimeWindow,
   delay
 } from '@/lib/utils';
+
 import { YOUTUBE_FOUNDING_DATE } from '@/lib/constants';
 import { format, addMinutes, subMinutes } from 'date-fns';
 import { SearchType } from '@/types';
+
+// Helper functions for testing only
+function getWindowCenter(window: { startDate: Date, endDate: Date }): Date {
+  return new Date((window.startDate.getTime() + window.endDate.getTime()) / 2);
+}
+
+function createTimeWindow(centerTime: Date, durationMinutes: number) {
+  const halfDuration = durationMinutes / 2;
+  return {
+    startDate: subMinutes(centerTime, halfDuration),
+    endDate: addMinutes(centerTime, halfDuration),
+    durationMinutes
+  };
+}
 
 describe('Utils', () => {
   describe('formatDate', () => {

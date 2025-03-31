@@ -7,7 +7,6 @@ export const YOUTUBE_FOUNDING_DATE = new Date(2005, 3, 23); // April 23, 2005 - 
 export const STATUS_MESSAGE_DELAY_MS = 1200;
 
 // Search parameters
-export const RARE_VIEW_THRESHOLD = 0; // Only true treasures with 0 views
 export const MAX_BATCH_SIZE = 50; // Maximum videos per API call
 
 // Search window durations (in days)
@@ -28,15 +27,6 @@ export const ERROR_MESSAGES = {
   INVALID_SEARCH: 'Invalid search parameters. Please try again.',
 };
 
-// Status messages
-export const STATUS_MESSAGES = {
-  SEARCHING: 'Searching for rare videos...',
-  PROCESSING: 'Processing search results...',
-  LOADING_DETAILS: 'Loading video details...',
-  FILTERING: 'Filtering for rare videos...',
-  SAVING: 'Saving video...',
-  REMOVING: 'Removing video...',
-};
 
 // YouTube Video Category IDs
 // Reference: https://developers.google.com/youtube/v3/docs/videoCategories/list
