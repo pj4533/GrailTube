@@ -15,7 +15,9 @@ GrailTube is a web application that helps you discover rare YouTube videos with 
 - [Installation](#installation)
 - [Usage](#usage)
 - [Development](#development)
+  - [Testing](TESTING.md)
 - [Architecture](#architecture)
+  - [Detailed Architecture](ARCHITECTURE.md)
 - [Technologies](#technologies)
 - [License](#license)
 
@@ -110,6 +112,8 @@ GrailTube is a web application that helps you discover rare YouTube videos with 
 - **Run tests with watch mode**: `npm run test:watch`
 - **Run tests with coverage report**: `npm run test:coverage`
 
+For more information on the testing approach, see [TESTING.md](TESTING.md).
+
 ## Architecture
 
 The application follows a clean architecture with separation of concerns:
@@ -120,6 +124,8 @@ The application follows a clean architecture with separation of concerns:
 - **Model Layer**: Database models and business logic
 - **Adapters**: Type conversion and data transformation
 - **Utilities**: Shared helper functions and constants
+
+For a detailed explanation of the architecture, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Technologies
 
