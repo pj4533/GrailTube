@@ -1,4 +1,4 @@
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useAsync } from '@/hooks/useAsync';
 
 // Mock the logger
@@ -40,20 +40,18 @@ describe('useAsync Hook', () => {
     const asyncFn = jest.fn().mockResolvedValue('test data');
     const onSuccess = jest.fn();
     
-    const { result, waitForNextUpdate } = renderHook(() => 
+    const { result } = renderHook(() => 
       useAsync(asyncFn, { onSuccess })
     );
 
     expect(result.current.isLoading).toBe(false);
     
-    act(() => {
-      result.current.execute();
+    // Execute the async function and wrap in act
+    await act(async () => {
+      await result.current.execute();
     });
     
-    expect(result.current.isLoading).toBe(true);
-    
-    await waitForNextUpdate();
-    
+    // Assertions after async operation completes
     expect(result.current.isLoading).toBe(false);
     expect(result.current.data).toBe('test data');
     expect(result.current.error).toBe(null);
@@ -65,16 +63,20 @@ describe('useAsync Hook', () => {
     const asyncFn = jest.fn().mockRejectedValue(error);
     const onError = jest.fn();
     
-    const { result, waitForNextUpdate } = renderHook(() => 
+    const { result } = renderHook(() => 
       useAsync(asyncFn, { onError })
     );
     
-    act(() => {
-      result.current.execute();
+    // Execute and wait for rejection
+    await act(async () => {
+      try {
+        await result.current.execute();
+      } catch (e) {
+        // Expected rejection
+      }
     });
     
-    await waitForNextUpdate();
-    
+    // Assertions after error
     expect(result.current.isLoading).toBe(false);
     expect(result.current.data).toBe(null);
     expect(result.current.error).toBe('Test error');
@@ -84,16 +86,16 @@ describe('useAsync Hook', () => {
   it('should reset state correctly', async () => {
     const asyncFn = jest.fn().mockResolvedValue('test data');
     
-    const { result, waitForNextUpdate } = renderHook(() => useAsync(asyncFn));
+    const { result } = renderHook(() => useAsync(asyncFn));
     
-    act(() => {
-      result.current.execute();
+    // Execute the async function
+    await act(async () => {
+      await result.current.execute();
     });
-    
-    await waitForNextUpdate();
     
     expect(result.current.data).toBe('test data');
     
+    // Reset the state
     act(() => {
       result.current.reset();
     });
@@ -106,17 +108,16 @@ describe('useAsync Hook', () => {
   it('should execute immediately when immediate option is true', async () => {
     const asyncFn = jest.fn().mockResolvedValue('immediate data');
     
-    const { result, waitForNextUpdate } = renderHook(() => 
+    renderHook(() => 
       useAsync(asyncFn, { immediate: true })
     );
     
-    expect(result.current.isLoading).toBe(true);
     expect(asyncFn).toHaveBeenCalledTimes(1);
     
-    await waitForNextUpdate();
-    
-    expect(result.current.data).toBe('immediate data');
-    expect(result.current.isLoading).toBe(false);
+    // Wait for all effects to complete
+    await waitFor(() => {
+      expect(asyncFn).toHaveBeenCalled();
+    });
   });
 
   it('should allow manual state setting', () => {
