@@ -103,6 +103,9 @@ GrailTube is a web application that helps you discover rare YouTube videos with 
 - **Build the project**: `npm run build`
 - **Run type checking**: `npx tsc --noEmit`
 - **Run linting**: `npm run lint`
+- **Run tests**: `npm test`
+- **Run tests with watch mode**: `npm run test:watch`
+- **Run tests with coverage report**: `npm run test:coverage`
 
 ## Architecture
 

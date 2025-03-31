@@ -5,6 +5,10 @@
 - **Dev Server**: `npm run dev`
 - **Lint**: `npm run lint`
 - **Type Check**: `npx tsc --noEmit`
+- **Run Tests**: `npm test`
+- **Run Tests with Watch Mode**: `npm run test:watch`
+- **Run Tests with Coverage**: `npm run test:coverage`
+- **Run Tests in CI Environment**: `npm run test:ci`
 
 ## Code Style
 - Use TypeScript with strict type checking
@@ -81,3 +85,19 @@
     - **youtubeFilters.ts**: Filtering logic
     - **youtubeTypes.ts**: Type definitions
 - **/src/types**: TypeScript type definitions including SearchType enum
+- **/src/__tests__**: Test files organized by domain (components, hooks, lib)
+
+## Testing Guidelines
+- Use Jest and React Testing Library for unit tests
+- Organize tests to mirror the source directory structure
+- Test components, hooks, and utilities independently
+- Mock external dependencies (API calls, DB operations)
+- Use test utilities from `src/__tests__/utils/test-utils.tsx`
+- Write tests for both success and error paths
+- Use descriptive test names: `describe('Component', () => { it('should do something', () => {}) })`
+- Target minimum 70% code coverage (statements, functions, branches)
+- Run tests before committing changes
+- Use mock functions for API and database operations
+- Create focused tests that verify a single behavior
+- Test edge cases and error handling
+- Keep tests fast and independent of each other
