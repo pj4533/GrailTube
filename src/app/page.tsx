@@ -140,7 +140,9 @@ export default function Home() {
                       style={{
                         WebkitAppearance: "none",
                         MozAppearance: "none",
-                        appearance: "none"
+                        appearance: "none",
+                        backgroundColor: "#1f2937", // bg-gray-800
+                        color: "white"
                       }}
                     >
                       <option value={SearchType.RandomTime}>Random Time</option>

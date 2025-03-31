@@ -56,9 +56,17 @@ export const animationStyles = {
 // Form element styles
 export const formStyles = {
   input: 'bg-gray-800 text-white text-sm rounded-md px-3 py-2 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-all',
-  select: 'appearance-none bg-gray-800 text-white text-sm rounded-md px-3 py-2 pr-8 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-all cursor-pointer hover:bg-gray-700',
+  select: 'bg-gray-800 text-white text-sm rounded-md px-3 py-2 pr-8 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-all cursor-pointer hover:bg-gray-700',
   // We include a separate class to normalize styling across browsers
-  selectNormalized: '-webkit-appearance-none -moz-appearance-none appearance-none',
+  selectNormalized: 'appearance-none -webkit-appearance-none -moz-appearance-none',
+  // Documentation for select style (we need to use inline styles due to type constraints)
+  // style={{
+  //   WebkitAppearance: "none",
+  //   MozAppearance: "none", 
+  //   appearance: "none",
+  //   backgroundColor: "#1f2937", // bg-gray-800
+  //   color: "white"
+  // }}
 };
 
 // Common color styles
