@@ -92,7 +92,7 @@ export const textStyles = {
   multiLineTruncate: 'line-clamp-2',
 };
 
-export default {
+const styles = {
   card: cardStyles,
   button: buttonStyles,
   media: mediaStyles,
@@ -103,3 +103,5 @@ export default {
   color: colorStyles,
   text: textStyles,
 };
+
+export default styles;

@@ -95,7 +95,7 @@ export function useAsync<T = any>(
       onErrorRef.current(error as Error);
       return Promise.reject(error);
     }
-  }, []); // Empty dependency array for stable reference - refs handle values
+  }, [isMounted]); // Include isMounted in the dependency array
 
   // Run immediately if option is set
   // Use a ref to track if we've already run the immediate execution
@@ -124,7 +124,7 @@ export function useAsync<T = any>(
       hasRunImmediate.current = true;
       execute();
     }
-  }, [immediate, execute]);
+  }, [immediate, execute, isMounted]);
 
   // Reset the state
   const reset = useCallback(() => {

@@ -60,7 +60,9 @@ export function createErrorHandler(options: ErrorHandlerOptions) {
   };
 }
 
-export default {
+const errorHandlers = {
   handleError,
   createErrorHandler,
 };
+
+export default errorHandlers;

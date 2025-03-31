@@ -96,7 +96,7 @@ export function useSavedVideos() {
       logger.error('useSavedVideos: Failed to save video', error);
       return false;
     }
-  }, [fetchSavedVideos]);
+  }, [fetchSavedVideos, isMounted]);
 
   // Remove a saved video
   const removeVideo = useCallback(async (videoId: string) => {
@@ -145,7 +145,7 @@ export function useSavedVideos() {
       logger.error('useSavedVideos: Failed to remove video', error);
       return false;
     }
-  }, [fetchSavedVideos, savedVideosData, setSavedVideosData]);
+  }, [fetchSavedVideos, savedVideosData, setSavedVideosData, isMounted]);
 
   // Check if a video is already saved
   const isVideoSaved = useCallback((videoId: string) => {
