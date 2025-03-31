@@ -15,8 +15,15 @@ import {
 import { Video, TimeWindow, ViewStats, SearchType } from '@/types';
 import {
   MAX_REROLLS,
-  STATUS_MESSAGE_DELAY_MS
+  STATUS_MESSAGE_DELAY_MS,
+  ERROR_MESSAGES,
+  STATUS_MESSAGES,
+  RANDOM_TIME_WINDOW_DAYS,
+  UNEDITED_WINDOW_DAYS,
+  KEYWORD_WINDOW_DAYS
 } from '@/lib/constants';
+import { createErrorHandler } from '@/lib/errorHandlers';
+import useMounted from './useMounted';
 
 /**
  * Custom hook to handle YouTube search for rare videos
@@ -33,17 +40,16 @@ export function useYouTubeSearch() {
   const [keyword, setKeyword] = useState<string>('');
 
   /**
-   * Handle errors consistently throughout the hook
+   * Create a reusable error handler for this hook
    */
-  const handleError = (err: unknown, context: string): void => {
-    if (err instanceof YouTubeRateLimitError) {
-      setError(`YouTube API rate limit reached: ${err.message}. Please try again later.`);
-    } else {
-      console.error(`Error during ${context}:`, err);
-      setError('An unexpected error occurred. Please try again later.');
+  const handleError = createErrorHandler({
+    setError,
+    setLoading: setIsLoading,
+    customMessages: {
+      rateLimit: ERROR_MESSAGES.RATE_LIMIT,
+      default: ERROR_MESSAGES.DEFAULT
     }
-    setIsLoading(false);
-  };
+  });
 
   /**
    * Perform a search on a single time window and reroll if no videos found

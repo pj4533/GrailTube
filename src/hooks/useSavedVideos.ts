@@ -2,7 +2,10 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { SavedVideo, Video } from '@/types';
 import apiClient from '@/lib/apiClient';
 import useAsync from './useAsync';
+import useMounted from './useMounted';
 import logger from '@/lib/logger';
+import { ERROR_MESSAGES } from '@/lib/constants';
+import { createErrorHandler } from '@/lib/errorHandlers';
 
 /**
  * Hook for managing saved videos
@@ -26,18 +29,8 @@ export function useSavedVideos() {
     return response.data || { videos: [] };
   }, []);
 
-  // Track component mounting state separately as a safety measure
-  const isMounted = useRef(true);
-  
-  useEffect(() => {
-    isMounted.current = true;
-    logger.debug('useSavedVideos: Component mounted');
-    
-    return () => {
-      isMounted.current = false;
-      logger.debug('useSavedVideos: Component unmounted');
-    };
-  }, []);
+  // Use the centralized useMounted hook for mount state tracking
+  const isMounted = useMounted('useSavedVideos');
   
   // Use the useAsync hook to manage fetch state
   const { 

@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import logger from '@/lib/logger';
+import useMounted from './useMounted';
 
 interface AsyncState<T> {
   data: T | null;
@@ -44,20 +45,8 @@ export function useAsync<T = any>(
     error: null,
   });
   
-  // Track if the component is mounted to prevent setState after unmount
-  const isMounted = useRef(true);
-  
-  // Set up the mounted ref and cleanup function
-  useEffect(() => {
-    // Set to true when the effect runs (component mounts)
-    isMounted.current = true;
-    
-    // Return cleanup function to set to false when component unmounts
-    return () => {
-      logger.debug('useAsync: Component unmounting, setting isMounted to false');
-      isMounted.current = false;
-    };
-  }, []);
+  // Use the centralized useMounted hook
+  const isMounted = useMounted('useAsync');
 
   // Create a ref for the immediate value too
   const immediateRef = useRef(immediate);

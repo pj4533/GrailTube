@@ -10,8 +10,33 @@ export const STATUS_MESSAGE_DELAY_MS = 1200;
 export const RARE_VIEW_THRESHOLD = 0; // Only true treasures with 0 views
 export const MAX_BATCH_SIZE = 50; // Maximum videos per API call
 
+// Search window durations (in days)
+export const RANDOM_TIME_WINDOW_DAYS = 4; // 96 hours
+export const UNEDITED_WINDOW_DAYS = 7; // 1 week
+export const KEYWORD_WINDOW_DAYS = 7; // 1 week
+
 // Reroll settings
 export const MAX_REROLLS = 7;  // Maximum number of rerolls before giving up
+
+// Error messages
+export const ERROR_MESSAGES = {
+  RATE_LIMIT: 'YouTube API rate limit reached. Please try again later.',
+  NETWORK: 'Network error. Please check your connection and try again.',
+  DEFAULT: 'An unexpected error occurred. Please try again later.',
+  DATABASE: 'Database operation failed. Please try again later.',
+  NO_VIDEOS_FOUND: 'No rare videos found. Please try a different search.',
+  INVALID_SEARCH: 'Invalid search parameters. Please try again.',
+};
+
+// Status messages
+export const STATUS_MESSAGES = {
+  SEARCHING: 'Searching for rare videos...',
+  PROCESSING: 'Processing search results...',
+  LOADING_DETAILS: 'Loading video details...',
+  FILTERING: 'Filtering for rare videos...',
+  SAVING: 'Saving video...',
+  REMOVING: 'Removing video...',
+};
 
 // YouTube Video Category IDs
 // Reference: https://developers.google.com/youtube/v3/docs/videoCategories/list
