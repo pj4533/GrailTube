@@ -57,7 +57,7 @@ export default function VideoCard({
           <Image
             src={video.thumbnailUrl}
             alt={video.title}
-            fill
+            fill={true}
             className="object-cover"
             unoptimized={true} // Try without Next.js optimization
           />

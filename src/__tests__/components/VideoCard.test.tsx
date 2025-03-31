@@ -12,8 +12,18 @@ jest.mock('@/lib/utils', () => ({
 jest.mock('next/image', () => ({
   __esModule: true,
   default: (props: any) => {
+    // Convert boolean attributes to strings to avoid React warnings
+    const safeProps = {...props};
+    if (props.fill === true) safeProps.fill = "true";
+    if (props.unoptimized === true) safeProps.unoptimized = "true";
+    
     // eslint-disable-next-line @next/next/no-img-element
-    return <img {...props} src={props.src} alt={props.alt} style={{ objectFit: props.className?.includes('object-cover') ? 'cover' : 'initial' }} />;
+    return <img 
+      {...safeProps} 
+      src={props.src} 
+      alt={props.alt} 
+      style={{ objectFit: props.className?.includes('object-cover') ? 'cover' : 'initial' }} 
+    />;
   }
 }));
 

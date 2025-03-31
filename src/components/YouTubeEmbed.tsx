@@ -26,7 +26,7 @@ export const YouTubeEmbed: React.FC<YouTubeEmbedProps> = ({
       <iframe
         src={youtubeUrl}
         title={title}
-        frameBorder="0"
+        frameBorder={0}
         allow={`accelerometer; ${autoplay ? 'autoplay; ' : ''}clipboard-write; encrypted-media; gyroscope; picture-in-picture`}
         allowFullScreen={allowFullScreen}
         className="w-full h-full"

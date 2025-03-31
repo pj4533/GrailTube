@@ -1,5 +1,6 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useAsync } from '@/hooks/useAsync';
+import React from 'react';
 
 // Mock the logger
 jest.mock('@/lib/logger', () => ({
@@ -11,9 +12,33 @@ jest.mock('@/lib/logger', () => ({
   timeEnd: jest.fn(),
 }));
 
+// Suppress React act() warnings in tests
+// This makes sense because we're testing async behavior
+const originalError = console.error;
+beforeAll(() => {
+  console.error = (...args) => {
+    if (/Warning.*not wrapped in act/.test(args[0])) {
+      return;
+    }
+    originalError.call(console, ...args);
+  };
+});
+
+afterAll(() => {
+  console.error = originalError;
+});
+
+// Configure a fake timer to control the async behaviors
+jest.useFakeTimers();
+
 describe('useAsync Hook', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.clearAllTimers();
+  });
+  
+  afterAll(() => {
+    jest.useRealTimers();
   });
 
   it('should initialize with default state', () => {
@@ -37,102 +62,176 @@ describe('useAsync Hook', () => {
   });
 
   it('should handle successful async operation', async () => {
-    const asyncFn = jest.fn().mockResolvedValue('test data');
-    const onSuccess = jest.fn();
-    
-    const { result } = renderHook(() => 
-      useAsync(asyncFn, { onSuccess })
-    );
-
-    expect(result.current.isLoading).toBe(false);
-    
-    // Execute the async function and wrap in act
-    await act(async () => {
-      await result.current.execute();
+    // Create a promise we can control
+    let resolvePromise;
+    const promise = new Promise(resolve => {
+      resolvePromise = resolve;
     });
     
+    const asyncFn = jest.fn().mockReturnValue(promise);
+    const onSuccess = jest.fn();
+    
+    let hook;
+    act(() => {
+      hook = renderHook(() => useAsync(asyncFn, { onSuccess }));
+    });
+
+    expect(hook.result.current.isLoading).toBe(false);
+    
+    // Start execution
+    let executePromise;
+    act(() => {
+      executePromise = hook.result.current.execute();
+    });
+    
+    // Check loading state
+    expect(hook.result.current.isLoading).toBe(true);
+    
+    // Resolve the promise inside act
+    await act(async () => {
+      resolvePromise('test data');
+      jest.runAllTimers();
+    });
+    
+    // Wait for execution to complete
+    await executePromise;
+    
     // Assertions after async operation completes
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.data).toBe('test data');
-    expect(result.current.error).toBe(null);
+    expect(hook.result.current.isLoading).toBe(false);
+    expect(hook.result.current.data).toBe('test data');
+    expect(hook.result.current.error).toBe(null);
     expect(onSuccess).toHaveBeenCalledWith('test data');
   });
 
   it('should handle error in async operation', async () => {
-    const error = new Error('Test error');
-    const asyncFn = jest.fn().mockRejectedValue(error);
-    const onError = jest.fn();
-    
-    const { result } = renderHook(() => 
-      useAsync(asyncFn, { onError })
-    );
-    
-    // Execute and wait for rejection
-    await act(async () => {
-      try {
-        await result.current.execute();
-      } catch (e) {
-        // Expected rejection
-      }
+    // Create a promise we can control
+    let rejectPromise;
+    const promise = new Promise((resolve, reject) => {
+      rejectPromise = reject;
     });
     
+    const error = new Error('Test error');
+    const asyncFn = jest.fn().mockReturnValue(promise);
+    const onError = jest.fn();
+    
+    let hook;
+    act(() => {
+      hook = renderHook(() => useAsync(asyncFn, { onError }));
+    });
+    
+    // Start execution
+    let executePromise;
+    act(() => {
+      executePromise = hook.result.current.execute().catch(() => {});
+    });
+    
+    // Check loading state
+    expect(hook.result.current.isLoading).toBe(true);
+    
+    // Reject the promise inside act
+    await act(async () => {
+      rejectPromise(error);
+      jest.runAllTimers();
+    });
+    
+    // Wait for execution to complete
+    await executePromise;
+    
     // Assertions after error
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.data).toBe(null);
-    expect(result.current.error).toBe('Test error');
+    expect(hook.result.current.isLoading).toBe(false);
+    expect(hook.result.current.data).toBe(null);
+    expect(hook.result.current.error).toBe('Test error');
     expect(onError).toHaveBeenCalledWith(error);
   });
 
   it('should reset state correctly', async () => {
-    const asyncFn = jest.fn().mockResolvedValue('test data');
-    
-    const { result } = renderHook(() => useAsync(asyncFn));
-    
-    // Execute the async function
-    await act(async () => {
-      await result.current.execute();
+    // Create a promise we can control
+    let resolvePromise;
+    const promise = new Promise(resolve => {
+      resolvePromise = resolve;
     });
     
-    expect(result.current.data).toBe('test data');
+    const asyncFn = jest.fn().mockReturnValue(promise);
+    
+    let hook;
+    act(() => {
+      hook = renderHook(() => useAsync(asyncFn));
+    });
+    
+    // Start execution
+    let executePromise;
+    act(() => {
+      executePromise = hook.result.current.execute();
+    });
+    
+    // Resolve the promise inside act
+    await act(async () => {
+      resolvePromise('test data');
+      jest.runAllTimers();
+    });
+    
+    // Wait for execution to complete
+    await executePromise;
+    
+    expect(hook.result.current.data).toBe('test data');
     
     // Reset the state
     act(() => {
-      result.current.reset();
+      hook.result.current.reset();
     });
     
-    expect(result.current.data).toBe(null);
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.error).toBe(null);
+    expect(hook.result.current.data).toBe(null);
+    expect(hook.result.current.isLoading).toBe(false);
+    expect(hook.result.current.error).toBe(null);
   });
 
   it('should execute immediately when immediate option is true', async () => {
-    const asyncFn = jest.fn().mockResolvedValue('immediate data');
-    
-    renderHook(() => 
-      useAsync(asyncFn, { immediate: true })
-    );
-    
-    expect(asyncFn).toHaveBeenCalledTimes(1);
-    
-    // Wait for all effects to complete
-    await waitFor(() => {
-      expect(asyncFn).toHaveBeenCalled();
+    // Create a promise that we control resolution for
+    let resolvePromise;
+    const promise = new Promise(resolve => {
+      resolvePromise = resolve;
     });
+    
+    const asyncFn = jest.fn().mockReturnValue(promise);
+    
+    // Render with immediate=true inside an act to catch all state updates
+    let hook;
+    act(() => {
+      hook = renderHook(() => useAsync(asyncFn, { immediate: true }));
+    });
+    
+    // Verify loading state
+    expect(asyncFn).toHaveBeenCalledTimes(1);
+    expect(hook.result.current.isLoading).toBe(true);
+    
+    // Resolve the promise inside act to handle the state update properly
+    await act(async () => {
+      resolvePromise('immediate data');
+      // Advance timers to process all async operations
+      jest.runAllTimers();
+    });
+    
+    // Verify final state
+    expect(hook.result.current.data).toBe('immediate data');
+    expect(hook.result.current.isLoading).toBe(false);
   });
 
   it('should allow manual state setting', () => {
     const asyncFn = jest.fn();
     
-    const { result } = renderHook(() => useAsync(asyncFn));
-    
+    let hook;
     act(() => {
-      result.current.setData('manual data');
-      result.current.setLoading(true);
-      result.current.setError('manual error');
+      hook = renderHook(() => useAsync(asyncFn));
     });
     
-    expect(result.current.data).toBe('manual data');
-    expect(result.current.isLoading).toBe(true);
-    expect(result.current.error).toBe('manual error');
+    act(() => {
+      hook.result.current.setData('manual data');
+      hook.result.current.setLoading(true);
+      hook.result.current.setError('manual error');
+    });
+    
+    expect(hook.result.current.data).toBe('manual data');
+    expect(hook.result.current.isLoading).toBe(true);
+    expect(hook.result.current.error).toBe('manual error');
   });
 });
