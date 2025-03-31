@@ -23,6 +23,7 @@ export default function VideoThumbnail({
       className={`${styles.media.thumbnail} ${className}`}
       onClick={onClick}
       data-testid="video-thumbnail"
+      style={{ height: '192px' }} // Ensure explicit height (h-48 = 192px)
     >
       {thumbnailUrl ? (
         <Image
@@ -32,6 +33,7 @@ export default function VideoThumbnail({
           className="object-cover"
           unoptimized={true}
           data-testid="thumbnail-image"
+          sizes="(max-width: 768px) 100vw, 33vw" // Add sizes to optimize loading
         />
       ) : (
         <div className={styles.media.thumbnailFallback}>

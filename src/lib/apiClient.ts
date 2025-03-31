@@ -41,12 +41,13 @@ export const apiClient = {
       };
 
       // Make the fetch request
-      logger.time(`fetch:${endpoint}`);
+      const timerId = `fetch:${endpoint.replace(/\/\d+$/, '/:id')}`; // Normalize IDs in paths
+      logger.time(timerId);
       const response = await fetch(url, {
         ...options,
         headers,
       });
-      logger.timeEnd(`fetch:${endpoint}`);
+      logger.timeEnd(timerId);
 
       // Get status code
       const statusCode = response.status;
