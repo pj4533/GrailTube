@@ -13,7 +13,7 @@ export const MAX_BATCH_SIZE = 50; // Maximum videos per API call
 // Search window durations (in days)
 export const RANDOM_TIME_WINDOW_DAYS = 4; // 96 hours
 export const UNEDITED_WINDOW_DAYS = 7; // 1 week
-export const KEYWORD_WINDOW_DAYS = 14; // 2 weeks
+export const KEYWORD_WINDOW_DAYS = 30; // 1 month
 
 // Reroll settings
 export const MAX_REROLLS = 7;  // Maximum number of rerolls before giving up

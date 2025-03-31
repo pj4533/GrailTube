@@ -61,7 +61,7 @@ export function useYouTubeSearch() {
       if (searchType === SearchType.Unedited) {
         windowDescription = '1-week window';
       } else if (searchType === SearchType.Keyword) {
-        windowDescription = '2-week window';
+        windowDescription = '1-month window';
       }
         
       setStatusMessage(`Scanning YouTube videos from ${timeWindow.startDate.toLocaleDateString()} (${windowDescription})`);
