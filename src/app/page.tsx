@@ -137,6 +137,11 @@ export default function Home() {
                       disabled={isSearchLoading}
                       className={styles.form.select}
                       data-testid="search-type-select"
+                      style={{
+                        WebkitAppearance: "none",
+                        MozAppearance: "none",
+                        appearance: "none"
+                      }}
                     >
                       <option value={SearchType.RandomTime}>Random Time</option>
                       <option value={SearchType.Unedited}>Unedited</option>
