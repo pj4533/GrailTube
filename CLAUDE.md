@@ -40,6 +40,7 @@
 - Use database connection verification before operations
 - Add appropriate logging for API and database operations
 - Implement proper error recovery for network and database issues
+- Use MySQL for all database operations (MongoDB has been removed)
 
 ## Logging and Debugging
 - Use the centralized logger from src/lib/logger.ts
@@ -95,9 +96,11 @@
 - Use test utilities from `src/__tests__/utils/test-utils.tsx`
 - Write tests for both success and error paths
 - Use descriptive test names: `describe('Component', () => { it('should do something', () => {}) })`
-- Target minimum 70% code coverage (statements, functions, branches)
+- Maintain >70% code coverage (statements, functions, branches) as enforced in config
 - Run tests before committing changes
 - Use mock functions for API and database operations
 - Create focused tests that verify a single behavior
 - Test edge cases and error handling
 - Keep tests fast and independent of each other
+- Address React act() warnings to ensure proper component lifecycle testing
+- Use proper boolean attribute values in component tests

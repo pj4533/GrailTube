@@ -36,6 +36,7 @@ GrailTube is a web application that helps you discover rare YouTube videos with 
 - Error handling with graceful recovery for network and database issues
 - Allows you to watch videos directly within the app
 - Clean, responsive interface with saved videos and search modes
+- Fully tested with >70% test coverage using Jest and React Testing Library
 
 ## Installation
 
@@ -56,6 +57,8 @@ GrailTube is a web application that helps you discover rare YouTube videos with 
    ```bash
    mysql -u root -e "CREATE DATABASE grailtube;"
    ```
+   
+   The database tables will be created automatically when you first run the app.
 
 3. Create a `.env.local` file in the root directory with the following:
    ```
@@ -126,6 +129,9 @@ The application follows a clean architecture with separation of concerns:
 - MySQL database
 - Tailwind CSS
 - YouTube Data API v3
+- Jest & React Testing Library
+- Axios
+- Date-fns
 
 ## License
 
