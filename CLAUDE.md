@@ -58,6 +58,8 @@
 - Follow consistent prop patterns across similar components
 - Use TypeScript interfaces for component props
 - Maintain consistent styling with Tailwind classes
+- For tab navigation, use the modern border-bottom style for indication
+- Maintain consistent spacing and alignment in navigation components
 
 ## State Management
 - Use React hooks for local component state
@@ -72,9 +74,18 @@
 
 ## Project Structure
 - **/src/app**: Next.js app router pages and API routes
+  - **page.tsx**: Main application with tabbed navigation and video display
 - **/src/components**: Reusable UI components
   - **/src/components/ui**: Shared UI primitives and patterns
+  - **SearchTypeIndicator.tsx**: Displays the current search type
+  - **SearchStatus.tsx**: Shows search status and progress
+  - **VideoCard.tsx**: Card component for displaying video information
+  - **VideoGrid.tsx**: Grid layout for multiple video cards
+  - **VideoPlayer.tsx**: Video player modal for watching videos
 - **/src/hooks**: Custom React hooks for data fetching and state
+  - **useYouTubeSearch.ts**: Manages YouTube search with multiple search types
+  - **useSavedVideos.ts**: Handles saved video operations
+  - **useAsync.ts**: Generic async operation hook
 - **/src/lib**: Utilities and services
   - **/src/lib/models**: Database models and data access
   - YouTube service modules:
@@ -85,7 +96,7 @@
     - **youtubeError.ts**: Error handling
     - **youtubeFilters.ts**: Filtering logic
     - **youtubeTypes.ts**: Type definitions
-- **/src/types**: TypeScript type definitions including SearchType enum
+- **/src/types**: TypeScript type definitions including SearchType enum (RandomTime, Unedited, Keyword)
 - **/src/__tests__**: Test files organized by domain (components, hooks, lib)
 
 ## Testing Guidelines

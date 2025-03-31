@@ -73,9 +73,10 @@ Reusable UI components are composed to build more complex interfaces:
 
 ### UI Layer (`/src/components`)
 
-- **Video Components**: `VideoCard`, `VideoGrid`, `VideoPlayer`
-- **Status Components**: `SearchStatus`, `ApiStatsDisplay`
-- **UI Primitives**: `LoadingIndicator`, `ErrorDisplay`, `EmptyState`
+- **Video Components**: `VideoCard`, `VideoGrid`, `VideoPlayer`, `VideoMetadata`, `YouTubeEmbed`
+- **Navigation Component**: Modern tabbed interface in the main layout
+- **Search Components**: `SearchStatus`, `SearchTypeIndicator`, `ApiStatsDisplay`
+- **UI Primitives**: `LoadingIndicator`, `ErrorDisplay`, `EmptyState`, `Button`, `Icon`
 
 ### Data Access Layer (`/src/hooks`)
 
@@ -112,6 +113,10 @@ Reusable UI components are composed to build more complex interfaces:
 ### Types (`/src/types`)
 
 - Core type definitions shared across the application
+- `SearchType` enum with three modes:
+  - `RandomTime`: Searches videos from random time periods in YouTube history
+  - `Unedited`: Finds raw, unedited footage using camera filename patterns
+  - `Keyword`: Searches for videos matching custom search terms
 
 ## Data Flow
 

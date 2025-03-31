@@ -27,6 +27,7 @@ GrailTube is a web application that helps you discover rare YouTube videos with 
 - Multiple search modes:
   - **Random Time**: Searches videos from random time periods in YouTube history
   - **Unedited**: Finds raw, unedited footage using camera filename patterns
+  - **Keyword**: Searches for videos matching custom search terms
 - Shows video thumbnails, titles, channel information, and view counts
 - Saves your favorite rare videos to a MySQL database
 - Displays when you discovered videos and how many views they had at that time
@@ -37,7 +38,7 @@ GrailTube is a web application that helps you discover rare YouTube videos with 
 - Comprehensive logging system for debugging and performance tracking
 - Error handling with graceful recovery for network and database issues
 - Allows you to watch videos directly within the app
-- Clean, responsive interface with saved videos and search modes
+- Modern tabbed interface with "Saved Videos" and "Find Videos" sections
 - Fully tested with >70% test coverage using Jest and React Testing Library
 
 ## Installation
@@ -89,19 +90,23 @@ GrailTube is a web application that helps you discover rare YouTube videos with 
 
 ## Usage
 
-1. Choose a search type from the dropdown:
+1. The app opens in "Saved Videos" mode by default.
+2. To find new videos, click the "Find Videos" tab in the navigation bar.
+3. In the "Find Videos" view, choose a search type from the dropdown:
    - **Random Time**: Searches for videos from random time periods (default)
    - **Unedited**: Searches for raw footage using camera filename patterns
-2. Click the "Find Videos" button
-3. GrailTube selects an appropriate time window from YouTube's history:
+   - **Keyword**: Searches for videos matching your custom search terms
+4. For Keyword search, enter your search terms in the text field.
+5. Click the "Search" button to begin the search.
+6. GrailTube selects an appropriate time window from YouTube's history:
    - For Random Time: A 96-hour (4-day) window
-   - For Unedited: A larger time window to find camera footage
-4. It searches for videos uploaded during that time period
-5. It filters for videos with fewer than 10 views
-6. It displays view count statistics for all found videos
-7. Click any video thumbnail to watch it directly in the app
-8. Save interesting videos by clicking the bookmark icon
-9. Switch to "Saved Videos" tab to view your collection
+   - For Unedited and Keyword: A 1-week window for more comprehensive results
+7. It searches for videos uploaded during that time period
+8. It filters for videos with fewer than 10 views
+9. It displays view count statistics for all found videos
+10. Click any video thumbnail to watch it directly in the app
+11. Save interesting videos by clicking the bookmark icon
+12. Switch back to "Saved Videos" tab to view your collection
 
 ## Development
 
