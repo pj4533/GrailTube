@@ -10,6 +10,7 @@ import {
 } from '@/lib/utils';
 import { YOUTUBE_FOUNDING_DATE } from '@/lib/constants';
 import { format, addMinutes, subMinutes } from 'date-fns';
+import { SearchType } from '@/types';
 
 describe('Utils', () => {
   describe('formatDate', () => {
@@ -141,6 +142,16 @@ describe('Utils', () => {
       expect(result.durationMinutes).toBe(10080);
       expect(result.startDate).toEqual(subMinutes(centerDate, 10080 / 2));
       expect(result.endDate).toEqual(addMinutes(centerDate, 10080 / 2));
+    });
+
+    it('creates 2-month time window (86400 minutes) for keyword search', () => {
+      const centerDate = new Date('2023-01-15T12:00:00Z');
+      
+      const result = createInitialTimeWindow(centerDate, false, SearchType.Keyword);
+      
+      expect(result.durationMinutes).toBe(86400);
+      expect(result.startDate).toEqual(subMinutes(centerDate, 86400 / 2));
+      expect(result.endDate).toEqual(addMinutes(centerDate, 86400 / 2));
     });
   });
 

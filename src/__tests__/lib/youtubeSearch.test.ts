@@ -2,7 +2,12 @@ import axios from 'axios';
 import { 
   getSearchCacheKey, 
   getLargeTimeWindow, 
-  performYouTubeSearch
+  performYouTubeSearch,
+  getSearchQuery,
+  getRandomSearchTerm,
+  getRandomCameraPattern,
+  searchTerms,
+  cameraFilenamePatterns
 } from '@/lib/youtubeSearch';
 import { SearchType, TimeWindow } from '@/types';
 import { YouTubeRateLimitError, handleYouTubeApiError } from '@/lib/youtubeTypes';
@@ -17,6 +22,48 @@ jest.mock('@/lib/youtubeTypes', () => ({
 }));
 
 describe('YouTube Search', () => {
+  describe('getSearchQuery', () => {
+    it('should return random search term for RandomTime type', () => {
+      const result = getSearchQuery(SearchType.RandomTime);
+      expect(searchTerms).toContain(result);
+    });
+    
+    it('should return camera pattern for Unedited type', () => {
+      const result = getSearchQuery(SearchType.Unedited);
+      expect(cameraFilenamePatterns).toContain(result);
+    });
+    
+    it('should use provided keyword for Keyword type', () => {
+      const keyword = 'test keyword';
+      const result = getSearchQuery(SearchType.Keyword, keyword);
+      expect(result).toBe(keyword);
+    });
+    
+    it('should fall back to random term when no keyword provided for Keyword type', () => {
+      const result = getSearchQuery(SearchType.Keyword);
+      expect(searchTerms).toContain(result);
+    });
+    
+    it('should handle default case', () => {
+      const result = getSearchQuery('invalid' as SearchType);
+      expect(searchTerms).toContain(result);
+    });
+  });
+
+  describe('getRandomSearchTerm', () => {
+    it('should return a term from the search terms array', () => {
+      const result = getRandomSearchTerm();
+      expect(searchTerms).toContain(result);
+    });
+  });
+
+  describe('getRandomCameraPattern', () => {
+    it('should return a pattern from the camera patterns array', () => {
+      const result = getRandomCameraPattern();
+      expect(cameraFilenamePatterns).toContain(result);
+    });
+  });
+
   describe('getSearchCacheKey', () => {
     it('should generate cache key with time window and search type', () => {
       const timeWindow: TimeWindow = {
