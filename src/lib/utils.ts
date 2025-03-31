@@ -56,10 +56,11 @@ export function createTimeWindow(centerTime: Date, durationMinutes: number): Tim
   };
 }
 
-// Create initial 96-hour time window
-export function createInitialTimeWindow(centerDate: Date): TimeWindow {
-  // Always use 96 hours (5760 minutes)
-  return createTimeWindow(centerDate, 5760);
+// Create initial time window based on default timeframe (96 hours for random, 1 week for unedited)
+export function createInitialTimeWindow(centerDate: Date, isUnedited: boolean = false): TimeWindow {
+  // Use 1 week (10080 minutes) for unedited videos, otherwise 96 hours (5760 minutes)
+  const durationMinutes = isUnedited ? 10080 : 5760;
+  return createTimeWindow(centerDate, durationMinutes);
 }
 
 // Add delay (useful for UI updates)

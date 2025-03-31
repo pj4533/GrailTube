@@ -50,8 +50,8 @@ export function useYouTubeSearch() {
   const performSearch = async (timeWindow: TimeWindow): Promise<void> => {
     try {
       const windowDescription = searchType === SearchType.Unedited 
-        ? 'large time window' 
-        : '24-hour window';
+        ? '1-week window' 
+        : '96-hour window';
         
       setStatusMessage(`Scanning YouTube videos from ${timeWindow.startDate.toLocaleDateString()} (${windowDescription})`);
       
@@ -120,9 +120,9 @@ export function useYouTubeSearch() {
       // Brief delay to show the reroll message
       await delay(STATUS_MESSAGE_DELAY_MS);
       
-      // Get a fresh random date and create a new window
+      // Get a fresh random date and create a new window based on search type
       const randomDate = getRandomPastDate();
-      const newWindow = createInitialTimeWindow(randomDate);
+      const newWindow = createInitialTimeWindow(randomDate, searchType === SearchType.Unedited);
       setCurrentWindow(newWindow);
       
       // Search with the new window
@@ -152,9 +152,9 @@ export function useYouTubeSearch() {
     apiStats.reset();
     
     try {
-      // Get a random date and create initial time window
+      // Get a random date and create initial time window based on search type
       const randomDate = getRandomPastDate();
-      const initialWindow = createInitialTimeWindow(randomDate);
+      const initialWindow = createInitialTimeWindow(randomDate, type === SearchType.Unedited);
       setCurrentWindow(initialWindow);
       
       // Start the search process with the current search type

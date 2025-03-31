@@ -123,14 +123,24 @@ describe('Utils', () => {
   });
 
   describe('createInitialTimeWindow', () => {
-    it('creates 96-hour time window (5760 minutes)', () => {
+    it('creates 96-hour time window (5760 minutes) for random search', () => {
       const centerDate = new Date('2023-01-15T12:00:00Z');
       
-      const result = createInitialTimeWindow(centerDate);
+      const result = createInitialTimeWindow(centerDate, false);
       
       expect(result.durationMinutes).toBe(5760);
       expect(result.startDate).toEqual(subMinutes(centerDate, 5760 / 2));
       expect(result.endDate).toEqual(addMinutes(centerDate, 5760 / 2));
+    });
+
+    it('creates 1-week time window (10080 minutes) for unedited search', () => {
+      const centerDate = new Date('2023-01-15T12:00:00Z');
+      
+      const result = createInitialTimeWindow(centerDate, true);
+      
+      expect(result.durationMinutes).toBe(10080);
+      expect(result.startDate).toEqual(subMinutes(centerDate, 10080 / 2));
+      expect(result.endDate).toEqual(addMinutes(centerDate, 10080 / 2));
     });
   });
 
