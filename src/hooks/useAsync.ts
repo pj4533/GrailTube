@@ -46,8 +46,15 @@ export function useAsync<T = any>(
   
   // Track if the component is mounted to prevent setState after unmount
   const isMounted = useRef(true);
+  
+  // Set up the mounted ref and cleanup function
   useEffect(() => {
+    // Set to true when the effect runs (component mounts)
+    isMounted.current = true;
+    
+    // Return cleanup function to set to false when component unmounts
     return () => {
+      logger.debug('useAsync: Component unmounting, setting isMounted to false');
       isMounted.current = false;
     };
   }, []);
@@ -106,12 +113,24 @@ export function useAsync<T = any>(
   const hasRunImmediate = useRef(false);
   
   useEffect(() => {
+    // Reset the hasRunImmediate when component unmounts so it will run again if remounted
+    return () => {
+      hasRunImmediate.current = false;
+    };
+  }, []);
+  
+  useEffect(() => {
     logger.debug('useAsync: useEffect for immediate execution triggered', { 
       immediate, 
-      hasRunBefore: hasRunImmediate.current 
+      hasRunBefore: hasRunImmediate.current,
+      isMounted: isMounted.current 
     });
     
-    if (immediate && !hasRunImmediate.current) {
+    // Only run if:
+    // 1. Component is mounted
+    // 2. immediate option is true
+    // 3. We haven't already run the immediate execution
+    if (isMounted.current && immediate && !hasRunImmediate.current) {
       logger.debug('useAsync: Running immediate execution');
       hasRunImmediate.current = true;
       execute();

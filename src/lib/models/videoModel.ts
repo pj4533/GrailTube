@@ -1,37 +1,68 @@
 import { query } from '@/lib/db';
 import { Video, SavedVideo } from '@/types';
 import { prepareVideoForSaving } from '@/lib/videoAdapter';
+import logger from '@/lib/logger';
 
 /**
  * Video model that provides data access functions for the saved_videos table
  */
 export const VideoModel = {
   /**
+   * Tests the database connection by doing a simple lightweight query
+   */
+  async testConnection(): Promise<boolean> {
+    logger.debug('VideoModel: Testing database connection');
+    try {
+      // Simple lightweight query to check connection
+      await query('SELECT 1 AS connection_test');
+      logger.debug('VideoModel: Database connection test passed');
+      return true;
+    } catch (error) {
+      logger.error('VideoModel: Database connection test failed', error);
+      throw error;
+    }
+  },
+  /**
    * Get all saved videos, ordered by most recently discovered
    */
   async getAll(): Promise<SavedVideo[]> {
-    const results = await query(`
-      SELECT 
-        id,
-        video_id,
-        title,
-        description,
-        thumbnail_url AS thumbnailUrl,
-        channel_title AS channelTitle,
-        published_at AS publishedAt,
-        view_count_at_discovery,
-        discovered_at,
-        duration
-      FROM saved_videos 
-      ORDER BY discovered_at DESC
-    `);
+    logger.debug('VideoModel: Getting all saved videos');
     
-    // Convert MySQL datetime strings to ISO format for consistency
-    return (results as any[]).map(video => ({
-      ...video,
-      publishedAt: new Date(video.publishedAt).toISOString(),
-      discovered_at: new Date(video.discovered_at).toISOString()
-    }));
+    try {
+      const results = await query(`
+        SELECT 
+          id,
+          video_id,
+          title,
+          description,
+          thumbnail_url AS thumbnailUrl,
+          channel_title AS channelTitle,
+          published_at AS publishedAt,
+          view_count_at_discovery,
+          discovered_at,
+          duration
+        FROM saved_videos 
+        ORDER BY discovered_at DESC
+      `);
+      
+      // Check if we got results
+      if (!results || !Array.isArray(results)) {
+        logger.warn('VideoModel: getAll query did not return an array', { results });
+        return [];
+      }
+      
+      logger.debug('VideoModel: Retrieved saved videos', { count: results.length });
+      
+      // Convert MySQL datetime strings to ISO format for consistency
+      return (results as any[]).map(video => ({
+        ...video,
+        publishedAt: new Date(video.publishedAt).toISOString(),
+        discovered_at: new Date(video.discovered_at).toISOString()
+      }));
+    } catch (error) {
+      logger.error('VideoModel: Error retrieving all videos', error);
+      throw error;
+    }
   },
   
   /**
