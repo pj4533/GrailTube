@@ -7,7 +7,7 @@ import { filterExcludedCategories } from './youtubeFilters';
 /**
  * Fetch a batch of video details from YouTube API
  */
-export async function fetchVideoBatch(apiKey: string, batchIds: string[]): Promise<any[]> {
+export async function fetchVideoBatch(apiKey: string, batchIds: string[], signal?: AbortSignal): Promise<any[]> {
   try {
     // Increment API call stats
     apiStats.videoDetailApiCalls++;
@@ -19,6 +19,7 @@ export async function fetchVideoBatch(apiKey: string, batchIds: string[]): Promi
         id: batchIds.join(','),
         key: apiKey,
       },
+      signal
     });
     
     return response.data.items || [];
@@ -66,7 +67,8 @@ export async function processVideoDetails(
   apiKey: string,
   videoIds: string[],
   videoCache: Record<string, Video>,
-  maxIdsPerRequest: number
+  maxIdsPerRequest: number,
+  signal?: AbortSignal
 ): Promise<Video[]> {
   if (!videoIds.length) return [];
   
@@ -87,7 +89,7 @@ export async function processVideoDetails(
   
   try {
     // Process all batches in parallel
-    const batchPromises = batches.map(batchIds => fetchVideoBatch(apiKey, batchIds));
+    const batchPromises = batches.map(batchIds => fetchVideoBatch(apiKey, batchIds, signal));
     const batchResults = await Promise.all(batchPromises);
     const allItems = batchResults.flat();
     

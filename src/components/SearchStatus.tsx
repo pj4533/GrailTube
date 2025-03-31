@@ -4,6 +4,7 @@ import SearchTypeIndicator from './SearchTypeIndicator';
 import { Icon } from './ui/Icon';
 import LoadingIndicator from './ui/LoadingIndicator';
 import ErrorDisplay from './ui/ErrorDisplay';
+import Button from './ui/Button';
 
 interface SearchStatusProps {
   isLoading: boolean;
@@ -13,6 +14,7 @@ interface SearchStatusProps {
   error: string | null;
   viewStats: ViewStats | null;
   searchType?: SearchType;
+  onCancelSearch?: () => void;
 }
 
 /**
@@ -25,7 +27,8 @@ export default function SearchStatus({
   statusMessage, 
   error,
   viewStats,
-  searchType = SearchType.RandomTime
+  searchType = SearchType.RandomTime,
+  onCancelSearch
 }: SearchStatusProps) {
   return (
     <>
@@ -82,7 +85,24 @@ export default function SearchStatus({
       )}
 
       {isLoading && (
-        <LoadingIndicator className="my-16" size="lg" />
+        <div className="flex flex-col items-center">
+          <LoadingIndicator className="my-8" size="lg" />
+          {onCancelSearch && (
+            <Button 
+              variant="danger" 
+              size="md" 
+              onClick={onCancelSearch}
+              className="mt-4"
+              icon={
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              }
+            >
+              Cancel Search
+            </Button>
+          )}
+        </div>
       )}
     </>
   );

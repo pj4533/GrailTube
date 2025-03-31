@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { 
   searchVideosInTimeWindow, 
   getVideoDetails, 
@@ -38,6 +38,10 @@ export function useYouTubeSearch() {
   const [viewStats, setViewStats] = useState<ViewStats | null>(null);
   const [searchType, setSearchType] = useState<SearchType>(SearchType.RandomTime);
   const [keyword, setKeyword] = useState<string>('');
+  const [isCancelled, setIsCancelled] = useState<boolean>(false);
+  
+  // Create a ref to hold the abort controller
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   /**
    * Create a reusable error handler for this hook
@@ -56,6 +60,11 @@ export function useYouTubeSearch() {
    */
   const performSearch = async (timeWindow: TimeWindow): Promise<void> => {
     try {
+      // Check if the search has been cancelled
+      if (isCancelled) {
+        return;
+      }
+      
       // Determine window description based on search type
       let windowDescription = '96-hour window';
       if (searchType === SearchType.Unedited) {
@@ -67,16 +76,32 @@ export function useYouTubeSearch() {
       setStatusMessage(`Scanning YouTube videos from ${timeWindow.startDate.toLocaleDateString()} (${windowDescription})`);
       
       // Search for videos in the current window with current search type
+      // Check again if the search has been cancelled before making the API request
+      if (isCancelled) {
+        return;
+      }
+      
       const videoIds = await searchVideosInTimeWindow(
         timeWindow, 
         searchType,
         searchType === SearchType.Keyword ? keyword : undefined
       );
       
+      // Check if search was cancelled during this operation
+      if (isCancelled) {
+        return;
+      }
+      
       if (videoIds.length === 0) {
         // No videos found at all, immediately reroll to a new date
         setStatusMessage(`No videos found in this time period. Trying another date...`);
         await delay(STATUS_MESSAGE_DELAY_MS);
+        
+        // Check if cancelled during delay
+        if (isCancelled) {
+          return;
+        }
+        
         await performReroll();
         return;
       }
@@ -87,7 +112,17 @@ export function useYouTubeSearch() {
       else if (searchType === SearchType.Keyword) searchTypeLabel = 'keyword ';
       
       setStatusMessage(`Found ${videoIds.length} potential ${searchTypeLabel}videos! Analyzing view counts...`);
+      // Check if cancelled before getting details
+      if (isCancelled) {
+        return;
+      }
+      
       const videoDetails = await getVideoDetails(videoIds);
+      
+      // Check if search was cancelled during this operation
+      if (isCancelled) {
+        return;
+      }
       
       // Get view statistics
       const stats = getViewStats(videoDetails);
@@ -103,6 +138,12 @@ export function useYouTubeSearch() {
         
         // No rare videos found, reroll to a different date after showing stats
         await delay(STATUS_MESSAGE_DELAY_MS * 2);
+        
+        // Check if cancelled during delay
+        if (isCancelled) {
+          return;
+        }
+        
         await performReroll();
       } else {
         // Success! We found rare videos with <10 views
@@ -113,6 +154,12 @@ export function useYouTubeSearch() {
         setIsLoading(false);
       }
     } catch (error) {
+      // Check if this is an abort error (from the AbortController)
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        // This is expected when the search is cancelled, don't show an error
+        return;
+      }
+      
       handleError(error, 'search');
     }
   };
@@ -122,6 +169,11 @@ export function useYouTubeSearch() {
    */
   const performReroll = async (): Promise<void> => {
     try {
+      // Check if the search has been cancelled
+      if (isCancelled) {
+        return;
+      }
+      
       // Increment reroll count
       const newRerollCount = rerollCount + 1;
       setRerollCount(newRerollCount);
@@ -138,6 +190,11 @@ export function useYouTubeSearch() {
       // Brief delay to show the reroll message
       await delay(STATUS_MESSAGE_DELAY_MS);
       
+      // Check if cancelled during delay
+      if (isCancelled) {
+        return;
+      }
+      
       // Get a fresh random date and create a new window based on search type
       const randomDate = getRandomPastDate();
       const newWindow = createInitialTimeWindow(randomDate, searchType === SearchType.Unedited, searchType);
@@ -146,6 +203,12 @@ export function useYouTubeSearch() {
       // Search with the new window
       await performSearch(newWindow);
     } catch (error) {
+      // Check if this is an abort error
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        // This is expected when the search is cancelled, don't show an error
+        return;
+      }
+      
       handleError(error, 'reroll');
     }
   };
@@ -165,9 +228,13 @@ export function useYouTubeSearch() {
     setStatusMessage(null);
     setVideos([]);
     setRerollCount(0);
+    setIsCancelled(false);
     
     // Reset API call stats
     apiStats.reset();
+    
+    // Create a new abort controller for this search
+    abortControllerRef.current = new AbortController();
     
     try {
       // Get a random date and create initial time window based on search type
@@ -201,6 +268,26 @@ export function useYouTubeSearch() {
       }
     }
   };
+  
+  /**
+   * Cancel the current search operation
+   */
+  const cancelSearch = (): void => {
+    if (isLoading) {
+      // Abort any in-progress API calls
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+      
+      setIsCancelled(true);
+      setStatusMessage("Search cancelled");
+      setIsLoading(false);
+      
+      // Keep the current window and view stats for reference
+      // but don't process any more results
+    }
+  };
 
   return {
     isLoading,
@@ -214,6 +301,7 @@ export function useYouTubeSearch() {
     keyword,
     setKeyword,
     startSearch,
-    changeSearchType
+    changeSearchType,
+    cancelSearch
   };
 }

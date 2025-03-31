@@ -1,5 +1,5 @@
 import { Video, TimeWindow, ViewStats, SearchType } from '@/types';
-import { AxiosError } from 'axios';
+import axios, { AxiosError } from 'axios';
 
 /**
  * Error type for YouTube API rate limits
@@ -16,6 +16,12 @@ export class YouTubeRateLimitError extends Error {
  * This is a separate implementation from the API error handler
  */
 export function handleYouTubeApiError(error: any, context: string): never | [] {
+  // Check for cancellation
+  if (axios.isCancel(error)) {
+    console.log('Request cancelled:', context);
+    return [];
+  }
+  
   console.error(`Error during ${context}:`, error);
   
   if (error.isAxiosError) {
@@ -65,8 +71,8 @@ export const apiStats = {
  * Interface for the YouTube API service
  */
 export interface YouTubeServiceInterface {
-  searchVideosInTimeWindow(window: TimeWindow, searchType?: SearchType, userKeyword?: string): Promise<string[]>;
-  getVideoDetails(videoIds: string[]): Promise<Video[]>;
+  searchVideosInTimeWindow(window: TimeWindow, searchType?: SearchType, userKeyword?: string, signal?: AbortSignal): Promise<string[]>;
+  getVideoDetails(videoIds: string[], signal?: AbortSignal): Promise<Video[]>;
   filterRareVideos(videos: Video[]): Video[];
   getViewStats(videos: Video[]): ViewStats;
 }

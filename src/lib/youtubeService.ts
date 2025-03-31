@@ -32,8 +32,14 @@ class YouTubeApiService implements YouTubeServiceInterface {
   
   /**
    * Search for videos in a specific time window with a specific search type
+   * @param signal Optional AbortSignal to cancel the request
    */
-  async searchVideosInTimeWindow(window: TimeWindow, searchType: SearchType = SearchType.RandomTime, userKeyword?: string): Promise<string[]> {
+  async searchVideosInTimeWindow(
+    window: TimeWindow, 
+    searchType: SearchType = SearchType.RandomTime, 
+    userKeyword?: string,
+    signal?: AbortSignal
+  ): Promise<string[]> {
     // Import the founding date
     const { YOUTUBE_FOUNDING_DATE } = require('./constants');
     
@@ -68,7 +74,8 @@ class YouTubeApiService implements YouTubeServiceInterface {
         searchWindow, 
         searchType, 
         this.maxResultsPerRequest,
-        userKeyword
+        userKeyword,
+        signal
       );
       
       // Cache the results
@@ -86,15 +93,17 @@ class YouTubeApiService implements YouTubeServiceInterface {
   
   /**
    * Get detailed video information
+   * @param signal Optional AbortSignal to cancel the request
    */
-  async getVideoDetails(videoIds: string[]): Promise<Video[]> {
+  async getVideoDetails(videoIds: string[], signal?: AbortSignal): Promise<Video[]> {
     try {
       // Process video details with batching and caching
       const videoItems = await processVideoDetails(
         this.apiKey,
         videoIds,
         this.videoCache,
-        this.maxIdsPerRequest
+        this.maxIdsPerRequest,
+        signal
       );
       
       // Parse and cache the videos
