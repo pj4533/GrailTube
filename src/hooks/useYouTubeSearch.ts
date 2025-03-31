@@ -1,58 +1,28 @@
-import { useState, useRef } from 'react';
-import { 
-  searchVideosInTimeWindow, 
-  getVideoDetails, 
-  filterRareVideos,
-  getViewStats,
-  apiStats,
-  YouTubeRateLimitError
-} from '@/lib/youtube';
 import { 
   getRandomPastDate,
-  createInitialTimeWindow,
-  delay
+  createInitialTimeWindow
 } from '@/lib/utils';
-import { Video, TimeWindow, ViewStats, SearchType } from '@/types';
-import {
-  MAX_REROLLS,
-  STATUS_MESSAGE_DELAY_MS,
-  ERROR_MESSAGES,
-  RANDOM_TIME_WINDOW_DAYS,
-  UNEDITED_WINDOW_DAYS,
-  KEYWORD_WINDOW_DAYS
-} from '@/lib/constants';
-import { createErrorHandler } from '@/lib/errorHandlers';
-import useMounted from './useMounted';
+import { TimeWindow, SearchType } from '@/types';
+import { MAX_REROLLS } from '@/lib/constants';
+import { useYouTubeSearchState } from './useYouTubeSearchState';
+import { executeSearch, prepareNewSearch, processSearchResults } from './useYouTubeSearchHelpers';
+import { apiStats } from '@/lib/youtube';
 
 /**
  * Custom hook to handle YouTube search for rare videos
  */
 export function useYouTubeSearch() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [videos, setVideos] = useState<Video[]>([]);
-  const [currentWindow, setCurrentWindow] = useState<TimeWindow | null>(null);
-  const [statusMessage, setStatusMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [rerollCount, setRerollCount] = useState<number>(0);
-  const [viewStats, setViewStats] = useState<ViewStats | null>(null);
-  const [searchType, setSearchType] = useState<SearchType>(SearchType.RandomTime);
-  const [keyword, setKeyword] = useState<string>('');
-  const [isCancelled, setIsCancelled] = useState<boolean>(false);
+  const { state, actions, createAbortController, getAbortController, abortCurrentController } = useYouTubeSearchState();
+  const {
+    isLoading, videos, currentWindow, statusMessage, error,
+    rerollCount, viewStats, searchType, keyword, isCancelled
+  } = state;
   
-  // Create a ref to hold the abort controller
-  const abortControllerRef = useRef<AbortController | null>(null);
-
-  /**
-   * Create a reusable error handler for this hook
-   */
-  const handleError = createErrorHandler({
-    setError,
-    setLoading: setIsLoading,
-    customMessages: {
-      rateLimit: ERROR_MESSAGES.RATE_LIMIT,
-      default: ERROR_MESSAGES.DEFAULT
-    }
-  });
+  const {
+    setIsLoading, setVideos, setCurrentWindow, setStatusMessage,
+    setError, setRerollCount, setViewStats, setSearchType,
+    setKeyword, setIsCancelled, resetState, handleError
+  } = actions;
 
   /**
    * Perform a search on a single time window and reroll if no videos found
@@ -64,91 +34,35 @@ export function useYouTubeSearch() {
         return;
       }
       
-      // Determine window description based on search type
-      let windowDescription = '96-hour window';
-      if (searchType === SearchType.Unedited) {
-        windowDescription = '1-week window';
-      } else if (searchType === SearchType.Keyword) {
-        windowDescription = '2-month window';
-      }
-        
-      setStatusMessage(`Scanning YouTube videos from ${timeWindow.startDate.toLocaleDateString()} (${windowDescription})`);
-      
-      // Search for videos in the current window with current search type
-      // Check again if the search has been cancelled before making the API request
-      if (isCancelled) {
-        return;
-      }
-      
-      const videoIds = await searchVideosInTimeWindow(
-        timeWindow, 
+      const searchResults = await executeSearch(
+        timeWindow,
         searchType,
-        searchType === SearchType.Keyword ? keyword : undefined
+        keyword,
+        isCancelled,
+        setStatusMessage,
+        performReroll
       );
       
-      // Check if search was cancelled during this operation
-      if (isCancelled) {
+      // If search was cancelled or no results found that required reroll
+      if (!searchResults) {
         return;
       }
       
-      if (videoIds.length === 0) {
-        // No videos found at all, immediately reroll to a new date
-        setStatusMessage(`No videos found in this time period. Trying another date...`);
-        await delay(STATUS_MESSAGE_DELAY_MS);
-        
-        // Check if cancelled during delay
-        if (isCancelled) {
-          return;
-        }
-        
-        await performReroll();
-        return;
-      }
+      const { stats, rareVideos } = searchResults;
       
-      // Videos found, get their details
-      let searchTypeLabel = '';
-      if (searchType === SearchType.Unedited) searchTypeLabel = 'unedited ';
-      else if (searchType === SearchType.Keyword) searchTypeLabel = 'keyword ';
-      
-      setStatusMessage(`Found ${videoIds.length} potential ${searchTypeLabel}videos! Analyzing view counts...`);
-      // Check if cancelled before getting details
-      if (isCancelled) {
-        return;
-      }
-      
-      const videoDetails = await getVideoDetails(videoIds);
-      
-      // Check if search was cancelled during this operation
-      if (isCancelled) {
-        return;
-      }
-      
-      // Get view statistics
-      const stats = getViewStats(videoDetails);
+      // Update view stats
       setViewStats(stats);
       
-      // Filter for videos with less than 10 views
-      const rareVideos = filterRareVideos(videoDetails);
+      // Process the search results
+      const processedVideos = await processSearchResults(
+        searchResults,
+        isCancelled,
+        setStatusMessage,
+        performReroll
+      );
       
-      if (rareVideos.length === 0) {
-        // No videos with less than 10 views found
-        // Show the stats in the status message
-        setStatusMessage(`Searching... (analyzing ${stats.totalVideos} videos)`);
-        
-        // No rare videos found, reroll to a different date after showing stats
-        await delay(STATUS_MESSAGE_DELAY_MS * 2);
-        
-        // Check if cancelled during delay
-        if (isCancelled) {
-          return;
-        }
-        
-        await performReroll();
-      } else {
-        // Success! We found rare videos with <10 views
-        // Sort by viewCount (lowest first)
-        const sortedVideos = [...rareVideos].sort((a, b) => a.viewCount - b.viewCount);
-        setVideos(sortedVideos);
+      if (processedVideos) {
+        setVideos(processedVideos);
         setStatusMessage(null);
         setIsLoading(false);
       }
@@ -184,19 +98,12 @@ export function useYouTubeSearch() {
         return;
       }
       
-      setStatusMessage(`Reroll #${newRerollCount}: Trying a completely different time period...`);
+      const { newWindow } = prepareNewSearch(
+        searchType,
+        newRerollCount,
+        setStatusMessage
+      );
       
-      // Brief delay to show the reroll message
-      await delay(STATUS_MESSAGE_DELAY_MS);
-      
-      // Check if cancelled during delay
-      if (isCancelled) {
-        return;
-      }
-      
-      // Get a fresh random date and create a new window based on search type
-      const randomDate = getRandomPastDate();
-      const newWindow = createInitialTimeWindow(randomDate, searchType === SearchType.Unedited, searchType);
       setCurrentWindow(newWindow);
       
       // Search with the new window
@@ -222,18 +129,7 @@ export function useYouTubeSearch() {
     }
     
     // Reset all state
-    setIsLoading(true);
-    setError(null);
-    setStatusMessage(null);
-    setVideos([]);
-    setRerollCount(0);
-    setIsCancelled(false);
-    
-    // Reset API call stats
-    apiStats.reset();
-    
-    // Create a new abort controller for this search
-    abortControllerRef.current = new AbortController();
+    resetState();
     
     try {
       // Get a random date and create initial time window based on search type
@@ -274,10 +170,10 @@ export function useYouTubeSearch() {
   const cancelSearch = (): void => {
     if (isLoading) {
       // Abort any in-progress API calls
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-        abortControllerRef.current = null;
-      }
+      abortCurrentController();
+      
+      // Create a new abort controller
+      createAbortController();
       
       setIsCancelled(true);
       setStatusMessage("Search cancelled");
