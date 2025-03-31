@@ -5,16 +5,15 @@ import {
   fetchVideoBatch
 } from '@/lib/youtubeVideoDetails';
 import { Video } from '@/types';
-import { YouTubeRateLimitError, apiStats } from '@/lib/youtubeTypes';
-import * as youtubeError from '@/lib/youtubeError';
+import { YouTubeRateLimitError, apiStats, handleYouTubeApiError } from '@/lib/youtubeTypes';
 
 // Mock axios
 jest.mock('axios');
 
-// Mock youtubeError module
-jest.mock('@/lib/youtubeError', () => ({
-  isRateLimitError: jest.fn(),
-  handleApiError: jest.fn()
+// Mock youtubeTypes module
+jest.mock('@/lib/youtubeTypes', () => ({
+  ...jest.requireActual('@/lib/youtubeTypes'),
+  handleYouTubeApiError: jest.fn()
 }));
 
 describe('YouTube Video Details', () => {
@@ -69,8 +68,7 @@ describe('YouTube Video Details', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (axios.get as jest.Mock).mockResolvedValue(mockApiResponse);
-    (youtubeError.isRateLimitError as jest.Mock).mockReturnValue(false);
-    (youtubeError.handleApiError as jest.Mock).mockImplementation((error) => {
+    (handleYouTubeApiError as jest.Mock).mockImplementation((error) => {
       throw error;
     });
   });
@@ -108,10 +106,10 @@ describe('YouTube Video Details', () => {
     it('should handle errors properly', async () => {
       const error = new Error('Network error');
       (axios.get as jest.Mock).mockRejectedValue(error);
-      (youtubeError.handleApiError as jest.Mock).mockReturnValue([]);
+      (handleYouTubeApiError as jest.Mock).mockReturnValue([]);
       
       await expect(fetchVideoBatch(apiKey, ['video1', 'video2'])).resolves.toEqual([]);
-      expect(youtubeError.handleApiError).toHaveBeenCalledWith(error, 'fetching video details');
+      expect(handleYouTubeApiError).toHaveBeenCalledWith(error, 'fetching video details');
     });
   });
 

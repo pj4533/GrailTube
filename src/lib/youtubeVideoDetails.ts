@@ -1,9 +1,8 @@
 import axios from 'axios';
 import { Video } from '@/types';
 import { YOUTUBE_API_URL } from './constants';
-import { apiStats, YouTubeRateLimitError } from './youtubeTypes';
+import { apiStats, YouTubeRateLimitError, handleYouTubeApiError } from './youtubeTypes';
 import { filterExcludedCategories } from './youtubeFilters';
-import { handleApiError } from './youtubeError';
 
 /**
  * Fetch a batch of video details from YouTube API
@@ -24,7 +23,7 @@ export async function fetchVideoBatch(apiKey: string, batchIds: string[]): Promi
     
     return response.data.items || [];
   } catch (error) {
-    return handleApiError(error, 'fetching video details');
+    return handleYouTubeApiError(error, 'fetching video details');
   }
 }
 

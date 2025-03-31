@@ -1,8 +1,7 @@
 import axios from 'axios';
 import { TimeWindow, SearchType } from '@/types';
 import { YOUTUBE_API_URL } from './constants';
-import { apiStats } from './youtubeTypes';
-import { handleApiError } from './youtubeError';
+import { apiStats, handleYouTubeApiError } from './youtubeTypes';
 
 /**
  * Search terms and patterns for different search types
@@ -110,6 +109,6 @@ export async function performYouTubeSearch(
     
     return response.data.items.map((item: any) => item.id.videoId);
   } catch (error) {
-    return handleApiError(error, 'video search');
+    return handleYouTubeApiError(error, 'video search');
   }
 }

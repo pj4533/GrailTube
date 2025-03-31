@@ -5,16 +5,15 @@ import {
   performYouTubeSearch
 } from '@/lib/youtubeSearch';
 import { SearchType, TimeWindow } from '@/types';
-import { YouTubeRateLimitError } from '@/lib/youtubeTypes';
-import * as youtubeError from '@/lib/youtubeError';
+import { YouTubeRateLimitError, handleYouTubeApiError } from '@/lib/youtubeTypes';
 
 // Mock axios
 jest.mock('axios');
 
-// Mock youtubeError module
-jest.mock('@/lib/youtubeError', () => ({
-  isRateLimitError: jest.fn(),
-  handleApiError: jest.fn()
+// Mock youtubeTypes module
+jest.mock('@/lib/youtubeTypes', () => ({
+  ...jest.requireActual('@/lib/youtubeTypes'),
+  handleYouTubeApiError: jest.fn()
 }));
 
 describe('YouTube Search', () => {
@@ -101,7 +100,7 @@ describe('YouTube Search', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       (axios.get as jest.Mock).mockResolvedValue(mockSearchResponse);
-      (youtubeError.handleApiError as jest.Mock).mockImplementation((error) => {
+      (handleYouTubeApiError as jest.Mock).mockImplementation((error) => {
         throw error;
       });
       
@@ -168,11 +167,11 @@ describe('YouTube Search', () => {
     it('should handle API errors properly', async () => {
       const error = new Error('Network error');
       (axios.get as jest.Mock).mockRejectedValue(error);
-      (youtubeError.handleApiError as jest.Mock).mockReturnValue([]);
+      (handleYouTubeApiError as jest.Mock).mockReturnValue([]);
       
       await performYouTubeSearch(apiKey, timeWindow, SearchType.RandomTime, 50);
       
-      expect(youtubeError.handleApiError).toHaveBeenCalledWith(error, 'video search');
+      expect(handleYouTubeApiError).toHaveBeenCalledWith(error, 'video search');
     });
   });
 });
