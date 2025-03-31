@@ -75,32 +75,55 @@ export default function Home() {
       {/* Top Navigation Bar */}
       <nav className="bg-gray-900 text-white shadow-md">
         <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col">
             {/* Logo */}
-            <div className="flex items-center">
+            <div className="flex items-center mb-3">
               <h1 className="text-2xl font-bold">GrailTube</h1>
               <p className="ml-4 text-sm hidden md:block text-gray-300">
                 Discover rare YouTube videos with &lt;10 views
               </p>
             </div>
             
-            {/* Navigation Tabs */}
-            <div className="flex space-x-1">
-              <button
-                onClick={handleBackToSaved}
-                className={`px-4 py-2 rounded-md transition-all duration-200 flex items-center space-x-1 font-medium shadow-sm ${
-                  appMode === 'savedVideos'
-                    ? 'bg-blue-600 text-white hover:bg-blue-700' 
-                    : 'text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700'
-                }`}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                </svg>
-                <span>Saved Videos</span>
-              </button>
-              
-              <div className="flex items-center space-x-3">
+            {/* Modern Tab Navigation */}
+            <div className="flex items-start">
+              <div className="flex border-b border-gray-700">
+                <button
+                  onClick={handleBackToSaved}
+                  className={`px-4 py-2 text-sm font-medium transition-all duration-200 border-b-2 ${
+                    appMode === 'savedVideos'
+                      ? 'text-blue-400 border-blue-400' 
+                      : 'text-gray-400 border-transparent hover:text-gray-200 hover:border-gray-400'
+                  }`}
+                >
+                  <div className="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                    </svg>
+                    <span>Saved Videos</span>
+                  </div>
+                </button>
+                
+                <button
+                  onClick={() => setAppMode('search')}
+                  className={`px-4 py-2 text-sm font-medium transition-all duration-200 border-b-2 ${
+                    appMode === 'search'
+                      ? 'text-blue-400 border-blue-400' 
+                      : 'text-gray-400 border-transparent hover:text-gray-200 hover:border-gray-400'
+                  }`}
+                >
+                  <div className="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <span>Find Videos</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+            
+            {/* Search Controls - Only visible when in search mode */}
+            {appMode === 'search' && (
+              <div className="flex items-center space-x-3 mt-4 ml-1">
                 <div className="flex space-x-2">
                   <div className="relative group">
                     <select
@@ -149,11 +172,9 @@ export default function Home() {
                 <button
                   onClick={handleStartSearch}
                   disabled={isSearchLoading || (searchType === SearchType.Keyword && !keyword)}
-                  className={`px-4 py-2 rounded-md transition-all duration-200 flex items-center space-x-1 font-medium shadow-sm ${
-                    appMode === 'search'
-                      ? 'bg-red-600 text-white hover:bg-red-700' 
-                      : 'text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700'
-                  } ${isSearchLoading || (searchType === SearchType.Keyword && !keyword) ? 'opacity-70 cursor-not-allowed' : ''}`}
+                  className={`px-4 py-2 rounded-md transition-all duration-200 flex items-center space-x-1 text-sm font-medium shadow-sm 
+                    bg-blue-600 text-white hover:bg-blue-700
+                    ${isSearchLoading || (searchType === SearchType.Keyword && !keyword) ? 'opacity-70 cursor-not-allowed' : ''}`}
                 >
                   {isSearchLoading ? (
                     <>
@@ -168,12 +189,12 @@ export default function Home() {
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
-                      <span>Find Videos</span>
+                      <span>Search</span>
                     </>
                   )}
                 </button>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </nav>
