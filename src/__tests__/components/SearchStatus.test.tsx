@@ -171,7 +171,7 @@ describe('SearchStatus Component', () => {
     expect(screen.getByText(errorMessage)).toBeInTheDocument();
   });
 
-  it('displays view stats when provided and loading', () => {
+  it('displays video stats when provided and loading', () => {
     render(
       <SearchStatus
         isLoading={true}
@@ -184,7 +184,11 @@ describe('SearchStatus Component', () => {
     );
 
     expect(screen.getByText('Video Stats')).toBeInTheDocument();
+    expect(screen.getByText('Total videos:')).toBeInTheDocument();
     expect(screen.getByText('0 views:')).toBeInTheDocument();
+    expect(screen.getByText('Under 10 views:')).toBeInTheDocument();
+    expect(screen.getByText('Under 100 views:')).toBeInTheDocument();
+    expect(screen.getByText('Under 1000 views:')).toBeInTheDocument();
     expect(screen.getByText('10')).toBeInTheDocument(); // zeroViews
     expect(screen.getByText('20')).toBeInTheDocument(); // underTenViews
     expect(screen.getByText('50')).toBeInTheDocument(); // underHundredViews

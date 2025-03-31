@@ -1,5 +1,5 @@
 import { format, addMinutes, subMinutes, subDays } from 'date-fns';
-import { TimeWindow } from '@/types';
+import { TimeWindow, SearchType } from '@/types';
 import { YOUTUBE_FOUNDING_DATE } from './constants';
 
 // Format date for display
@@ -38,7 +38,21 @@ export function getRandomPastDate(): Date {
 
 // Format a time window for display
 export function formatTimeWindow(window: TimeWindow): string {
-  return `96-hour period starting ${format(window.startDate, 'MMM d, yyyy h:mm a')}`;
+  const duration = window.durationMinutes;
+  
+  // Determine the appropriate time period description
+  let periodDescription = "";
+  if (duration === 5760) { // 4 days in minutes = 5760
+    periodDescription = "96-hour period";
+  } else if (duration === 10080) { // 7 days in minutes = 10080
+    periodDescription = "1-week period";
+  } else if (duration === 20160) { // 14 days in minutes = 20160
+    periodDescription = "2-week period";
+  } else {
+    periodDescription = `${Math.round(duration / 1440)}-day period`; // Fallback to days
+  }
+  
+  return `${periodDescription} starting ${format(window.startDate, 'MMM d, yyyy h:mm a')}`;
 }
 
 // Get center time from a window
@@ -56,10 +70,19 @@ export function createTimeWindow(centerTime: Date, durationMinutes: number): Tim
   };
 }
 
-// Create initial time window based on default timeframe (96 hours for random, 1 week for unedited)
-export function createInitialTimeWindow(centerDate: Date, isUnedited: boolean = false): TimeWindow {
-  // Use 1 week (10080 minutes) for unedited videos, otherwise 96 hours (5760 minutes)
-  const durationMinutes = isUnedited ? 10080 : 5760;
+// Create initial time window based on search type
+export function createInitialTimeWindow(centerDate: Date, isUnedited: boolean = false, searchType?: SearchType): TimeWindow {
+  // Default to 4 days (96 hours) for random time search
+  let durationMinutes = 5760; // 4 days in minutes (RANDOM_TIME_WINDOW_DAYS * 24 * 60)
+  
+  if (isUnedited) {
+    // 7 days for unedited videos
+    durationMinutes = 10080; // 7 days in minutes (UNEDITED_WINDOW_DAYS * 24 * 60)
+  } else if (searchType === SearchType.Keyword) {
+    // 14 days for keyword search
+    durationMinutes = 20160; // 14 days in minutes (KEYWORD_WINDOW_DAYS * 24 * 60)
+  }
+  
   return createTimeWindow(centerDate, durationMinutes);
 }
 

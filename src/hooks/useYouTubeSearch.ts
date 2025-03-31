@@ -58,8 +58,10 @@ export function useYouTubeSearch() {
     try {
       // Determine window description based on search type
       let windowDescription = '96-hour window';
-      if (searchType === SearchType.Unedited || searchType === SearchType.Keyword) {
+      if (searchType === SearchType.Unedited) {
         windowDescription = '1-week window';
+      } else if (searchType === SearchType.Keyword) {
+        windowDescription = '2-week window';
       }
         
       setStatusMessage(`Scanning YouTube videos from ${timeWindow.startDate.toLocaleDateString()} (${windowDescription})`);
@@ -97,7 +99,7 @@ export function useYouTubeSearch() {
       if (rareVideos.length === 0) {
         // No videos with less than 10 views found
         // Show the stats in the status message
-        setStatusMessage(`Found ${stats.totalVideos} ${searchTypeLabel}videos: ${stats.zeroViews} with 0 views, ${stats.underTenViews} with <10 views, ${stats.underHundredViews} with <100 views, ${stats.underThousandViews} with <1000 views`);
+        setStatusMessage(`Searching... (analyzing ${stats.totalVideos} videos)`);
         
         // No rare videos found, reroll to a different date after showing stats
         await delay(STATUS_MESSAGE_DELAY_MS * 2);
@@ -138,7 +140,7 @@ export function useYouTubeSearch() {
       
       // Get a fresh random date and create a new window based on search type
       const randomDate = getRandomPastDate();
-      const newWindow = createInitialTimeWindow(randomDate, searchType === SearchType.Unedited);
+      const newWindow = createInitialTimeWindow(randomDate, searchType === SearchType.Unedited, searchType);
       setCurrentWindow(newWindow);
       
       // Search with the new window
@@ -170,7 +172,7 @@ export function useYouTubeSearch() {
     try {
       // Get a random date and create initial time window based on search type
       const randomDate = getRandomPastDate();
-      const initialWindow = createInitialTimeWindow(randomDate, type === SearchType.Unedited);
+      const initialWindow = createInitialTimeWindow(randomDate, type === SearchType.Unedited, type);
       setCurrentWindow(initialWindow);
       
       // Start the search process with the current search type
