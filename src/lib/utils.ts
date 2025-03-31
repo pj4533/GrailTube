@@ -46,8 +46,8 @@ export function formatTimeWindow(window: TimeWindow): string {
     periodDescription = "96-hour period";
   } else if (duration === 10080) { // 7 days in minutes = 10080
     periodDescription = "1-week period";
-  } else if (duration === 43200) { // 30 days in minutes = 43200
-    periodDescription = "1-month period";
+  } else if (duration === 86400) { // 60 days in minutes = 86400
+    periodDescription = "2-month period";
   } else {
     periodDescription = `${Math.round(duration / 1440)}-day period`; // Fallback to days
   }
@@ -79,8 +79,8 @@ export function createInitialTimeWindow(centerDate: Date, isUnedited: boolean = 
     // 7 days for unedited videos
     durationMinutes = 10080; // 7 days in minutes (UNEDITED_WINDOW_DAYS * 24 * 60)
   } else if (searchType === SearchType.Keyword) {
-    // 30 days for keyword search
-    durationMinutes = 43200; // 30 days in minutes (KEYWORD_WINDOW_DAYS * 24 * 60)
+    // 60 days for keyword search
+    durationMinutes = 86400; // 60 days in minutes (KEYWORD_WINDOW_DAYS * 24 * 60)
   }
   
   return createTimeWindow(centerDate, durationMinutes);
