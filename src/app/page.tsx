@@ -76,20 +76,21 @@ export default function Home() {
       <nav className="bg-gray-900 text-white shadow-md">
         <div className="container mx-auto px-4 py-3">
           <div className="flex flex-col">
-            {/* Logo */}
-            <div className="flex items-center mb-3">
-              <h1 className="text-2xl font-bold">GrailTube</h1>
-              <p className="ml-4 text-sm hidden md:block text-gray-300">
-                Discover rare YouTube videos with &lt;10 views
-              </p>
-            </div>
-            
-            {/* Modern Tab Navigation */}
-            <div className="flex items-start">
-              <div className="flex border-b border-gray-700">
+            {/* Logo and Tabs in same row */}
+            <div className="flex items-center justify-between border-b border-gray-700 pb-3">
+              {/* Left side: Logo and description */}
+              <div className="flex items-center">
+                <h1 className="text-2xl font-bold">GrailTube</h1>
+                <p className="ml-4 text-sm hidden md:block text-gray-300">
+                  Discover rare YouTube videos with &lt;10 views
+                </p>
+              </div>
+              
+              {/* Right side: Tab Navigation */}
+              <div className="flex">
                 <button
                   onClick={handleBackToSaved}
-                  className={`px-4 py-2 text-sm font-medium transition-all duration-200 border-b-2 ${
+                  className={`px-4 py-1 text-sm font-medium transition-all duration-200 border-b-2 -mb-[1px] ${
                     appMode === 'savedVideos'
                       ? 'text-blue-400 border-blue-400' 
                       : 'text-gray-400 border-transparent hover:text-gray-200 hover:border-gray-400'
@@ -105,7 +106,7 @@ export default function Home() {
                 
                 <button
                   onClick={() => setAppMode('search')}
-                  className={`px-4 py-2 text-sm font-medium transition-all duration-200 border-b-2 ${
+                  className={`px-4 py-1 text-sm font-medium transition-all duration-200 border-b-2 -mb-[1px] ${
                     appMode === 'search'
                       ? 'text-blue-400 border-blue-400' 
                       : 'text-gray-400 border-transparent hover:text-gray-200 hover:border-gray-400'
@@ -123,7 +124,7 @@ export default function Home() {
             
             {/* Search Controls - Only visible when in search mode */}
             {appMode === 'search' && (
-              <div className="flex items-center space-x-3 mt-4 ml-1">
+              <div className="flex items-center space-x-3 mt-3">
                 <div className="flex space-x-2">
                   <div className="relative group">
                     <select
