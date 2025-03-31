@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { SavedVideo, Video } from '@/types';
 import apiClient from '@/lib/apiClient';
 import useAsync from './useAsync';
@@ -26,8 +26,10 @@ export function useSavedVideos() {
     { immediate: true }
   );
 
-  // Derived state for convenience
-  const savedVideos = savedVideosData?.videos || [];
+  // Derived state wrapped in useMemo to maintain reference stability
+  const savedVideos = useMemo(() => {
+    return savedVideosData?.videos || [];
+  }, [savedVideosData]);
 
   // Save a video
   const saveVideo = useCallback(async (video: Video) => {
