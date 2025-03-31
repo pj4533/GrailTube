@@ -8,6 +8,15 @@ import useAsync from './useAsync';
  * Uses the apiClient and useAsync for consistent data fetching patterns
  */
 export function useSavedVideos() {
+  // Fetch saved videos function defined outside of useAsync to maintain reference
+  const fetchSavedVideosAsync = useCallback(async () => {
+    const response = await apiClient.get<{ videos: SavedVideo[] }>('/saved-videos');
+    if (response.error) {
+      throw new Error(response.error);
+    }
+    return response.data || { videos: [] };
+  }, []);
+
   // Use the useAsync hook to manage fetch state
   const { 
     data: savedVideosData,
@@ -16,13 +25,7 @@ export function useSavedVideos() {
     execute: fetchSavedVideos,
     setData: setSavedVideosData
   } = useAsync<{ videos: SavedVideo[] }>(
-    async () => {
-      const response = await apiClient.get<{ videos: SavedVideo[] }>('/saved-videos');
-      if (response.error) {
-        throw new Error(response.error);
-      }
-      return response.data || { videos: [] };
-    },
+    fetchSavedVideosAsync,
     { immediate: true }
   );
 

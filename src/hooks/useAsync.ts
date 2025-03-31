@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 
 interface AsyncState<T> {
   data: T | null;
@@ -25,38 +25,70 @@ export function useAsync<T = any>(
     onError = () => {} 
   } = options;
 
+  // Store the latest asyncFunction and callbacks in refs to avoid dependency changes
+  const asyncFunctionRef = useRef(asyncFunction);
+  const onSuccessRef = useRef(onSuccess);
+  const onErrorRef = useRef(onError);
+  
+  // Update refs when the functions change
+  useEffect(() => {
+    asyncFunctionRef.current = asyncFunction;
+    onSuccessRef.current = onSuccess;
+    onErrorRef.current = onError;
+  }, [asyncFunction, onSuccess, onError]);
+
   const [state, setState] = useState<AsyncState<T>>({
     data: null,
     isLoading: immediate,
     error: null,
   });
+  
+  // Track if the component is mounted to prevent setState after unmount
+  const isMounted = useRef(true);
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
-  // Function to execute the async operation
+  // Function to execute the async operation - uses stable refs instead of direct dependencies
   const execute = useCallback(async () => {
+    if (!isMounted.current) return;
+    
     setState(prevState => ({ ...prevState, isLoading: true, error: null }));
 
     try {
-      const response = await asyncFunction();
-      setState({ data: response, isLoading: false, error: null });
-      onSuccess(response);
+      // Use the current ref value to call the async function
+      const response = await asyncFunctionRef.current();
+      
+      if (isMounted.current) {
+        setState({ data: response, isLoading: false, error: null });
+        onSuccessRef.current(response);
+      }
       return response;
     } catch (error) {
+      if (!isMounted.current) return Promise.reject(error);
+      
       const errorMessage = error instanceof Error 
         ? error.message 
         : 'An unexpected error occurred';
       
       setState({ data: null, isLoading: false, error: errorMessage });
-      onError(error as Error);
+      onErrorRef.current(error as Error);
       return Promise.reject(error);
     }
-  }, [asyncFunction, onSuccess, onError]);
+  }, []); // Empty dependency array for stable reference
 
   // Run immediately if option is set
+  // Use a ref to track if we've already run the immediate execution
+  const hasRunImmediate = useRef(false);
+  
   useEffect(() => {
-    if (immediate) {
+    if (immediate && !hasRunImmediate.current) {
+      hasRunImmediate.current = true;
       execute();
     }
-  }, [execute, immediate]);
+  }, [immediate, execute]);
 
   // Reset the state
   const reset = useCallback(() => {
