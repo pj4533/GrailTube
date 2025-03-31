@@ -22,6 +22,9 @@ GrailTube is a web application that helps you discover rare YouTube videos with 
 ## Features
 
 - Discovers rare YouTube videos with fewer than 10 views
+- Multiple search modes:
+  - **Random Time**: Searches videos from random time periods in YouTube history
+  - **Unedited**: Finds raw, unedited footage using camera filename patterns
 - Shows video thumbnails, titles, channel information, and view counts
 - Saves your favorite rare videos to a MySQL database
 - Displays when you discovered videos and how many views they had at that time
@@ -29,6 +32,8 @@ GrailTube is a web application that helps you discover rare YouTube videos with 
 - Automatically tries multiple time periods to find rare content
 - Filters out commercial content, movie/TV trailers, and livestreams
 - Caches search results and video details to reduce API usage
+- Comprehensive logging system for debugging and performance tracking
+- Error handling with graceful recovery for network and database issues
 - Allows you to watch videos directly within the app
 - Clean, responsive interface with saved videos and search modes
 
@@ -79,12 +84,19 @@ GrailTube is a web application that helps you discover rare YouTube videos with 
 
 ## Usage
 
-1. Click the "Find Rare Videos" button
-2. GrailTube selects a random 96-hour (4-day) window from YouTube's history
-3. It searches for videos uploaded during that time period
-4. It filters for videos with fewer than 10 views
-5. It displays view count statistics for all found videos
-6. Click any video thumbnail to watch it directly in the app
+1. Choose a search type from the dropdown:
+   - **Random Time**: Searches for videos from random time periods (default)
+   - **Unedited**: Searches for raw footage using camera filename patterns
+2. Click the "Find Videos" button
+3. GrailTube selects an appropriate time window from YouTube's history:
+   - For Random Time: A 96-hour (4-day) window
+   - For Unedited: A larger time window to find camera footage
+4. It searches for videos uploaded during that time period
+5. It filters for videos with fewer than 10 views
+6. It displays view count statistics for all found videos
+7. Click any video thumbnail to watch it directly in the app
+8. Save interesting videos by clicking the bookmark icon
+9. Switch to "Saved Videos" tab to view your collection
 
 ## Development
 

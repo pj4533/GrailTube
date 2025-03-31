@@ -29,9 +29,23 @@
 ## API and Data Guidelines
 - Use centralized error handling from src/lib/api.ts
 - Use shared fetch utilities for consistent API calling patterns
+- Use apiClient for standardized API communication
 - Follow data transformation patterns in adapters (videoAdapter.ts)
 - Prefer model abstractions for database operations
 - Handle loading, error, and success states consistently
+- Use database connection verification before operations
+- Add appropriate logging for API and database operations
+- Implement proper error recovery for network and database issues
+
+## Logging and Debugging
+- Use the centralized logger from src/lib/logger.ts
+- Include appropriate log levels (debug, info, warn, error)
+- Use structured logging with timestamps and context
+- Use logger.time() and logger.timeEnd() for performance monitoring
+- Log component lifecycle events (mount/unmount) in hooks
+- Add detailed error logs with full context information
+- Control log verbosity with environment variables
+- Avoid excessive logging in production
 
 ## Component Guidelines
 - Use shared UI components for common patterns (LoadingIndicator, ErrorDisplay, EmptyState)
@@ -43,8 +57,12 @@
 ## State Management
 - Use React hooks for local component state
 - Custom hooks for complex logic (e.g., useYouTubeSearch, useSavedVideos)
+- Use useAsync for consistent async operation handling
 - Separate UI concerns from data fetching logic
 - Apply consistent patterns for state initialization and updates
+- Always track component mount state to prevent memory leaks
+- Use refs for storing values that shouldn't trigger re-renders
+- Reset state appropriately when switching modes/views
 - Provide clear status messages during operations
 
 ## Project Structure
@@ -54,4 +72,12 @@
 - **/src/hooks**: Custom React hooks for data fetching and state
 - **/src/lib**: Utilities and services
   - **/src/lib/models**: Database models and data access
-- **/src/types**: TypeScript type definitions
+  - YouTube service modules:
+    - **youtube.ts**: Main facade/entry point
+    - **youtubeService.ts**: Core service implementation
+    - **youtubeSearch.ts**: Search-specific functionality 
+    - **youtubeVideoDetails.ts**: Video details functionality
+    - **youtubeError.ts**: Error handling
+    - **youtubeFilters.ts**: Filtering logic
+    - **youtubeTypes.ts**: Type definitions
+- **/src/types**: TypeScript type definitions including SearchType enum

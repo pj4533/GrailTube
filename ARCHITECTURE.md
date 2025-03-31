@@ -35,13 +35,15 @@ GrailTube follows a layered architecture with clear separation of concerns:
 
 ## Key Design Patterns
 
-### 1. Custom Hooks for Data Fetching
+### 1. Custom Hooks for Data Fetching and State Management
 
-Custom hooks like `useYouTubeSearch` and `useSavedVideos` abstract away the data-fetching logic from the UI components, providing:
+Custom hooks like `useYouTubeSearch`, `useSavedVideos`, and `useAsync` abstract away the data-fetching logic and state management from the UI components, providing:
 
 - Clean separation between UI and data logic
 - Consistent state management (loading, error, data states)
 - Reusable data operations
+- Component lifecycle management with mount/unmount tracking
+- Prevention of memory leaks and React state update errors
 
 ### 2. Adapter Pattern
 
@@ -77,18 +79,26 @@ Reusable UI components are composed to build more complex interfaces:
 
 ### Data Access Layer (`/src/hooks`)
 
-- **Search Hook**: `useYouTubeSearch` - manages YouTube search state
-- **Saved Videos Hook**: `useSavedVideos` - manages database interaction
+- **Search Hook**: `useYouTubeSearch` - manages YouTube search state and search types
+- **Saved Videos Hook**: `useSavedVideos` - manages database interaction for saved videos
+- **Async Hook**: `useAsync` - general-purpose hook for async operations with lifecycle management
 
 ### Services Layer (`/src/lib`)
 
 - **YouTube Service**: Modular service for YouTube API interactions
+  - `youtube.ts`: Main facade/entry point
   - `youtubeService.ts`: Core service implementation
+  - `youtubeSearch.ts`: Search-specific functionality
+  - `youtubeVideoDetails.ts`: Video detail retrieval
   - `youtubeFilters.ts`: Filtering logic for videos
   - `youtubeTypes.ts`: Types and interfaces
-- **API Utilities**: `api.ts` - Shared HTTP client and error handling
+  - `youtubeError.ts`: Error handling for YouTube services
+- **API Utilities**: 
+  - `api.ts` - Shared HTTP client and error handling
+  - `apiClient.ts` - Standardized client for API communication
 - **Adapters**: `videoAdapter.ts` - Data transformation utilities
 - **Database**: `db.ts` - Database connection and query utilities
+- **Logging**: `logger.ts` - Centralized logging system with timing functions
 
 ### Models Layer (`/src/lib/models`)
 
@@ -112,13 +122,17 @@ Reusable UI components are composed to build more complex interfaces:
 5. **State Update**: Hook updates local state with results
 6. **UI Rendering**: Components re-render with updated data
 
-## Error Handling
+## Error Handling and Logging
 
-The application uses a centralized error handling approach:
+The application uses a centralized error handling and logging approach:
 
-1. **API Errors**: Captured and standardized in the `api.ts` utility
+1. **API Errors**: Captured and standardized in the `api.ts` and `apiClient.ts` utilities
 2. **UI Feedback**: Error states are passed up to components for display
 3. **Error Components**: `ErrorDisplay` component shows user-friendly messages
+4. **Database Error Recovery**: Automatic reconnection and connection verification
+5. **Component Lifecycle Management**: Prevents React state updates on unmounted components
+6. **Logger System**: Structured logging with timestamps, levels, and performance timing
+7. **Debugging**: Rich logging throughout the application that can be enabled in development
 
 ## Future Considerations
 
