@@ -1,12 +1,12 @@
 /**
  * Re-export YouTube API functionality from modular files
- * This file exists for backward compatibility
+ * Central API facade for all YouTube-related functionality
  */
 
-// Import what we need from youtubeService
+// Import from service
 import { 
   searchVideosInTimeWindow as search,
-  getVideoDetails as getDetails,
+  getVideoDetails as details,
   filterRareVideos as filter,
   getViewStats as stats
 } from './youtubeService';
@@ -14,21 +14,16 @@ import {
 // Import from types
 import { 
   YouTubeRateLimitError as RateLimitError,
-  apiStats as stats2,
+  apiStats as statsObject,
   YouTubeServiceInterface
 } from './youtubeTypes';
 
 import { TimeWindow, SearchType } from '@/types';
-import { Video, ViewStats } from '@/types';
 
-// Re-export with updated signatures
-export const searchVideosInTimeWindow = (
-  window: TimeWindow, 
-  searchType?: SearchType
-): Promise<string[]> => search(window, searchType);
-
-export const getVideoDetails = (videoIds: string[]): Promise<Video[]> => getDetails(videoIds);
+// Re-export everything with consistent naming
+export const searchVideosInTimeWindow = search;
+export const getVideoDetails = details;
 export const filterRareVideos = filter;
 export const getViewStats = stats;
-export const apiStats = stats2;
+export const apiStats = statsObject;
 export const YouTubeRateLimitError = RateLimitError;
