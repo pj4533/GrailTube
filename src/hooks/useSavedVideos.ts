@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { SavedVideo, Video } from '@/types';
 import apiClient from '@/lib/apiClient';
 import useAsync from './useAsync';
+import logger from '@/lib/logger';
 
 /**
  * Hook for managing saved videos
@@ -10,10 +11,18 @@ import useAsync from './useAsync';
 export function useSavedVideos() {
   // Fetch saved videos function defined outside of useAsync to maintain reference
   const fetchSavedVideosAsync = useCallback(async () => {
-    const response = await apiClient.get<{ videos: SavedVideo[] }>('/saved-videos');
+    logger.debug('useSavedVideos: Fetching saved videos');
+    // Use absolute path to match the original API calls
+    const response = await apiClient.get<{ videos: SavedVideo[] }>('/api/saved-videos');
+    
     if (response.error) {
+      logger.error('useSavedVideos: Error fetching videos', response.error);
       throw new Error(response.error);
     }
+    
+    logger.debug('useSavedVideos: Fetched videos successfully', { 
+      count: response.data?.videos?.length || 0 
+    });
     return response.data || { videos: [] };
   }, []);
 
@@ -37,7 +46,7 @@ export function useSavedVideos() {
   // Save a video
   const saveVideo = useCallback(async (video: Video) => {
     try {
-      const response = await apiClient.post<{ success: boolean }>('/saved-videos', { video });
+      const response = await apiClient.post<{ success: boolean }>('/api/saved-videos', { video });
       
       if (response.error) {
         throw new Error(response.error);
@@ -55,7 +64,7 @@ export function useSavedVideos() {
   // Remove a saved video
   const removeVideo = useCallback(async (videoId: string) => {
     try {
-      const response = await apiClient.delete<{ success: boolean }>(`/saved-videos/${videoId}`);
+      const response = await apiClient.delete<{ success: boolean }>(`/api/saved-videos/${videoId}`);
       
       if (response.error) {
         throw new Error(response.error);

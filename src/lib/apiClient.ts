@@ -1,4 +1,5 @@
 import { API_BASE_URL } from './constants';
+import logger from './logger';
 
 interface RequestOptions extends RequestInit {
   params?: Record<string, string | number | boolean | undefined>;
@@ -31,6 +32,8 @@ export const apiClient = {
         url = `${url}?${searchParams.toString()}`;
       }
 
+      logger.debug('apiClient: Fetching', { url, method: options.method || 'GET' });
+
       // Default headers
       const headers = {
         'Content-Type': 'application/json',
@@ -38,29 +41,49 @@ export const apiClient = {
       };
 
       // Make the fetch request
+      logger.time(`fetch:${endpoint}`);
       const response = await fetch(url, {
         ...options,
         headers,
       });
+      logger.timeEnd(`fetch:${endpoint}`);
 
       // Get status code
       const statusCode = response.status;
+      logger.debug('apiClient: Response received', { statusCode });
 
       // Parse the response
       let data: T | null = null;
       if (statusCode !== 204) { // No content
         try {
           data = await response.json();
+          logger.debug('apiClient: Response data', { data });
         } catch (e) {
+          logger.warn('apiClient: Failed to parse JSON response', { error: e });
           // If not JSON, leave data as null
         }
       }
 
       // Handle error responses
       if (!response.ok) {
-        const errorMessage = data && typeof data === 'object' && 'message' in data
-          ? String(data.message)
-          : `API error: ${response.status} ${response.statusText}`;
+        // Check for multiple error message formats from our API
+        let errorMessage = `API error: ${response.status} ${response.statusText}`;
+        
+        if (data) {
+          if (typeof data === 'object') {
+            if ('message' in data) {
+              errorMessage = String(data.message);
+            } else if ('error' in data) {
+              errorMessage = String(data.error);
+            }
+          }
+        }
+        
+        logger.error('apiClient: Request failed', { 
+          statusCode, 
+          errorMessage, 
+          endpoint 
+        });
         
         return {
           data: null,
@@ -70,6 +93,7 @@ export const apiClient = {
       }
 
       // Return successful response
+      logger.debug('apiClient: Request successful', { endpoint });
       return {
         data,
         error: null,
@@ -80,6 +104,11 @@ export const apiClient = {
       const errorMessage = error instanceof Error 
         ? error.message 
         : 'Network error';
+      
+      logger.error('apiClient: Network error', { 
+        endpoint, 
+        error: errorMessage 
+      });
       
       return {
         data: null,

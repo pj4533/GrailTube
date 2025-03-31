@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
+import logger from '@/lib/logger';
 
 interface AsyncState<T> {
   data: T | null;
@@ -51,40 +52,67 @@ export function useAsync<T = any>(
     };
   }, []);
 
+  // Create a ref for the immediate value too
+  const immediateRef = useRef(immediate);
+  useEffect(() => {
+    immediateRef.current = immediate;
+  }, [immediate]);
+
   // Function to execute the async operation - uses stable refs instead of direct dependencies
   const execute = useCallback(async () => {
-    if (!isMounted.current) return;
+    if (!isMounted.current) {
+      logger.debug('useAsync: execute called but component is unmounted');
+      return;
+    }
     
+    logger.debug('useAsync: Starting execution', { 
+      immediate: immediateRef.current 
+    });
     setState(prevState => ({ ...prevState, isLoading: true, error: null }));
 
     try {
       // Use the current ref value to call the async function
+      logger.time('asyncFunction');
       const response = await asyncFunctionRef.current();
+      logger.timeEnd('asyncFunction');
       
       if (isMounted.current) {
+        logger.debug('useAsync: Success, updating state');
         setState({ data: response, isLoading: false, error: null });
         onSuccessRef.current(response);
+      } else {
+        logger.debug('useAsync: Success, but component unmounted');
       }
       return response;
     } catch (error) {
-      if (!isMounted.current) return Promise.reject(error);
+      if (!isMounted.current) {
+        logger.debug('useAsync: Error occurred but component unmounted');
+        return Promise.reject(error);
+      }
       
       const errorMessage = error instanceof Error 
         ? error.message 
         : 'An unexpected error occurred';
       
+      logger.error('useAsync: Error in execution', { error: errorMessage });
       setState({ data: null, isLoading: false, error: errorMessage });
       onErrorRef.current(error as Error);
       return Promise.reject(error);
     }
-  }, []); // Empty dependency array for stable reference
+  }, []); // Empty dependency array for stable reference - refs handle values
 
   // Run immediately if option is set
   // Use a ref to track if we've already run the immediate execution
   const hasRunImmediate = useRef(false);
   
   useEffect(() => {
+    logger.debug('useAsync: useEffect for immediate execution triggered', { 
+      immediate, 
+      hasRunBefore: hasRunImmediate.current 
+    });
+    
     if (immediate && !hasRunImmediate.current) {
+      logger.debug('useAsync: Running immediate execution');
       hasRunImmediate.current = true;
       execute();
     }
