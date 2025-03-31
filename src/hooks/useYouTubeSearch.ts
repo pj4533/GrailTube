@@ -12,7 +12,7 @@ import {
   createInitialTimeWindow,
   delay
 } from '@/lib/utils';
-import { Video, TimeWindow, ViewStats } from '@/types';
+import { Video, TimeWindow, ViewStats, SearchType } from '@/types';
 import {
   MAX_REROLLS,
   STATUS_MESSAGE_DELAY_MS
@@ -29,6 +29,7 @@ export function useYouTubeSearch() {
   const [error, setError] = useState<string | null>(null);
   const [rerollCount, setRerollCount] = useState<number>(0);
   const [viewStats, setViewStats] = useState<ViewStats | null>(null);
+  const [searchType, setSearchType] = useState<SearchType>(SearchType.RandomTime);
 
   /**
    * Handle errors consistently throughout the hook
@@ -44,14 +45,18 @@ export function useYouTubeSearch() {
   };
 
   /**
-   * Perform a search on a single 24-hour window and reroll if no videos found
+   * Perform a search on a single time window and reroll if no videos found
    */
   const performSearch = async (timeWindow: TimeWindow): Promise<void> => {
     try {
-      setStatusMessage(`Scanning YouTube videos from ${timeWindow.startDate.toLocaleDateString()} (24-hour window)`);
+      const windowDescription = searchType === SearchType.Unedited 
+        ? 'large time window' 
+        : '24-hour window';
+        
+      setStatusMessage(`Scanning YouTube videos from ${timeWindow.startDate.toLocaleDateString()} (${windowDescription})`);
       
-      // Search for videos in the current window
-      const videoIds = await searchVideosInTimeWindow(timeWindow);
+      // Search for videos in the current window with current search type
+      const videoIds = await searchVideosInTimeWindow(timeWindow, searchType);
       
       if (videoIds.length === 0) {
         // No videos found at all, immediately reroll to a new date
@@ -62,7 +67,8 @@ export function useYouTubeSearch() {
       }
       
       // Videos found, get their details
-      setStatusMessage(`Found ${videoIds.length} videos! Analyzing view counts...`);
+      const searchTypeLabel = searchType === SearchType.Unedited ? 'unedited ' : '';
+      setStatusMessage(`Found ${videoIds.length} potential ${searchTypeLabel}videos! Analyzing view counts...`);
       const videoDetails = await getVideoDetails(videoIds);
       
       // Get view statistics
@@ -75,7 +81,7 @@ export function useYouTubeSearch() {
       if (rareVideos.length === 0) {
         // No videos with less than 10 views found
         // Show the stats in the status message
-        setStatusMessage(`Found ${stats.totalVideos} videos: ${stats.zeroViews} with 0 views, ${stats.underTenViews} with <10 views, ${stats.underHundredViews} with <100 views, ${stats.underThousandViews} with <1000 views`);
+        setStatusMessage(`Found ${stats.totalVideos} ${searchTypeLabel}videos: ${stats.zeroViews} with 0 views, ${stats.underTenViews} with <10 views, ${stats.underHundredViews} with <100 views, ${stats.underThousandViews} with <1000 views`);
         
         // No rare videos found, reroll to a different date after showing stats
         await delay(STATUS_MESSAGE_DELAY_MS * 2);
@@ -127,9 +133,14 @@ export function useYouTubeSearch() {
   };
 
   /**
-   * Start search from a random date
+   * Start search from a random date with the specified search type
    */
-  const startSearch = async (): Promise<void> => {
+  const startSearch = async (type: SearchType = searchType): Promise<void> => {
+    // If the selected search type is different, update it
+    if (type !== searchType) {
+      setSearchType(type);
+    }
+    
     // Reset all state
     setIsLoading(true);
     setError(null);
@@ -141,15 +152,30 @@ export function useYouTubeSearch() {
     apiStats.reset();
     
     try {
-      // Get a random date and create initial 24-hour window
+      // Get a random date and create initial time window
       const randomDate = getRandomPastDate();
       const initialWindow = createInitialTimeWindow(randomDate);
       setCurrentWindow(initialWindow);
       
-      // Start the search process
+      // Start the search process with the current search type
       await performSearch(initialWindow);
     } catch (err) {
       handleError(err, 'initial search');
+    }
+  };
+
+  /**
+   * Change search type and clear results
+   */
+  const changeSearchType = (type: SearchType): void => {
+    // Only process if it's a different type and not loading
+    if (type !== searchType && !isLoading) {
+      setSearchType(type);
+      setVideos([]);
+      setStatusMessage(null);
+      setError(null);
+      setViewStats(null);
+      setCurrentWindow(null);
     }
   };
 
@@ -161,6 +187,8 @@ export function useYouTubeSearch() {
     error,
     viewStats,
     apiStats,
-    startSearch
+    searchType,
+    startSearch,
+    changeSearchType
   };
 }

@@ -32,3 +32,8 @@ export interface TimeWindow {
   endDate: Date;
   durationMinutes: number;
 }
+
+export enum SearchType {
+  RandomTime = 'randomTime',
+  Unedited = 'unedited'
+}

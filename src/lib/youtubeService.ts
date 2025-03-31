@@ -1,5 +1,5 @@
 import axios, { AxiosError } from 'axios';
-import { Video, TimeWindow, ViewStats } from '@/types';
+import { Video, TimeWindow, ViewStats, SearchType } from '@/types';
 import { YOUTUBE_API_URL } from './constants';
 import { YouTubeRateLimitError, apiStats, YouTubeServiceInterface } from './youtubeTypes';
 import { filterRareVideos as filterVideos, filterExcludedCategories, getViewStats as getVideoStats } from './youtubeFilters';
@@ -29,6 +29,14 @@ class YouTubeApiService implements YouTubeServiceInterface {
     'game', 'play', 'fun', 'adventure', 'explore'
   ];
   
+  // Camera filename patterns for "Unedited" search type
+  private readonly cameraFilenamePatterns: string[] = [
+    'IMG_', 'DSC_', 'DCIM', 'MOV_', 'VID_', 'MVI_',
+    'GOPRO', 'CLIP', 'REC', 'VIDEO', 'CAMERA',
+    'iphone', 'samsung', 'pixel', 'P_', 'PANA', 'LUMIX',
+    'canon', 'nikon', 'sony', 'fuji', 'olympus', 'raw footage'
+  ];
+  
   constructor() {
     this.apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY || '';
     this.maxResultsPerRequest = 50;
@@ -41,6 +49,47 @@ class YouTubeApiService implements YouTubeServiceInterface {
   private getRandomSearchTerm(): string {
     const randomIndex = Math.floor(Math.random() * this.searchTerms.length);
     return this.searchTerms[randomIndex];
+  }
+  
+  /**
+   * Get a random camera filename pattern for unedited videos
+   */
+  private getRandomCameraPattern(): string {
+    const randomIndex = Math.floor(Math.random() * this.cameraFilenamePatterns.length);
+    return this.cameraFilenamePatterns[randomIndex];
+  }
+  
+  /**
+   * Get search query based on search type
+   */
+  private getSearchQuery(searchType: SearchType): string {
+    switch (searchType) {
+      case SearchType.RandomTime:
+        return this.getRandomSearchTerm();
+      case SearchType.Unedited:
+        return this.getRandomCameraPattern();
+      default:
+        return this.getRandomSearchTerm();
+    }
+  }
+  
+  /**
+   * Create a larger time window for unedited content
+   */
+  private getLargeTimeWindow(baseWindow: TimeWindow): TimeWindow {
+    // For unedited content, we want a larger window (2x the original)
+    const centerTime = new Date((baseWindow.startDate.getTime() + baseWindow.endDate.getTime()) / 2);
+    const largeDuration = baseWindow.durationMinutes * 2;
+    
+    const halfDuration = largeDuration / 2;
+    const startDate = new Date(centerTime.getTime() - (halfDuration * 60 * 1000));
+    const endDate = new Date(centerTime.getTime() + (halfDuration * 60 * 1000));
+    
+    return {
+      startDate,
+      endDate,
+      durationMinutes: largeDuration
+    };
   }
   
   /**
@@ -80,27 +129,32 @@ class YouTubeApiService implements YouTubeServiceInterface {
   }
   
   /**
-   * Generate cache key for a time window
+   * Generate cache key for a time window and search type
    */
-  private getSearchCacheKey(window: TimeWindow): string {
-    return `${window.startDate.toISOString()}_${window.endDate.toISOString()}`;
+  private getSearchCacheKey(window: TimeWindow, searchType: SearchType): string {
+    return `${searchType}_${window.startDate.toISOString()}_${window.endDate.toISOString()}`;
   }
   
   /**
-   * Search for videos in a specific time window
+   * Search for videos in a specific time window with a specific search type
    */
-  async searchVideosInTimeWindow(window: TimeWindow): Promise<string[]> {
+  async searchVideosInTimeWindow(window: TimeWindow, searchType: SearchType = SearchType.RandomTime): Promise<string[]> {
     // Import the founding date
     const { YOUTUBE_FOUNDING_DATE } = require('./constants');
     
-    // Ensure we never search before YouTube's founding
+    // Determine the appropriate time window based on search type
     let searchWindow = {...window};
+    if (searchType === SearchType.Unedited) {
+      searchWindow = this.getLargeTimeWindow(window);
+    }
+    
+    // Ensure we never search before YouTube's founding
     if (searchWindow.startDate < YOUTUBE_FOUNDING_DATE) {
       searchWindow.startDate = new Date(YOUTUBE_FOUNDING_DATE);
       console.log('Adjusted search window to start at YouTube founding date');
     }
     
-    const cacheKey = this.getSearchCacheKey(searchWindow);
+    const cacheKey = this.getSearchCacheKey(searchWindow, searchType);
     
     // Check if we already have this search cached
     if (this.searchCache[cacheKey]) {
@@ -121,8 +175,8 @@ class YouTubeApiService implements YouTubeServiceInterface {
           type: 'video',
           publishedAfter: searchWindow.startDate.toISOString(),
           publishedBefore: searchWindow.endDate.toISOString(),
-          // Add random search query parameter to get more diverse results
-          q: this.getRandomSearchTerm(),
+          // Add search query parameter based on search type
+          q: this.getSearchQuery(searchType),
           key: this.apiKey,
         },
       });
@@ -267,8 +321,8 @@ class YouTubeApiService implements YouTubeServiceInterface {
 const youtubeApiService = new YouTubeApiService();
 
 // Export methods for use elsewhere
-export const searchVideosInTimeWindow = (window: TimeWindow): Promise<string[]> => 
-  youtubeApiService.searchVideosInTimeWindow(window);
+export const searchVideosInTimeWindow = (window: TimeWindow, searchType?: SearchType): Promise<string[]> => 
+  youtubeApiService.searchVideosInTimeWindow(window, searchType);
 
 export const getVideoDetails = (videoIds: string[]): Promise<Video[]> => 
   youtubeApiService.getVideoDetails(videoIds);
