@@ -35,7 +35,8 @@ export default function Home() {
     keyword,
     setKeyword,
     startSearch,
-    changeSearchType
+    changeSearchType,
+    cancelSearch
   } = useYouTubeSearch();
   
   // Saved videos hook
@@ -218,6 +219,7 @@ export default function Home() {
             error={searchError}
             viewStats={viewStats}
             searchType={searchType}
+            onCancelSearch={cancelSearch}
           />
         )}
 

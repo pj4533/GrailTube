@@ -90,7 +90,8 @@ export async function performYouTubeSearch(
   searchWindow: TimeWindow,
   searchType: SearchType,
   maxResults: number,
-  userKeyword?: string
+  userKeyword?: string,
+  signal?: AbortSignal
 ): Promise<string[]> {
   try {
     // Increment API call stats
@@ -108,6 +109,7 @@ export async function performYouTubeSearch(
         q: getSearchQuery(searchType, userKeyword),
         key: apiKey,
       },
+      signal, // Add the abort signal
     });
     
     return response.data.items.map((item: any) => item.id.videoId);
