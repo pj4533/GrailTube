@@ -33,6 +33,7 @@ describe('Logger', () => {
   it('logs debug messages when debug is enabled', () => {
     // Set NODE_ENV to development to enable debug
     const originalNodeEnv = process.env.NODE_ENV;
+    // @ts-ignore - we need to modify the readonly property for testing
     process.env.NODE_ENV = 'development';
     
     const message = 'Debug message';
@@ -47,6 +48,7 @@ describe('Logger', () => {
     expect(loggedMessage).toContain(JSON.stringify(data));
     
     // Restore NODE_ENV
+    // @ts-ignore - we need to modify the readonly property for testing
     process.env.NODE_ENV = originalNodeEnv;
   });
 
@@ -94,6 +96,7 @@ describe('Logger', () => {
   it('tracks time with time() and timeEnd()', () => {
     // Set NODE_ENV to development to enable debug
     const originalNodeEnv = process.env.NODE_ENV;
+    // @ts-ignore - we need to modify the readonly property for testing
     process.env.NODE_ENV = 'development';
     
     const label = 'operation';
@@ -106,6 +109,7 @@ describe('Logger', () => {
     expect((console.debug as jest.Mock).mock.calls[1][0]).toContain('Timer \'operation\' completed in 500.00ms');
     
     // Restore NODE_ENV
+    // @ts-ignore - we need to modify the readonly property for testing
     process.env.NODE_ENV = originalNodeEnv;
   });
 
@@ -124,6 +128,7 @@ describe('Logger', () => {
     const originalDebugFlag = process.env.NEXT_PUBLIC_DEBUG;
     
     // Ensure we're in development mode
+    // @ts-ignore - we need to modify the readonly property for testing
     process.env.NODE_ENV = 'development';
     delete process.env.NEXT_PUBLIC_DEBUG;
     
@@ -136,6 +141,7 @@ describe('Logger', () => {
     expect(console.debug).toHaveBeenCalledTimes(1);
     
     // Restore the original values
+    // @ts-ignore - we need to modify the readonly property for testing
     process.env.NODE_ENV = originalNodeEnv;
     process.env.NEXT_PUBLIC_DEBUG = originalDebugFlag;
   });
@@ -146,6 +152,7 @@ describe('Logger', () => {
     const originalDebugFlag = process.env.NEXT_PUBLIC_DEBUG;
     
     // Set production mode but enable debug with flag
+    // @ts-ignore - we need to modify the readonly property for testing
     process.env.NODE_ENV = 'production';
     process.env.NEXT_PUBLIC_DEBUG = 'true';
     
@@ -158,6 +165,7 @@ describe('Logger', () => {
     expect(console.debug).toHaveBeenCalledTimes(1);
     
     // Restore the original values
+    // @ts-ignore - we need to modify the readonly property for testing
     process.env.NODE_ENV = originalNodeEnv;
     process.env.NEXT_PUBLIC_DEBUG = originalDebugFlag;
   });

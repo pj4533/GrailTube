@@ -196,7 +196,7 @@ describe('YouTube Video Details', () => {
   describe('processVideoDetails', () => {
     it('should fetch details for uncached videos only', async () => {
       const videoIds = ['video1', 'video2', 'video3'];
-      const cache = {
+      const cache: Record<string, Video> = {
         'video1': {
           id: 'video1',
           title: 'Cached Video',
@@ -204,13 +204,7 @@ describe('YouTube Video Details', () => {
           publishedAt: '2023-01-01T00:00:00Z',
           channelTitle: 'Cached Channel',
           viewCount: 10,
-          likeCount: 2,
-          commentCount: 1,
-          thumbnails: {
-            default: { url: 'http://example.com/cached.jpg', width: 120, height: 90 },
-            medium: { url: 'http://example.com/cached.jpg', width: 320, height: 180 },
-            high: { url: 'http://example.com/cached.jpg', width: 480, height: 360 }
-          }
+          thumbnailUrl: 'http://example.com/cached.jpg'
         }
       };
       

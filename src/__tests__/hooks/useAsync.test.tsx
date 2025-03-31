@@ -63,29 +63,29 @@ describe('useAsync Hook', () => {
 
   it('should handle successful async operation', async () => {
     // Create a promise we can control
-    let resolvePromise;
-    const promise = new Promise(resolve => {
+    let resolvePromise: (value: string) => void;
+    const promise = new Promise<string>(resolve => {
       resolvePromise = resolve;
     });
     
     const asyncFn = jest.fn().mockReturnValue(promise);
     const onSuccess = jest.fn();
     
-    let hook;
+    const { result } = renderHook(() => useAsync(asyncFn, { onSuccess }));
+    
     act(() => {
-      hook = renderHook(() => useAsync(asyncFn, { onSuccess }));
     });
 
-    expect(hook.result.current.isLoading).toBe(false);
+    expect(result.current.isLoading).toBe(false);
     
     // Start execution
     let executePromise;
     act(() => {
-      executePromise = hook.result.current.execute();
+      executePromise = result.current.execute();
     });
     
     // Check loading state
-    expect(hook.result.current.isLoading).toBe(true);
+    expect(result.current.isLoading).toBe(true);
     
     // Resolve the promise inside act
     await act(async () => {
@@ -97,16 +97,16 @@ describe('useAsync Hook', () => {
     await executePromise;
     
     // Assertions after async operation completes
-    expect(hook.result.current.isLoading).toBe(false);
-    expect(hook.result.current.data).toBe('test data');
-    expect(hook.result.current.error).toBe(null);
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.data).toBe('test data');
+    expect(result.current.error).toBe(null);
     expect(onSuccess).toHaveBeenCalledWith('test data');
   });
 
   it('should handle error in async operation', async () => {
     // Create a promise we can control
-    let rejectPromise;
-    const promise = new Promise((resolve, reject) => {
+    let rejectPromise: (reason: Error) => void;
+    const promise = new Promise<string>((resolve, reject) => {
       rejectPromise = reject;
     });
     
@@ -114,19 +114,19 @@ describe('useAsync Hook', () => {
     const asyncFn = jest.fn().mockReturnValue(promise);
     const onError = jest.fn();
     
-    let hook;
+    const { result } = renderHook(() => useAsync(asyncFn, { onError }));
+    
     act(() => {
-      hook = renderHook(() => useAsync(asyncFn, { onError }));
     });
     
     // Start execution
     let executePromise;
     act(() => {
-      executePromise = hook.result.current.execute().catch(() => {});
+      executePromise = result.current.execute().catch(() => {});
     });
     
     // Check loading state
-    expect(hook.result.current.isLoading).toBe(true);
+    expect(result.current.isLoading).toBe(true);
     
     // Reject the promise inside act
     await act(async () => {
@@ -138,30 +138,30 @@ describe('useAsync Hook', () => {
     await executePromise;
     
     // Assertions after error
-    expect(hook.result.current.isLoading).toBe(false);
-    expect(hook.result.current.data).toBe(null);
-    expect(hook.result.current.error).toBe('Test error');
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.data).toBe(null);
+    expect(result.current.error).toBe('Test error');
     expect(onError).toHaveBeenCalledWith(error);
   });
 
   it('should reset state correctly', async () => {
     // Create a promise we can control
-    let resolvePromise;
-    const promise = new Promise(resolve => {
+    let resolvePromise: (value: string) => void;
+    const promise = new Promise<string>(resolve => {
       resolvePromise = resolve;
     });
     
     const asyncFn = jest.fn().mockReturnValue(promise);
     
-    let hook;
+    const { result } = renderHook(() => useAsync(asyncFn));
+    
     act(() => {
-      hook = renderHook(() => useAsync(asyncFn));
     });
     
     // Start execution
     let executePromise;
     act(() => {
-      executePromise = hook.result.current.execute();
+      executePromise = result.current.execute();
     });
     
     // Resolve the promise inside act
@@ -173,36 +173,36 @@ describe('useAsync Hook', () => {
     // Wait for execution to complete
     await executePromise;
     
-    expect(hook.result.current.data).toBe('test data');
+    expect(result.current.data).toBe('test data');
     
     // Reset the state
     act(() => {
-      hook.result.current.reset();
+      result.current.reset();
     });
     
-    expect(hook.result.current.data).toBe(null);
-    expect(hook.result.current.isLoading).toBe(false);
-    expect(hook.result.current.error).toBe(null);
+    expect(result.current.data).toBe(null);
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.error).toBe(null);
   });
 
   it('should execute immediately when immediate option is true', async () => {
     // Create a promise that we control resolution for
-    let resolvePromise;
-    const promise = new Promise(resolve => {
+    let resolvePromise: (value: string) => void;
+    const promise = new Promise<string>(resolve => {
       resolvePromise = resolve;
     });
     
     const asyncFn = jest.fn().mockReturnValue(promise);
     
     // Render with immediate=true inside an act to catch all state updates
-    let hook;
+    const { result } = renderHook(() => useAsync(asyncFn, { immediate: true }));
+    
     act(() => {
-      hook = renderHook(() => useAsync(asyncFn, { immediate: true }));
     });
     
     // Verify loading state
     expect(asyncFn).toHaveBeenCalledTimes(1);
-    expect(hook.result.current.isLoading).toBe(true);
+    expect(result.current.isLoading).toBe(true);
     
     // Resolve the promise inside act to handle the state update properly
     await act(async () => {
@@ -212,26 +212,26 @@ describe('useAsync Hook', () => {
     });
     
     // Verify final state
-    expect(hook.result.current.data).toBe('immediate data');
-    expect(hook.result.current.isLoading).toBe(false);
+    expect(result.current.data).toBe('immediate data');
+    expect(result.current.isLoading).toBe(false);
   });
 
   it('should allow manual state setting', () => {
     const asyncFn = jest.fn();
     
-    let hook;
+    const { result } = renderHook(() => useAsync(asyncFn));
+    
     act(() => {
-      hook = renderHook(() => useAsync(asyncFn));
     });
     
     act(() => {
-      hook.result.current.setData('manual data');
-      hook.result.current.setLoading(true);
-      hook.result.current.setError('manual error');
+      result.current.setData('manual data');
+      result.current.setLoading(true);
+      result.current.setError('manual error');
     });
     
-    expect(hook.result.current.data).toBe('manual data');
-    expect(hook.result.current.isLoading).toBe(true);
-    expect(hook.result.current.error).toBe('manual error');
+    expect(result.current.data).toBe('manual data');
+    expect(result.current.isLoading).toBe(true);
+    expect(result.current.error).toBe('manual error');
   });
 });

@@ -77,7 +77,6 @@ describe('VideoGrid Component', () => {
 
   const mockSavedVideos: SavedVideo[] = [
     {
-      id: 1,
       video_id: 'saved1',
       title: 'Saved Video 1',
       description: 'Saved Description 1',
@@ -86,10 +85,10 @@ describe('VideoGrid Component', () => {
       publishedAt: '2023-01-03T00:00:00Z',
       view_count_at_discovery: 3,
       discovered_at: '2023-01-15T00:00:00Z',
-      duration: 'PT1M30S'
+      duration: 'PT1M30S',
+      viewCount: 3
     },
     {
-      id: 2,
       video_id: 'saved2',
       title: 'Saved Video 2',
       description: 'Saved Description 2',
@@ -98,7 +97,8 @@ describe('VideoGrid Component', () => {
       publishedAt: '2023-01-04T00:00:00Z',
       view_count_at_discovery: 7,
       discovered_at: '2023-01-16T00:00:00Z',
-      duration: 'PT4M15S'
+      duration: 'PT4M15S',
+      viewCount: 7
     }
   ];
 

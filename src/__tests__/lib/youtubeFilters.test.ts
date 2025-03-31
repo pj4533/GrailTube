@@ -9,13 +9,7 @@ describe('YouTube Filters', () => {
     publishedAt: '2023-01-01T00:00:00Z',
     channelTitle: 'Test Channel',
     viewCount: 5,
-    likeCount: 1,
-    commentCount: 0,
-    thumbnails: {
-      default: { url: 'http://example.com/default.jpg', width: 120, height: 90 },
-      medium: { url: 'http://example.com/medium.jpg', width: 320, height: 180 },
-      high: { url: 'http://example.com/high.jpg', width: 480, height: 360 }
-    },
+    thumbnailUrl: 'http://example.com/medium.jpg',
     ...overrides
   });
 

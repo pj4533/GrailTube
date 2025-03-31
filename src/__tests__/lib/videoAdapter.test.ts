@@ -15,6 +15,7 @@ describe('Video Adapter', () => {
     channelTitle: 'Test Channel',
     channelId: 'UC12345',
     publishedAt: '2023-01-01T00:00:00Z',
+    viewCount: 10,
     view_count_at_discovery: 5,
     discovered_at: '2023-01-15T00:00:00Z',
     duration: 'PT2M30S'

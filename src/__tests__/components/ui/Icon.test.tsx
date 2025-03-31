@@ -29,9 +29,9 @@ describe('Icon Component', () => {
       
       // Check if default class is applied
       if (iconName === 'Spinner') {
-        expect(svg).toHaveClass('h-4', 'w-4', 'animate-spin');
+        expect(svg).toHaveClass('h-4 w-4 animate-spin');
       } else {
-        expect(svg).toHaveClass('h-4', 'w-4');
+        expect(svg).toHaveClass('h-4 w-4');
       }
     });
 
@@ -43,7 +43,7 @@ describe('Icon Component', () => {
       const svg = container.querySelector('svg');
       expect(svg).toBeInTheDocument();
       expect(svg).toHaveClass('custom-class');
-      expect(svg).not.toHaveClass('h-4', 'w-4');
+      expect(svg).not.toHaveClass('h-4 w-4');
     });
   });
 

@@ -30,7 +30,7 @@ jest.mock('@/hooks/useAsync', () => {
     const mockAsyncState = {
       data: { videos: [] },
       isLoading: false,
-      error: null,
+      error: "",
       execute: jest.fn().mockImplementation(async () => {
         try {
           const result = await fn();
@@ -123,7 +123,7 @@ describe('useSavedVideos Hook', () => {
     (useAsync as jest.Mock).mockImplementationOnce(() => ({
       data: { videos: mockSavedVideos },
       isLoading: false,
-      error: null,
+      error: "",
       execute: jest.fn(),
       reset: jest.fn(),
       setData: jest.fn(),
@@ -136,7 +136,7 @@ describe('useSavedVideos Hook', () => {
     // Should have videos immediately due to our mock
     expect(result.current.savedVideos).toEqual(mockSavedVideos);
     expect(result.current.isLoading).toBe(false);
-    expect(result.current.error).toBeNull();
+    expect(result.current.error).toBe(null);
   });
 
   it('handles API error when fetching saved videos', async () => {
@@ -167,7 +167,7 @@ describe('useSavedVideos Hook', () => {
     (useAsync as jest.Mock).mockImplementationOnce(() => ({
       data: { videos: mockSavedVideos },
       isLoading: false,
-      error: null,
+      error: "",
       execute: executeAsync,
       reset: jest.fn(),
       setData: jest.fn(),
@@ -198,7 +198,7 @@ describe('useSavedVideos Hook', () => {
     (useAsync as jest.Mock).mockImplementationOnce(() => ({
       data: { videos: mockSavedVideos },
       isLoading: false,
-      error: null,
+      error: "",
       execute: jest.fn(),
       reset: jest.fn(),
       setData: jest.fn(),
@@ -227,7 +227,7 @@ describe('useSavedVideos Hook', () => {
     (useAsync as jest.Mock).mockImplementationOnce(() => ({
       data: { videos: mockSavedVideos },
       isLoading: false,
-      error: null,
+      error: "",
       execute: executeAsync,
       reset: jest.fn(),
       setData: setDataMock,
@@ -254,7 +254,7 @@ describe('useSavedVideos Hook', () => {
     (useAsync as jest.Mock).mockImplementationOnce(() => ({
       data: { videos: mockSavedVideos },
       isLoading: false,
-      error: null,
+      error: "",
       execute: jest.fn(),
       reset: jest.fn(),
       setData: jest.fn(),
