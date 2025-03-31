@@ -19,7 +19,8 @@ jest.mock('@/lib/youtubeService', () => ({
 describe('YouTube Facade', () => {
   const mockTimeWindow: TimeWindow = {
     startDate: new Date('2023-01-01'),
-    endDate: new Date('2023-01-02')
+    endDate: new Date('2023-01-02'),
+    durationMinutes: 1440
   };
 
   const mockVideoIds = ['video1', 'video2', 'video3'];
@@ -31,14 +32,10 @@ describe('YouTube Facade', () => {
       description: 'Description 1',
       publishedAt: '2023-01-01T12:00:00Z',
       channelTitle: 'Test Channel',
+      channelId: 'UC12345',
       viewCount: 5,
-      likeCount: 1,
-      commentCount: 0,
-      thumbnails: {
-        default: { url: 'http://example.com/default1.jpg', width: 120, height: 90 },
-        medium: { url: 'http://example.com/medium1.jpg', width: 320, height: 180 },
-        high: { url: 'http://example.com/high1.jpg', width: 480, height: 360 }
-      }
+      thumbnailUrl: 'http://example.com/medium1.jpg',
+      duration: 'PT2M30S'
     },
     {
       id: 'video2',
@@ -46,14 +43,10 @@ describe('YouTube Facade', () => {
       description: 'Description 2',
       publishedAt: '2023-01-01T15:00:00Z',
       channelTitle: 'Another Channel',
+      channelId: 'UC67890',
       viewCount: 8,
-      likeCount: 2,
-      commentCount: 1,
-      thumbnails: {
-        default: { url: 'http://example.com/default2.jpg', width: 120, height: 90 },
-        medium: { url: 'http://example.com/medium2.jpg', width: 320, height: 180 },
-        high: { url: 'http://example.com/high2.jpg', width: 480, height: 360 }
-      }
+      thumbnailUrl: 'http://example.com/medium2.jpg',
+      duration: 'PT3M45S'
     }
   ];
 

@@ -37,6 +37,7 @@ export const VideoModel = {
           description,
           thumbnail_url AS thumbnailUrl,
           channel_title AS channelTitle,
+          channel_id AS channelId,
           published_at AS publishedAt,
           view_count_at_discovery,
           discovered_at,
@@ -77,6 +78,7 @@ export const VideoModel = {
         description,
         thumbnail_url AS thumbnailUrl,
         channel_title AS channelTitle,
+        channel_id AS channelId,
         published_at AS publishedAt,
         view_count_at_discovery,
         discovered_at,
@@ -109,14 +111,15 @@ export const VideoModel = {
     await query(
       `INSERT INTO saved_videos (
         video_id, title, description, thumbnail_url, 
-        channel_title, published_at, view_count_at_discovery, duration
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        channel_title, channel_id, published_at, view_count_at_discovery, duration
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         videoData.video_id,
         videoData.title,
         videoData.description,
         videoData.thumbnail_url,
         videoData.channel_title,
+        videoData.channel_id,
         videoData.published_at,
         videoData.view_count_at_discovery,
         videoData.duration

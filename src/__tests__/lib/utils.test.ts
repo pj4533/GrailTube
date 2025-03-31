@@ -83,7 +83,7 @@ describe('Utils', () => {
     it('formats time window correctly', () => {
       const startDate = new Date('2023-01-01T00:00:00Z');
       const endDate = new Date('2023-01-05T00:00:00Z');
-      const window = { startDate, endDate };
+      const window = { startDate, endDate, durationMinutes: 5760 };
       
       // Mock format function from date-fns
       const expectedFormattedDate = 'Jan 1, 2023 12:00 AM';
@@ -100,7 +100,7 @@ describe('Utils', () => {
     it('calculates center time correctly', () => {
       const startDate = new Date('2023-01-01T00:00:00Z');
       const endDate = new Date('2023-01-03T00:00:00Z');
-      const window = { startDate, endDate };
+      const window = { startDate, endDate, durationMinutes: 2880 };
       
       const result = getWindowCenter(window);
       const expectedCenter = new Date('2023-01-02T00:00:00Z');

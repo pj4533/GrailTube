@@ -25,7 +25,18 @@ export default function VideoMetadata({
           {video.title}
         </h2>
         <p className={`${styles.text.body} ${styles.text.muted}`}>
-          {video.channelTitle}
+          {video.channelId ? (
+            <a 
+              href={`https://www.youtube.com/channel/${video.channelId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:underline"
+            >
+              {video.channelTitle}
+            </a>
+          ) : (
+            video.channelTitle
+          )}
         </p>
       </div>
       

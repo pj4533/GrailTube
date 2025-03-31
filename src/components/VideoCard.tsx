@@ -55,7 +55,21 @@ export default function VideoCard({
         onClick={() => onClick(video.id)}
       >
         <h3 className={styles.card.title}>{video.title}</h3>
-        <p className={styles.card.subtitle}>{video.channelTitle}</p>
+        <p className={styles.card.subtitle}>
+          {video.channelId ? (
+            <a 
+              href={`https://www.youtube.com/channel/${video.channelId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:underline"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {video.channelTitle}
+            </a>
+          ) : (
+            video.channelTitle
+          )}
+        </p>
         
         <div className={styles.card.metaGrid}>
           <span>{formatDate(video.publishedAt)}</span>

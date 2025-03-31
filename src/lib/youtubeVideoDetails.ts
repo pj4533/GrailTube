@@ -49,6 +49,7 @@ export function parseVideoDetails(items: any[]): Video[] {
       publishedAt: item.snippet.publishedAt,
       viewCount: parseInt(item.statistics.viewCount || '0', 10),
       channelTitle: item.snippet.channelTitle,
+      channelId: item.snippet.channelId,
       categoryId: item.snippet.categoryId,
       isLiveStream,
       isUpcoming,

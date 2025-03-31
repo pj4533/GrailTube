@@ -88,6 +88,7 @@ export async function initDatabase() {
         description TEXT,
         thumbnail_url VARCHAR(255) NOT NULL,
         channel_title VARCHAR(255) NOT NULL,
+        channel_id VARCHAR(50),
         published_at DATETIME NOT NULL,
         view_count_at_discovery INT NOT NULL DEFAULT 0,
         discovered_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,

@@ -6,6 +6,7 @@ export interface Video {
   publishedAt: string;
   viewCount: number;
   channelTitle: string;
+  channelId?: string;
   categoryId?: string;
   isLiveStream?: boolean;
   isUpcoming?: boolean;

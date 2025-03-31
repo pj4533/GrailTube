@@ -14,6 +14,7 @@ export function adaptSavedVideoToVideo(savedVideo: SavedVideo): Video {
     // Use view count at discovery for saved videos
     viewCount: savedVideo.view_count_at_discovery || 0,
     channelTitle: savedVideo.channelTitle,
+    channelId: savedVideo.channelId,
     duration: savedVideo.duration,
   };
 }
@@ -35,6 +36,7 @@ export function prepareVideoForSaving(video: Video): {
   description: string;
   thumbnail_url: string;
   channel_title: string;
+  channel_id: string | null;
   published_at: string;
   view_count_at_discovery: number;
   duration: string | null;
@@ -51,6 +53,7 @@ export function prepareVideoForSaving(video: Video): {
     description: video.description,
     thumbnail_url: thumbnailUrl,
     channel_title: video.channelTitle,
+    channel_id: video.channelId || null,
     published_at: publishedAt,
     view_count_at_discovery: video.viewCount || 0,
     duration: video.duration || null

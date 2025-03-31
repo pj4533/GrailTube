@@ -48,7 +48,8 @@ jest.mock('@/components/ui/ErrorDisplay', () => {
 describe('SearchStatus Component', () => {
   const mockTimeWindow: TimeWindow = {
     startDate: new Date('2023-01-01T00:00:00Z'),
-    endDate: new Date('2023-01-05T00:00:00Z')
+    endDate: new Date('2023-01-05T00:00:00Z'),
+    durationMinutes: 5760 // 4 days in minutes
   };
 
   const mockVideos: Video[] = [
@@ -58,6 +59,7 @@ describe('SearchStatus Component', () => {
       description: 'Description 1',
       thumbnailUrl: 'https://example.com/thumb1.jpg',
       channelTitle: 'Test Channel',
+      channelId: 'UC12345',
       publishedAt: '2023-01-01T00:00:00Z',
       viewCount: 5,
       duration: 'PT2M30S'
@@ -68,6 +70,7 @@ describe('SearchStatus Component', () => {
       description: 'Description 2',
       thumbnailUrl: 'https://example.com/thumb2.jpg',
       channelTitle: 'Test Channel',
+      channelId: 'UC12345',
       publishedAt: '2023-01-02T00:00:00Z',
       viewCount: 8,
       duration: 'PT3M45S'
