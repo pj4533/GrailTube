@@ -2,6 +2,8 @@ import { handleYouTubeApiError, YouTubeRateLimitError, apiStats } from '@/lib/yo
 import axios from 'axios';
 
 jest.mock('axios');
+// Make sure TypeScript knows that our axios methods are mocked
+jest.mocked(axios.isCancel);
 
 describe('YouTubeTypes', () => {
   beforeEach(() => {
@@ -13,7 +15,7 @@ describe('YouTubeTypes', () => {
   describe('handleYouTubeApiError', () => {
     it('should handle cancelled requests', () => {
       const cancelError = new axios.Cancel('Request cancelled');
-      (axios.isCancel as jest.Mock).mockReturnValue(true);
+      jest.mocked(axios.isCancel).mockReturnValue(true);
       
       const result = handleYouTubeApiError(cancelError, 'test');
       
@@ -33,7 +35,7 @@ describe('YouTubeTypes', () => {
           }
         }
       };
-      (axios.isCancel as jest.Mock).mockReturnValue(false);
+      jest.mocked(axios.isCancel).mockReturnValue(false);
       
       expect(() => handleYouTubeApiError(quotaError, 'test'))
         .toThrow(YouTubeRateLimitError);
@@ -51,7 +53,7 @@ describe('YouTubeTypes', () => {
           }
         }
       };
-      (axios.isCancel as jest.Mock).mockReturnValue(false);
+      jest.mocked(axios.isCancel).mockReturnValue(false);
       
       expect(() => handleYouTubeApiError(rateLimitError, 'test'))
         .toThrow(YouTubeRateLimitError);
@@ -65,7 +67,7 @@ describe('YouTubeTypes', () => {
           data: {}
         }
       };
-      (axios.isCancel as jest.Mock).mockReturnValue(false);
+      jest.mocked(axios.isCancel).mockReturnValue(false);
       
       expect(() => handleYouTubeApiError(status429Error, 'test'))
         .toThrow(YouTubeRateLimitError);
@@ -79,7 +81,7 @@ describe('YouTubeTypes', () => {
           data: {}
         }
       };
-      (axios.isCancel as jest.Mock).mockReturnValue(false);
+      jest.mocked(axios.isCancel).mockReturnValue(false);
       
       expect(() => handleYouTubeApiError(status403Error, 'test'))
         .toThrow(YouTubeRateLimitError);
@@ -87,7 +89,7 @@ describe('YouTubeTypes', () => {
 
     it('should handle generic errors', () => {
       const genericError = new Error('Generic error');
-      (axios.isCancel as jest.Mock).mockReturnValue(false);
+      jest.mocked(axios.isCancel).mockReturnValue(false);
       
       const result = handleYouTubeApiError(genericError, 'test');
       
@@ -100,7 +102,7 @@ describe('YouTubeTypes', () => {
         isAxiosError: true,
         response: undefined
       };
-      (axios.isCancel as jest.Mock).mockReturnValue(false);
+      jest.mocked(axios.isCancel).mockReturnValue(false);
       
       const result = handleYouTubeApiError(noResponseError, 'test');
       
