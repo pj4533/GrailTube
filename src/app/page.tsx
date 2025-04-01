@@ -80,7 +80,7 @@ export default function Home() {
         <div className={styles.nav.innerContainer}>
           <div className="flex flex-col">
             {/* Logo and Tabs in same row */}
-            <div className="flex items-center justify-between border-b border-gray-700 pb-3">
+            <div className="flex items-center justify-between pb-3">
               {/* Left side: Logo and description */}
               <div className="flex items-center">
                 <h1 className={styles.text.title}>GrailTube</h1>
