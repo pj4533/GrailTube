@@ -50,7 +50,7 @@ export function useYouTubeSearchState(): {
   const [error, setError] = useState<string | null>(null);
   const [rerollCount, setRerollCount] = useState<number>(0);
   const [viewStats, setViewStats] = useState<ViewStats | null>(null);
-  const [searchType, setSearchType] = useState<SearchType>(SearchType.RandomTime);
+  const [searchType, setSearchType] = useState<SearchType>(SearchType.Unedited);
   const [keyword, setKeyword] = useState<string>('');
   const [isCancelled, setIsCancelled] = useState<boolean>(false);
   

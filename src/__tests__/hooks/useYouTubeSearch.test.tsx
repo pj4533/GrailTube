@@ -98,7 +98,7 @@ describe('useYouTubeSearch Hook', () => {
     expect(result.current.currentWindow).toBeNull();
     expect(result.current.statusMessage).toBeNull();
     expect(result.current.error).toBeNull();
-    expect(result.current.searchType).toBe(SearchType.RandomTime);
+    expect(result.current.searchType).toBe(SearchType.Unedited);
   });
 
   it('should search and find videos with less than 10 views', async () => {
@@ -116,8 +116,8 @@ describe('useYouTubeSearch Hook', () => {
     });
     
     expect(getRandomPastDate).toHaveBeenCalled();
-    expect(createInitialTimeWindow).toHaveBeenCalledWith(mockDate, false, SearchType.RandomTime);
-    expect(searchVideosInTimeWindow).toHaveBeenCalledWith(mockTimeWindow, SearchType.RandomTime, undefined);
+    expect(createInitialTimeWindow).toHaveBeenCalledWith(mockDate, true, SearchType.Unedited);
+    expect(searchVideosInTimeWindow).toHaveBeenCalledWith(mockTimeWindow, SearchType.Unedited, undefined);
     expect(getVideoDetails).toHaveBeenCalledWith(mockVideoIds);
     expect(filterRareVideos).toHaveBeenCalledWith(mockVideoDetails);
     
