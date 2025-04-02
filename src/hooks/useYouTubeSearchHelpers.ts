@@ -34,8 +34,8 @@ export const executeSearch = async (
       return null;
     }
     
-    // Always using 1-week window for Unedited search type
-    const windowDescription = '1-week window';
+    // Always using 30-day window for Unedited search type
+    const windowDescription = '1-month window';
       
     setStatusMessage(`Scanning YouTube videos from ${timeWindow.startDate.toLocaleDateString()} (${windowDescription})`);
     
