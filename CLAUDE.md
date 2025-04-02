@@ -109,6 +109,7 @@
 - Use descriptive test names: `describe('Component', () => { it('should do something', () => {}) })`
 - Maintain >70% code coverage (statements, functions, branches) as enforced in config
 - Run tests before committing changes
+- Make sure to run tests after making any big changes
 - Use mock functions for API and database operations
 - Create focused tests that verify a single behavior
 - Test edge cases and error handling
