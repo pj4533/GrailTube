@@ -141,6 +141,66 @@ The application uses a centralized error handling and logging approach:
 6. **Logger System**: Structured logging with timestamps, levels, and performance timing
 7. **Debugging**: Rich logging throughout the application that can be enabled in development
 
+## YouTube Search Algorithm
+
+This section provides a detailed breakdown of the YouTube search algorithm used in GrailTube. As the search logic evolves, this section will be maintained to reflect the current implementation.
+
+### Search Process Overview
+
+1. **Initialize Search**
+   - User clicks "Search" button in the UI
+   - The application resets all search state
+   - A random past date is generated using `getRandomPastDate()`
+   - An initial 30-day time window is created around this random date
+
+2. **Time Window Selection**
+   - Every search uses a fixed 1-month (30-day) timeframe
+   - The start date is randomly selected from YouTube's history (after 2005)
+   - The end date is calculated as start date + 30 days
+
+3. **YouTube API Search Query**
+   - Sends request to YouTube Data API v3 `/search` endpoint
+   - Uses combined camera filename patterns (IMG_|DSC_|DCIM|MOV_|VID_|MVI_)
+   - Sets `maxResults` parameter (typically 50 videos per query)
+   - Uses `publishedAfter` and `publishedBefore` parameters with the selected time window
+   - Sets `type=video` to exclude playlists and channels
+
+4. **Video Details Retrieval**
+   - For each video ID returned by the search query, retrieves detailed information
+   - Uses YouTube Data API v3 `/videos` endpoint with `part=snippet,statistics,contentDetails`
+   - Batches requests in groups of up to 50 videos to minimize API calls
+   - Caches video details to reduce API usage in future searches
+
+5. **Filtering Process**
+   - Filters videos based on view count (<10 views)
+   - Calculates view statistics (0 views, <10 views, <100 views, <1000 views)
+   - Sorts results by view count (lowest first)
+
+6. **Handling No Results**
+   - If no videos are found or none have <10 views, automatically "rerolls" to a new time period
+   - Attempts up to 7 rerolls before giving up
+   - Shows status messages to inform the user about the search progress
+
+7. **AbortController Integration**
+   - All API requests use an AbortController signal to allow cancellation
+   - If a user cancels the search, all in-progress API calls are immediately terminated
+   - The search process can be safely restarted with new parameters
+
+### Implementation Details
+
+- Camera patterns are combined with OR operator: `IMG_|DSC_|DCIM|MOV_|VID_|MVI_`
+- All time windows are exactly 30 days (defined in `constants.ts` as `UNEDITED_WINDOW_DAYS`)
+- View count filtering uses a strict "less than 10" comparison
+- API call statistics are tracked and displayed to users for transparency
+- Search operations are cancellable at any point without leaving API requests pending
+
+### Error Handling
+
+- Automatically handles YouTube API quota limits and rate limiting
+- Provides user-friendly error messages for network issues
+- Detects and logs API errors with appropriate context information
+- Implements graceful degradation when the API is unavailable
+
 ## Future Considerations
 
 1. **State Management**: Consider more sophisticated state management for growth
