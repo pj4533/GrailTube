@@ -65,18 +65,10 @@ function createTimeWindow(centerTime: Date, durationMinutes: number): TimeWindow
   };
 }
 
-// Create initial time window based on search type
-export function createInitialTimeWindow(centerDate: Date, isUnedited: boolean = false, searchType?: SearchType): TimeWindow {
-  // Default to 4 days (96 hours) for random time search
-  let durationMinutes = 5760; // 4 days in minutes (RANDOM_TIME_WINDOW_DAYS * 24 * 60)
-  
-  if (isUnedited) {
-    // 7 days for unedited videos
-    durationMinutes = 10080; // 7 days in minutes (UNEDITED_WINDOW_DAYS * 24 * 60)
-  } else if (searchType === SearchType.Keyword) {
-    // 60 days for keyword search
-    durationMinutes = 86400; // 60 days in minutes (KEYWORD_WINDOW_DAYS * 24 * 60)
-  }
+// Create initial time window for unedited search
+export function createInitialTimeWindow(centerDate: Date, isUnedited: boolean = true): TimeWindow {
+  // Always use 7 days for unedited videos
+  const durationMinutes = 10080; // 7 days in minutes (UNEDITED_WINDOW_DAYS * 24 * 60)
   
   return createTimeWindow(centerDate, durationMinutes);
 }

@@ -20,8 +20,8 @@ export function useYouTubeSearch() {
   
   const {
     setIsLoading, setVideos, setCurrentWindow, setStatusMessage,
-    setError, setRerollCount, setViewStats, setSearchType,
-    setKeyword, setIsCancelled, resetState, handleError
+    setError, setRerollCount, setViewStats, 
+    setIsCancelled, resetState, handleError
   } = actions;
 
   /**
@@ -37,7 +37,7 @@ export function useYouTubeSearch() {
       const searchResults = await executeSearch(
         timeWindow,
         searchType,
-        keyword,
+        undefined, // No keyword needed for Unedited search
         isCancelled,
         setStatusMessage,
         performReroll
@@ -120,47 +120,22 @@ export function useYouTubeSearch() {
   };
 
   /**
-   * Start search from a random date with the specified search type
+   * Start search from a random date with Unedited search type
    */
-  const startSearch = async (type: SearchType = searchType): Promise<void> => {
-    // If the selected search type is different, update it
-    if (type !== searchType) {
-      setSearchType(type);
-    }
-    
+  const startSearch = async (): Promise<void> => {
     // Reset all state
     resetState();
     
     try {
-      // Get a random date and create initial time window based on search type
+      // Get a random date and create initial time window for Unedited search
       const randomDate = getRandomPastDate();
-      const initialWindow = createInitialTimeWindow(randomDate, type === SearchType.Unedited, type);
+      const initialWindow = createInitialTimeWindow(randomDate, true);
       setCurrentWindow(initialWindow);
       
-      // Start the search process with the current search type
+      // Start the search process
       await performSearch(initialWindow);
     } catch (err) {
       handleError(err, 'initial search');
-    }
-  };
-
-  /**
-   * Change search type and clear results
-   */
-  const changeSearchType = (type: SearchType): void => {
-    // Only process if it's a different type and not loading
-    if (type !== searchType && !isLoading) {
-      setSearchType(type);
-      setVideos([]);
-      setStatusMessage(null);
-      setError(null);
-      setViewStats(null);
-      setCurrentWindow(null);
-      
-      // Reset keyword field if switching away from Keyword search type
-      if (type !== SearchType.Keyword) {
-        setKeyword('');
-      }
     }
   };
   
@@ -202,10 +177,8 @@ export function useYouTubeSearch() {
     viewStats,
     apiStats,
     searchType,
-    keyword,
-    setKeyword,
     startSearch,
-    changeSearchType,
-    cancelSearch
+    cancelSearch,
+    performReroll
   };
 }

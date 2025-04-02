@@ -1,6 +1,5 @@
 import { TimeWindow, Video, ViewStats, SearchType } from '@/types';
 import { formatTimeWindow } from '@/lib/utils';
-import SearchTypeIndicator from './SearchTypeIndicator';
 import { Icon } from './ui/Icon';
 import LoadingIndicator from './ui/LoadingIndicator';
 import ErrorDisplay from './ui/ErrorDisplay';
@@ -27,7 +26,7 @@ export default function SearchStatus({
   statusMessage, 
   error,
   viewStats,
-  searchType = SearchType.RandomTime,
+  searchType = SearchType.Unedited,
   onCancelSearch
 }: SearchStatusProps) {
   return (
@@ -36,17 +35,15 @@ export default function SearchStatus({
         <div className="text-center mb-8">
           {!isLoading && videos.length > 0 ? (
             <p className="text-gray-600">
-              Found {videos.length} rare {searchType === SearchType.Unedited ? 'unedited ' : ''}videos (less than 10 views) uploaded during{' '}
+              Found {videos.length} rare unedited videos (less than 10 views) uploaded during{' '}
               <span className="font-semibold">
                 {formatTimeWindow(currentWindow)}
               </span>
-              <SearchTypeIndicator searchType={searchType} size="sm" className="ml-2" />
             </p>
           ) : (
             <p className="text-gray-600">
-              Searching for {searchType === SearchType.Unedited ? 'unedited videos' : 'rare videos'} in{' '}
+              Searching for unedited videos in{' '}
               <span className="font-semibold">{formatTimeWindow(currentWindow)}</span>
-              <SearchTypeIndicator searchType={searchType} size="sm" className="ml-2" />
             </p>
           )}
         </div>

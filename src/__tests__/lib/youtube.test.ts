@@ -72,11 +72,11 @@ describe('YouTube Facade', () => {
 
   describe('searchVideosInTimeWindow', () => {
     it('should call the service with correct parameters', async () => {
-      await searchVideosInTimeWindow(mockTimeWindow, SearchType.RandomTime);
+      await searchVideosInTimeWindow(mockTimeWindow, SearchType.Unedited);
       
       expect(youtubeService.searchVideosInTimeWindow).toHaveBeenCalledWith(
         mockTimeWindow, 
-        SearchType.RandomTime,
+        SearchType.Unedited,
         undefined
       );
     });
@@ -87,10 +87,10 @@ describe('YouTube Facade', () => {
       expect(result).toEqual(mockVideoIds);
     });
 
-    it('should use default search type if not provided', async () => {
+    it('should use Unedited search type by default', async () => {
       // First mock the implementation to provide the default
       (youtubeService.searchVideosInTimeWindow as jest.Mock).mockImplementation(
-        (timeWindow, searchType = SearchType.RandomTime) => Promise.resolve(mockVideoIds)
+        (timeWindow, searchType = SearchType.Unedited) => Promise.resolve(mockVideoIds)
       );
       
       await searchVideosInTimeWindow(mockTimeWindow);

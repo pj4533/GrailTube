@@ -36,19 +36,15 @@ class YouTubeApiService implements YouTubeServiceInterface {
    */
   async searchVideosInTimeWindow(
     window: TimeWindow, 
-    searchType: SearchType = SearchType.RandomTime, 
+    searchType: SearchType = SearchType.Unedited, 
     userKeyword?: string,
     signal?: AbortSignal
   ): Promise<string[]> {
     // Import the founding date
     const { YOUTUBE_FOUNDING_DATE } = require('./constants');
     
-    // Determine the appropriate time window based on search type
-    let searchWindow = {...window};
-    // Use larger time window for Unedited or Keyword search types
-    if (searchType === SearchType.Unedited || searchType === SearchType.Keyword) {
-      searchWindow = getLargeTimeWindow(window);
-    }
+    // Always use larger time window for Unedited search
+    let searchWindow = getLargeTimeWindow(window);
     
     // Ensure we never search before YouTube's founding
     if (searchWindow.startDate < YOUTUBE_FOUNDING_DATE) {
@@ -56,9 +52,8 @@ class YouTubeApiService implements YouTubeServiceInterface {
       console.log('Adjusted search window to start at YouTube founding date');
     }
     
-    // Include keyword in cache key if present
-    const keywordSuffix = searchType === SearchType.Keyword && userKeyword ? `_${userKeyword}` : '';
-    const cacheKey = getSearchCacheKey(searchWindow, searchType) + keywordSuffix;
+    // Simple cache key for unedited search
+    const cacheKey = getSearchCacheKey(searchWindow, searchType);
     
     // Check if we already have this search cached
     if (this.searchCache[cacheKey]) {

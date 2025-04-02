@@ -35,13 +35,8 @@ export const executeSearch = async (
       return null;
     }
     
-    // Determine window description based on search type
-    let windowDescription = '96-hour window';
-    if (searchType === SearchType.Unedited) {
-      windowDescription = '1-week window';
-    } else if (searchType === SearchType.Keyword) {
-      windowDescription = '2-month window';
-    }
+    // Always using 1-week window for Unedited search type
+    const windowDescription = '1-week window';
       
     setStatusMessage(`Scanning YouTube videos from ${timeWindow.startDate.toLocaleDateString()} (${windowDescription})`);
     
@@ -50,11 +45,7 @@ export const executeSearch = async (
       return null;
     }
     
-    const videoIds = await searchVideosInTimeWindow(
-      timeWindow, 
-      searchType,
-      searchType === SearchType.Keyword ? keyword : undefined
-    );
+    const videoIds = await searchVideosInTimeWindow(timeWindow, searchType);
     
     // Check if search was cancelled during this operation
     if (isCancelled) {
@@ -75,12 +66,7 @@ export const executeSearch = async (
       return null;
     }
     
-    // Videos found, get their details
-    let searchTypeLabel = '';
-    if (searchType === SearchType.Unedited) searchTypeLabel = 'unedited ';
-    else if (searchType === SearchType.Keyword) searchTypeLabel = 'keyword ';
-    
-    setStatusMessage(`Found ${videoIds.length} potential ${searchTypeLabel}videos! Analyzing view counts...`);
+    setStatusMessage(`Found ${videoIds.length} potential unedited videos! Analyzing view counts...`);
     
     // Check if cancelled before getting details
     if (isCancelled) {
@@ -117,9 +103,9 @@ export const prepareNewSearch = (
 ): { randomDate: Date, newWindow: TimeWindow } => {
   setStatusMessage(`Reroll #${newRerollCount}: Trying a completely different time period...`);
   
-  // Get a fresh random date and create a new window based on search type
+  // Get a fresh random date and create a new window for Unedited search
   const randomDate = getRandomPastDate();
-  const newWindow = createInitialTimeWindow(randomDate, searchType === SearchType.Unedited, searchType);
+  const newWindow = createInitialTimeWindow(randomDate, true);
   
   return { randomDate, newWindow };
 };

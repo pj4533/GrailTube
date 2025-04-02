@@ -116,7 +116,7 @@ describe('useYouTubeSearch Hook', () => {
     });
     
     expect(getRandomPastDate).toHaveBeenCalled();
-    expect(createInitialTimeWindow).toHaveBeenCalledWith(mockDate, true, SearchType.Unedited);
+    expect(createInitialTimeWindow).toHaveBeenCalledWith(mockDate, true);
     expect(searchVideosInTimeWindow).toHaveBeenCalledWith(mockTimeWindow, SearchType.Unedited, undefined);
     expect(getVideoDetails).toHaveBeenCalledWith(mockVideoIds);
     expect(filterRareVideos).toHaveBeenCalledWith(mockVideoDetails);
@@ -186,14 +186,9 @@ describe('useYouTubeSearch Hook', () => {
     expect(result.current.error).toContain('YouTube API rate limit reached');
   });
 
-  it('should change search type', () => {
+  it('should have a performReroll function', () => {
     const { result } = renderHook(() => useYouTubeSearch());
     
-    act(() => {
-      result.current.changeSearchType(SearchType.Unedited);
-    });
-    
-    expect(result.current.searchType).toBe(SearchType.Unedited);
-    expect(result.current.videos).toEqual([]);
+    expect(typeof result.current.performReroll).toBe('function');
   });
 });

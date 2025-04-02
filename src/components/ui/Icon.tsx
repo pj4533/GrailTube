@@ -74,6 +74,15 @@ export const Icon = {
       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
     </svg>
+  ),
+  
+  Dice: ({ className = "h-4 w-4" }: IconProps) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.111 4.889a1.5 1.5 0 00-2.121 0L4.889 16.89a1.5 1.5 0 000 2.121l.101.101a1.5 1.5 0 002.12 0L19.111 7.111a1.5 1.5 0 000-2.222z" />
+      <circle cx="7.5" cy="7.5" r="1" fill="currentColor" />
+      <circle cx="12" cy="12" r="1" fill="currentColor" />
+      <circle cx="16.5" cy="16.5" r="1" fill="currentColor" />
+    </svg>
   )
 };
 

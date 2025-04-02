@@ -13,6 +13,7 @@ import LoadingIndicator from '@/components/ui/LoadingIndicator';
 import ErrorDisplay from '@/components/ui/ErrorDisplay';
 import EmptyState from '@/components/ui/EmptyState';
 import Button from '@/components/ui/Button';
+import { Icon } from '@/components/ui/Icon';
 import styles from '@/lib/styles';
 
 // Type for app modes
@@ -32,11 +33,9 @@ export default function Home() {
     viewStats,
     apiStats,
     searchType,
-    keyword,
-    setKeyword,
     startSearch,
-    changeSearchType,
-    cancelSearch
+    cancelSearch,
+    performReroll
   } = useYouTubeSearch();
   
   // Saved videos hook
@@ -57,14 +56,15 @@ export default function Home() {
     setSelectedVideoId(null);
   };
 
-  const handleStartSearch = () => {
-    setSelectedVideoId(null);
-    setAppMode('search');
-    startSearch(searchType);
-  };
-
   const handleBackToSaved = () => {
     setAppMode('savedVideos');
+  };
+  
+  const handleSwitchToSearch = () => {
+    setSelectedVideoId(null);
+    setAppMode('search');
+    // Automatically start search when tab is clicked
+    startSearch();
   };
 
   // Determine if we found videos in search mode
@@ -109,7 +109,7 @@ export default function Home() {
                 </button>
                 
                 <button
-                  onClick={() => setAppMode('search')}
+                  onClick={handleSwitchToSearch}
                   className={`${styles.nav.tabBase} -mb-[1px] ${
                     appMode === 'search'
                       ? styles.nav.tabActive
@@ -127,79 +127,21 @@ export default function Home() {
               </div>
             </div>
             
-            {/* Search Controls - Only visible when in search mode */}
-            {appMode === 'search' && (
+            {/* Reroll button - only visible when in search mode with found videos */}
+            {appMode === 'search' && hasFoundVideos && (
               <div className="flex items-center space-x-3 mt-3">
-                <div className="flex space-x-2">
-                  <div className="relative group">
-                    <select
-                      value={searchType}
-                      onChange={(e) => changeSearchType(e.target.value as SearchType)}
-                      disabled={isSearchLoading}
-                      className={styles.form.select}
-                      data-testid="search-type-select"
-                      style={{
-                        WebkitAppearance: "none",
-                        MozAppearance: "none",
-                        appearance: "none",
-                        backgroundColor: "#1f2937", // bg-gray-800
-                        color: "white"
-                      }}
-                    >
-                      <option value={SearchType.RandomTime}>Random Time</option>
-                      <option value={SearchType.Unedited}>Unedited</option>
-                      <option value={SearchType.Keyword}>Keyword</option>
-                    </select>
-                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </div>
-                  </div>
-                  
-                  {/* Keyword input field - only show when SearchType.Keyword is selected */}
-                  {searchType === SearchType.Keyword && (
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={keyword}
-                        onChange={(e) => setKeyword(e.target.value)}
-                        placeholder="Enter keywords..."
-                        disabled={isSearchLoading}
-                        className={`${styles.form.input} w-40 md:w-56`}
-                        data-testid="keyword-input"
-                      />
-                      {keyword && (
-                        <button 
-                          onClick={() => setKeyword('')}
-                          className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300"
-                          title="Clear"
-                          data-testid="clear-keyword-button"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </div>
-                
                 <Button
-                  onClick={handleStartSearch}
-                  disabled={isSearchLoading || (searchType === SearchType.Keyword && !keyword)}
+                  onClick={() => performReroll()}
+                  disabled={isSearchLoading}
                   variant="primary"
                   size="md"
                   isLoading={isSearchLoading}
                   icon={
-                    !isSearchLoading && 
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+                    !isSearchLoading && <Icon.Dice className="h-4 w-4" />
                   }
-                  data-testid="search-button"
+                  data-testid="reroll-button"
                 >
-                  {isSearchLoading ? 'Searching...' : 'Search'}
+                  {isSearchLoading ? 'Searching...' : 'Reroll'}
                 </Button>
               </div>
             )}
@@ -227,8 +169,7 @@ export default function Home() {
         {hasFoundVideos && (
           <div className="mb-8">
             <h2 className={`${styles.layout.sectionHeader} flex items-center`}>
-              <span>Recently Discovered Videos</span>
-              <SearchTypeIndicator searchType={searchType} size="sm" className="ml-3" />
+              <span>Recently Discovered Unedited Videos</span>
             </h2>
             <VideoGrid 
               videos={searchResults} 
@@ -240,7 +181,7 @@ export default function Home() {
             
             {/* Search results count */}
             <div className="mt-4 text-sm text-gray-500">
-              Found {searchResults.length} videos with less than 10 views
+              Found {searchResults.length} unedited videos with less than 10 views
             </div>
           </div>
         )}

@@ -25,8 +25,6 @@ export interface SearchStateActions {
   setError: (error: string | null) => void;
   setRerollCount: (count: number) => void;
   setViewStats: (stats: ViewStats | null) => void;
-  setSearchType: (type: SearchType) => void;
-  setKeyword: (keyword: string) => void;
   setIsCancelled: (cancelled: boolean) => void;
   resetState: () => void;
   handleError: (error: any, context: string) => void;
@@ -50,8 +48,8 @@ export function useYouTubeSearchState(): {
   const [error, setError] = useState<string | null>(null);
   const [rerollCount, setRerollCount] = useState<number>(0);
   const [viewStats, setViewStats] = useState<ViewStats | null>(null);
-  const [searchType, setSearchType] = useState<SearchType>(SearchType.Unedited);
-  const [keyword, setKeyword] = useState<string>('');
+  // Always Unedited search type
+  const [searchType] = useState<SearchType>(SearchType.Unedited);
   const [isCancelled, setIsCancelled] = useState<boolean>(false);
   
   // Store the abort controller as a closure variable
@@ -121,7 +119,7 @@ export function useYouTubeSearchState(): {
       rerollCount,
       viewStats,
       searchType,
-      keyword,
+      keyword: "", // Not used anymore, but kept for API compatibility
       isCancelled
     },
     actions: {
@@ -132,8 +130,6 @@ export function useYouTubeSearchState(): {
       setError,
       setRerollCount,
       setViewStats,
-      setSearchType,
-      setKeyword,
       setIsCancelled,
       resetState,
       handleError

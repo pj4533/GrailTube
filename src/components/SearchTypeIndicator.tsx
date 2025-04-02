@@ -25,53 +25,14 @@ export const SearchTypeIndicator: React.FC<SearchTypeIndicatorProps> = ({
     md: 'px-3 py-1 text-sm',
   }[size];
   
-  // Color classes based on search type
-  let colorClasses = '';
-  switch(searchType) {
-    case SearchType.RandomTime:
-      colorClasses = 'bg-indigo-100 text-indigo-800';
-      break;
-    case SearchType.Unedited:
-      colorClasses = 'bg-emerald-100 text-emerald-800';
-      break;
-    case SearchType.Keyword:
-      colorClasses = 'bg-amber-100 text-amber-800';
-      break;
-    default:
-      colorClasses = 'bg-indigo-100 text-indigo-800';
-  }
+  // Always use emerald color for Unedited search type
+  const colorClasses = 'bg-emerald-100 text-emerald-800';
   
-  // Choose the appropriate icon based on search type
-  let IconComponent;
-  switch(searchType) {
-    case SearchType.RandomTime:
-      IconComponent = Icon.Clock;
-      break;
-    case SearchType.Unedited:
-      IconComponent = Icon.Camera;
-      break;
-    case SearchType.Keyword:
-      IconComponent = Icon.Search;
-      break;
-    default:
-      IconComponent = Icon.Clock;
-  }
+  // Always use the Camera icon for Unedited search type
+  const IconComponent = Icon.Camera;
   
-  // Get label text based on search type
-  let labelText;
-  switch(searchType) {
-    case SearchType.RandomTime:
-      labelText = 'Random Time';
-      break;
-    case SearchType.Unedited:
-      labelText = 'Unedited Videos';
-      break;
-    case SearchType.Keyword:
-      labelText = 'Keyword Search';
-      break;
-    default:
-      labelText = 'Random Time';
-  }
+  // Always use "Unedited Videos" label
+  const labelText = 'Unedited Videos';
 
   return (
     <span className={`${baseClasses} ${sizeClasses} ${colorClasses} ${className}`}>

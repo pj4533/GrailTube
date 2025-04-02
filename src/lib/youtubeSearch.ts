@@ -39,19 +39,11 @@ export function getCombinedCameraPatterns(): string {
 }
 
 /**
- * Get search query based on search type
+ * Get search query - always uses unedited camera patterns now
  */
 export function getSearchQuery(searchType: SearchType, userKeyword?: string): string {
-  switch (searchType) {
-    case SearchType.RandomTime:
-      return getRandomSearchTerm();
-    case SearchType.Unedited:
-      return getCombinedCameraPatterns();
-    case SearchType.Keyword:
-      return userKeyword || getRandomSearchTerm(); // Use provided keyword or fall back to random
-    default:
-      return getRandomSearchTerm();
-  }
+  // Always return camera patterns for unedited search
+  return getCombinedCameraPatterns();
 }
 
 /**

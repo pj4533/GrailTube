@@ -35,7 +35,5 @@ export interface TimeWindow {
 }
 
 export enum SearchType {
-  RandomTime = 'randomTime',
-  Unedited = 'unedited',
-  Keyword = 'keyword'
+  Unedited = 'unedited'
 }

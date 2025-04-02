@@ -137,17 +137,17 @@ describe('Utils', () => {
   });
 
   describe('createInitialTimeWindow', () => {
-    it('creates 96-hour time window (5760 minutes) for random search', () => {
+    it('creates 1-week time window (10080 minutes) for unedited search', () => {
       const centerDate = new Date('2023-01-15T12:00:00Z');
       
-      const result = createInitialTimeWindow(centerDate, false);
+      const result = createInitialTimeWindow(centerDate);
       
-      expect(result.durationMinutes).toBe(5760);
-      expect(result.startDate).toEqual(subMinutes(centerDate, 5760 / 2));
-      expect(result.endDate).toEqual(addMinutes(centerDate, 5760 / 2));
+      expect(result.durationMinutes).toBe(10080);
+      expect(result.startDate).toEqual(subMinutes(centerDate, 10080 / 2));
+      expect(result.endDate).toEqual(addMinutes(centerDate, 10080 / 2));
     });
 
-    it('creates 1-week time window (10080 minutes) for unedited search', () => {
+    it('respects the isUnedited parameter (though default is true)', () => {
       const centerDate = new Date('2023-01-15T12:00:00Z');
       
       const result = createInitialTimeWindow(centerDate, true);
@@ -155,16 +155,6 @@ describe('Utils', () => {
       expect(result.durationMinutes).toBe(10080);
       expect(result.startDate).toEqual(subMinutes(centerDate, 10080 / 2));
       expect(result.endDate).toEqual(addMinutes(centerDate, 10080 / 2));
-    });
-
-    it('creates 2-month time window (86400 minutes) for keyword search', () => {
-      const centerDate = new Date('2023-01-15T12:00:00Z');
-      
-      const result = createInitialTimeWindow(centerDate, false, SearchType.Keyword);
-      
-      expect(result.durationMinutes).toBe(86400);
-      expect(result.startDate).toEqual(subMinutes(centerDate, 86400 / 2));
-      expect(result.endDate).toEqual(addMinutes(centerDate, 86400 / 2));
     });
   });
 
