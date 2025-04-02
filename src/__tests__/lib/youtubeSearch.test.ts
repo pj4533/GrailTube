@@ -41,12 +41,16 @@ describe('YouTube Search', () => {
   describe('getCombinedCameraPatterns', () => {
     it('should combine camera patterns with OR operator', () => {
       const result = getCombinedCameraPatterns();
-      // Should be a specific subset of patterns
-      expect(result).toBe('IMG_|DSC_');
+      // Should include all camera patterns
+      expect(result).toBe('IMG_|DSC_|DCIM|MOV_|VID_|MVI_');
       
       // Verify it contains these specific patterns
       expect(result.includes('IMG_')).toBe(true);
       expect(result.includes('DSC_')).toBe(true);
+      expect(result.includes('DCIM')).toBe(true);
+      expect(result.includes('MOV_')).toBe(true);
+      expect(result.includes('VID_')).toBe(true);
+      expect(result.includes('MVI_')).toBe(true);
     });
   });
 
@@ -129,7 +133,7 @@ describe('YouTube Search', () => {
       jest.mock('@/lib/youtubeSearch', () => ({
         ...jest.requireActual('@/lib/youtubeSearch'),
         getSearchQuery: (searchType: SearchType) => {
-          return 'IMG_|DSC_';
+          return 'IMG_|DSC_|DCIM|MOV_|VID_|MVI_';
         }
       }));
     });
@@ -160,7 +164,7 @@ describe('YouTube Search', () => {
       const query = (axios.get as jest.Mock).mock.calls[0][1].params.q;
       
       // Should contain the camera patterns
-      expect(query).toBe('IMG_|DSC_');
+      expect(query).toBe('IMG_|DSC_|DCIM|MOV_|VID_|MVI_');
     });
 
     it('should extract and return video IDs from response', async () => {

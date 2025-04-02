@@ -32,10 +32,10 @@ export function getRandomSearchTerm(): string {
 
 /**
  * Get camera filename patterns for unedited videos with OR operator
- * Starting with just two common patterns for testing
+ * Using multiple common camera filename patterns to catch more unedited videos
  */
 export function getCombinedCameraPatterns(): string {
-  return 'IMG_|DSC_'; // Using OR operator with two common prefixes
+  return 'IMG_|DSC_|DCIM|MOV_|VID_|MVI_'; // Using OR operator with all available prefixes
 }
 
 /**
