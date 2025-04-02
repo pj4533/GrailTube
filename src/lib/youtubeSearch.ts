@@ -19,10 +19,7 @@ export const searchTerms: string[] = [
 ];
 
 export const cameraFilenamePatterns: string[] = [
-  'IMG_', 'DSC_', 'DCIM', 'MOV_', 'VID_', 'MVI_',
-  'GOPRO', 'CLIP', 'REC', 'VIDEO', 'CAMERA',
-  'iphone', 'samsung', 'pixel', 'P_', 'PANA', 'LUMIX',
-  'canon', 'nikon', 'sony', 'fuji', 'olympus', 'raw footage'
+  'IMG_', 'DSC_', 'DCIM', 'MOV_', 'VID_', 'MVI_'
 ];
 
 /**
@@ -34,10 +31,11 @@ export function getRandomSearchTerm(): string {
 }
 
 /**
- * Get combined camera filename patterns for unedited videos using OR operators
+ * Get camera filename patterns for unedited videos with OR operator
+ * Starting with just two common patterns for testing
  */
 export function getCombinedCameraPatterns(): string {
-  return cameraFilenamePatterns.join('|');
+  return 'IMG_|DSC_'; // Using OR operator with two common prefixes
 }
 
 /**

@@ -169,18 +169,27 @@ export function useYouTubeSearch() {
    */
   const cancelSearch = (): void => {
     if (isLoading) {
-      // Abort any in-progress API calls
+      // First set the cancelled flag to true immediately
+      // This ensures all subsequent operations will terminate
+      setIsCancelled(true);
+      
+      // Then abort any in-progress API calls
       abortCurrentController();
       
-      // Create a new abort controller
+      // Create a new abort controller for future operations
       createAbortController();
       
-      setIsCancelled(true);
+      // Clear loading state and set status message
       setStatusMessage("Search cancelled");
       setIsLoading(false);
       
+      // Reset reroll count to prevent further automatic searches
+      setRerollCount(0);
+      
       // Keep the current window and view stats for reference
       // but don't process any more results
+      
+      console.log('Search cancelled completely'); // Debug log
     }
   };
 
