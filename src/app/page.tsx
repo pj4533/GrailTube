@@ -127,24 +127,6 @@ export default function Home() {
               </div>
             </div>
             
-            {/* Reroll button - only visible when in search mode with found videos */}
-            {appMode === 'search' && hasFoundVideos && (
-              <div className="flex items-center space-x-3 mt-3">
-                <Button
-                  onClick={() => performReroll()}
-                  disabled={isSearchLoading}
-                  variant="primary"
-                  size="md"
-                  isLoading={isSearchLoading}
-                  icon={
-                    !isSearchLoading && <Icon.Dice className="h-4 w-4" />
-                  }
-                  data-testid="reroll-button"
-                >
-                  {isSearchLoading ? 'Searching...' : 'Reroll'}
-                </Button>
-              </div>
-            )}
           </div>
         </div>
       </nav>
@@ -168,8 +150,21 @@ export default function Home() {
         {/* Show search results */}
         {hasFoundVideos && (
           <div className="mb-8">
-            <h2 className={`${styles.layout.sectionHeader} flex items-center`}>
+            <h2 className={`${styles.layout.sectionHeader} flex items-center justify-between`}>
               <span>Recently Discovered Unedited Videos</span>
+              <button
+                onClick={() => performReroll()}
+                disabled={isSearchLoading}
+                className={`rounded-full p-1.5 transition-colors ${isSearchLoading ? 'bg-gray-200 text-gray-400' : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'}`}
+                title="Find different videos"
+                data-testid="reroll-button"
+              >
+                {isSearchLoading ? (
+                  <Icon.Spinner className="h-5 w-5" />
+                ) : (
+                  <Icon.Dice className="h-5 w-5" />
+                )}
+              </button>
             </h2>
             <VideoGrid 
               videos={searchResults} 
