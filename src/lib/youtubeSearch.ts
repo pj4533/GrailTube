@@ -2,6 +2,7 @@ import axios from 'axios';
 import { TimeWindow, SearchType } from '@/types';
 import { YOUTUBE_API_URL } from './constants';
 import { apiStats, handleYouTubeApiError } from './youtubeTypes';
+import logger from './logger';
 
 /**
  * Search terms and patterns for different search types
@@ -98,6 +99,20 @@ export async function performYouTubeSearch(
     apiStats.searchApiCalls++;
     apiStats.totalApiCalls++;
     
+    // Get search query based on search type
+    const searchQuery = getSearchQuery(searchType, userKeyword);
+    
+    // Log the search request
+    logger.info('Performing YouTube search', {
+      searchType,
+      searchQuery,
+      timeWindow: {
+        startDate: searchWindow.startDate.toISOString(),
+        endDate: searchWindow.endDate.toISOString(),
+        durationMinutes: searchWindow.durationMinutes
+      }
+    });
+    
     const response = await axios.get(`${YOUTUBE_API_URL}/search`, {
       params: {
         part: 'snippet',
@@ -105,15 +120,21 @@ export async function performYouTubeSearch(
         type: 'video',
         publishedAfter: searchWindow.startDate.toISOString(),
         publishedBefore: searchWindow.endDate.toISOString(),
-        // Add search query parameter based on search type
-        q: getSearchQuery(searchType, userKeyword),
+        q: searchQuery,
         key: apiKey,
       },
       signal, // Add the abort signal
     });
     
+    logger.debug('YouTube search completed', {
+      searchType,
+      searchQuery,
+      resultsCount: response.data.items.length
+    });
+    
     return response.data.items.map((item: any) => item.id.videoId);
   } catch (error) {
+    logger.error('YouTube search failed', { searchType, error });
     return handleYouTubeApiError(error, 'video search');
   }
 }
