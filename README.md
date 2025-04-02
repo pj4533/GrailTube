@@ -31,7 +31,9 @@ GrailTube is a web application that helps you discover rare YouTube videos with 
 - Displays statistics on video view distributions (0 views, <10 views, <100 views, <1000 views)
 - Automatically tries multiple time periods to find rare content
 - Filters out commercial content, movie/TV trailers, and livestreams
-- Caches search results and video details to reduce API usage
+- Displays search timeframe information for better context
+- Enhanced unedited footage detection with expanded camera filename patterns
+- Caches video details to reduce API usage while ensuring unique search results
 - Comprehensive logging system for debugging and performance tracking
 - Error handling with graceful recovery for network and database issues
 - Allows you to watch videos directly within the app

@@ -88,9 +88,9 @@ Reusable UI components are composed to build more complex interfaces:
 
 - **YouTube Service**: Modular service for YouTube API interactions
   - `youtube.ts`: Main facade/entry point
-  - `youtubeService.ts`: Core service implementation
-  - `youtubeSearch.ts`: Search-specific functionality
-  - `youtubeVideoDetails.ts`: Video detail retrieval
+  - `youtubeService.ts`: Core service implementation with AbortController signal support
+  - `youtubeSearch.ts`: Search-specific functionality with expanded camera filename patterns
+  - `youtubeVideoDetails.ts`: Video detail retrieval with caching
   - `youtubeFilters.ts`: Filtering logic for videos
   - `youtubeTypes.ts`: Types and interfaces
 - **API Utilities**: 

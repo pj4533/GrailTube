@@ -25,10 +25,12 @@
 ## YouTube API Guidelines
 - Store API keys in .env.local (never commit)
 - Use the modular YouTube service structure (youtubeService, youtubeFilters, youtubeTypes)
-- Use caching mechanisms to reduce API quota usage
-- Track API call statistics for transparency
+- Video details caching only - search results are not cached to ensure unique results
+- Track API call statistics for transparency and display timeframe information
 - Always handle rate limiting and quota errors gracefully
+- Support AbortController signal for cancellable search requests
 - Filter out commercial content, live streams, and misleading content
+- Expanded camera filename patterns (IMG_, DSC_, DCIM, MOV_, VID_, MVI_) for better unedited footage detection
 - Use a 1-month timeframe for unedited video searches
 
 ## API and Data Guidelines
@@ -42,6 +44,7 @@
 - Add appropriate logging for API and database operations
 - Implement proper error recovery for network and database issues
 - Use MySQL for all database operations (MongoDB has been removed)
+- Use template literals for MySQL pagination queries to avoid SQL injection issues
 
 ## Logging and Debugging
 - Use the centralized logger from src/lib/logger.ts
@@ -79,7 +82,7 @@
 - **/src/components**: Reusable UI components
   - **/src/components/ui**: Shared UI primitives and patterns
   - **SearchTypeIndicator.tsx**: Displays the current search type (currently fixed to Unedited)
-  - **SearchStatus.tsx**: Shows search status and progress
+  - **SearchStatus.tsx**: Shows search status, progress, and timeframe information
   - **VideoCard.tsx**: Card component for displaying video information
   - **VideoGrid.tsx**: Grid layout for multiple video cards
   - **VideoPlayer.tsx**: Video player modal for watching videos
