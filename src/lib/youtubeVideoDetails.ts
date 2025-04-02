@@ -2,7 +2,6 @@ import axios from 'axios';
 import { Video } from '@/types';
 import { YOUTUBE_API_URL } from './constants';
 import { apiStats, YouTubeRateLimitError, handleYouTubeApiError } from './youtubeTypes';
-import { filterExcludedCategories } from './youtubeFilters';
 import logger from './logger';
 
 /**
@@ -105,11 +104,8 @@ export async function processVideoDetails(
     const batchResults = await Promise.all(batchPromises);
     const allItems = batchResults.flat();
     
-    // Filter out excluded categories
-    const filteredItems = filterExcludedCategories(allItems);
-    
     // Parse and return video details
-    return filteredItems;
+    return allItems;
   } catch (error) {
     // If this is a rate limit error, propagate it up
     if (error instanceof YouTubeRateLimitError) {

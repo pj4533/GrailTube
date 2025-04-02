@@ -267,7 +267,7 @@ describe('VideoModel', () => {
     });
     
     it('should calculate correct offset for page > 1', async () => {
-      const mockDbResponse = [];
+      const mockDbResponse: any[] = [];
       (query as jest.Mock).mockResolvedValueOnce(mockDbResponse);
       
       await VideoModel.getPaginated(3, 10);
@@ -278,7 +278,7 @@ describe('VideoModel', () => {
     });
     
     it('should handle invalid page and limit values', async () => {
-      const mockDbResponse = [];
+      const mockDbResponse: any[] = [];
       (query as jest.Mock).mockResolvedValueOnce(mockDbResponse);
       
       await VideoModel.getPaginated(-1, -5);
