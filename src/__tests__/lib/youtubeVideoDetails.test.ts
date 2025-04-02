@@ -133,8 +133,7 @@ describe('YouTube Video Details', () => {
         channelTitle: 'Test Channel',
         viewCount: 5,
         thumbnailUrl: 'http://example.com/medium1.jpg',
-        isLiveStream: false,
-        isLicensed: true
+        duration: 'PT2M30S'
       });
     });
 
@@ -248,11 +247,7 @@ describe('YouTube Video Details', () => {
           channelTitle: 'Cached Channel',
           viewCount: 10,
           thumbnailUrl: 'http://example.com/cached.jpg',
-          isLiveStream: false,
-          duration: 'PT3M',
-          isLicensed: true,
-          categoryId: undefined,
-          isUpcoming: undefined
+          duration: 'PT3M'
         }
       };
       
