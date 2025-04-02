@@ -23,17 +23,11 @@ jest.mock('@/lib/youtubeTypes', () => ({
 
 describe('YouTube Search', () => {
   describe('getSearchQuery', () => {
-    it('should always return combined camera patterns', () => {
-      const result = getSearchQuery(SearchType.Unedited);
+    it('should return combined camera patterns', () => {
+      const result = getSearchQuery();
       expect(result).toBe(getCombinedCameraPatterns());
       // Verify it contains pipe-separated camera patterns
       expect(result.includes('|')).toBe(true);
-    });
-    
-    it('should ignore keyword parameter', () => {
-      const keyword = 'test keyword';
-      const result = getSearchQuery(SearchType.Unedited, keyword);
-      expect(result).toBe(getCombinedCameraPatterns());
     });
   });
 
@@ -163,10 +157,10 @@ describe('YouTube Search', () => {
 
     it('should use the camera patterns for search', async () => {
       await performYouTubeSearch(apiKey, timeWindow, SearchType.Unedited, 50);
-      const uneditedQuery = (axios.get as jest.Mock).mock.calls[0][1].params.q;
+      const query = (axios.get as jest.Mock).mock.calls[0][1].params.q;
       
       // Should contain the camera patterns
-      expect(uneditedQuery).toBe('IMG_|DSC_');
+      expect(query).toBe('IMG_|DSC_');
     });
 
     it('should extract and return video IDs from response', async () => {

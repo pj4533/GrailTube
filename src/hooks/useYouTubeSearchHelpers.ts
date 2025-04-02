@@ -96,13 +96,12 @@ export const executeSearch = async (
  * Create a new time window and prepare for a new search
  */
 export const prepareNewSearch = (
-  searchType: SearchType, 
   newRerollCount: number,
   setStatusMessage: (message: string | null) => void
 ): { randomDate: Date, newWindow: TimeWindow } => {
   setStatusMessage(`Reroll #${newRerollCount}: Trying a completely different time period...`);
   
-  // Get a fresh random date and create a new window for Unedited search
+  // Get a fresh random date and create a new window
   const randomDate = getRandomPastDate();
   const newWindow = createInitialTimeWindow(randomDate, true);
   

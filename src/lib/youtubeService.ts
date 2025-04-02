@@ -37,7 +37,6 @@ class YouTubeApiService implements YouTubeServiceInterface {
   async searchVideosInTimeWindow(
     window: TimeWindow, 
     searchType: SearchType = SearchType.Unedited, 
-    userKeyword?: string,
     signal?: AbortSignal
   ): Promise<string[]> {
     // Import the founding date
@@ -69,7 +68,6 @@ class YouTubeApiService implements YouTubeServiceInterface {
         searchWindow, 
         searchType, 
         this.maxResultsPerRequest,
-        userKeyword,
         signal
       );
       
@@ -143,8 +141,8 @@ class YouTubeApiService implements YouTubeServiceInterface {
 const youtubeApiService = new YouTubeApiService();
 
 // Export methods for use elsewhere
-export const searchVideosInTimeWindow = (window: TimeWindow, searchType?: SearchType, userKeyword?: string): Promise<string[]> => 
-  youtubeApiService.searchVideosInTimeWindow(window, searchType, userKeyword);
+export const searchVideosInTimeWindow = (window: TimeWindow, searchType?: SearchType): Promise<string[]> => 
+  youtubeApiService.searchVideosInTimeWindow(window, searchType);
 
 export const getVideoDetails = (videoIds: string[]): Promise<Video[]> => 
   youtubeApiService.getVideoDetails(videoIds);

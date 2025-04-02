@@ -21,8 +21,8 @@ import {
 import { TimeWindow, SearchType } from '@/types';
 
 // Re-export everything with consistent naming, with explicit function signatures
-export const searchVideosInTimeWindow = (window: TimeWindow, searchType?: SearchType, userKeyword?: string): Promise<string[]> => {
-  return searchImpl(window, searchType, userKeyword);
+export const searchVideosInTimeWindow = (window: TimeWindow, searchType?: SearchType): Promise<string[]> => {
+  return searchImpl(window, searchType);
 };
 export const getVideoDetails = details;
 export const filterRareVideos = filter;

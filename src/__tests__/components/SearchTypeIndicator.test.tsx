@@ -20,15 +20,15 @@ jest.mock('@/components/ui/Icon', () => ({
 }));
 
 describe('SearchTypeIndicator Component', () => {
-  it('displays "Unedited Videos" text for Unedited search type', () => {
-    render(<SearchTypeIndicator searchType={SearchType.Unedited} />);
+  it('displays "Unedited Videos" text', () => {
+    render(<SearchTypeIndicator />);
     
     expect(screen.getByText('Unedited Videos')).toBeInTheDocument();
     expect(screen.getByTestId('camera-icon')).toBeInTheDocument();
   });
 
-  it('applies correct color classes for Unedited search type', () => {
-    const { container } = render(<SearchTypeIndicator searchType={SearchType.Unedited} />);
+  it('applies correct color classes', () => {
+    const { container } = render(<SearchTypeIndicator />);
     
     const badgeElement = container.firstChild as HTMLElement;
     expect(badgeElement).toHaveClass('bg-emerald-100');
@@ -36,7 +36,7 @@ describe('SearchTypeIndicator Component', () => {
   });
 
   it('applies small size classes when size="sm"', () => {
-    const { container } = render(<SearchTypeIndicator searchType={SearchType.Unedited} size="sm" />);
+    const { container } = render(<SearchTypeIndicator size="sm" />);
     
     const badgeElement = container.firstChild as HTMLElement;
     expect(badgeElement).toHaveClass('px-2');
@@ -49,7 +49,7 @@ describe('SearchTypeIndicator Component', () => {
   });
 
   it('applies medium size classes by default', () => {
-    const { container } = render(<SearchTypeIndicator searchType={SearchType.Unedited} />);
+    const { container } = render(<SearchTypeIndicator />);
     
     const badgeElement = container.firstChild as HTMLElement;
     expect(badgeElement).toHaveClass('px-3');
@@ -63,7 +63,7 @@ describe('SearchTypeIndicator Component', () => {
 
   it('applies additional className when provided', () => {
     const { container } = render(
-      <SearchTypeIndicator searchType={SearchType.Unedited} className="ml-2" />
+      <SearchTypeIndicator className="ml-2" />
     );
     
     const badgeElement = container.firstChild as HTMLElement;

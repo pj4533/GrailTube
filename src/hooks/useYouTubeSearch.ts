@@ -108,7 +108,6 @@ export function useYouTubeSearch() {
       }
       
       const { newWindow } = prepareNewSearch(
-        searchType,
         newRerollCount,
         setStatusMessage
       );

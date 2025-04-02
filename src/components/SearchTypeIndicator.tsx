@@ -1,18 +1,15 @@
 import React from 'react';
-import { SearchType } from '@/types';
 import { Icon } from './ui/Icon';
 
 interface SearchTypeIndicatorProps {
-  searchType: SearchType;
   size?: 'sm' | 'md';
   className?: string;
 }
 
 /**
- * A component for displaying the current search type with consistent styling
+ * A component for displaying the unedited videos search type with consistent styling
  */
 export const SearchTypeIndicator: React.FC<SearchTypeIndicatorProps> = ({
-  searchType,
   size = 'md',
   className = '',
 }) => {
@@ -25,13 +22,8 @@ export const SearchTypeIndicator: React.FC<SearchTypeIndicatorProps> = ({
     md: 'px-3 py-1 text-sm',
   }[size];
   
-  // Always use emerald color for Unedited search type
   const colorClasses = 'bg-emerald-100 text-emerald-800';
-  
-  // Always use the Camera icon for Unedited search type
   const IconComponent = Icon.Camera;
-  
-  // Always use "Unedited Videos" label
   const labelText = 'Unedited Videos';
 
   return (

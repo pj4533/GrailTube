@@ -39,10 +39,9 @@ export function getCombinedCameraPatterns(): string {
 }
 
 /**
- * Get search query - always uses unedited camera patterns now
+ * Get search query for camera patterns
  */
-export function getSearchQuery(searchType: SearchType, userKeyword?: string): string {
-  // Always return camera patterns for unedited search
+export function getSearchQuery(): string {
   return getCombinedCameraPatterns();
 }
 
@@ -80,7 +79,6 @@ export async function performYouTubeSearch(
   searchWindow: TimeWindow,
   searchType: SearchType,
   maxResults: number,
-  userKeyword?: string,
   signal?: AbortSignal
 ): Promise<string[]> {
   try {
@@ -88,8 +86,8 @@ export async function performYouTubeSearch(
     apiStats.searchApiCalls++;
     apiStats.totalApiCalls++;
     
-    // Get search query based on search type
-    const searchQuery = getSearchQuery(searchType, userKeyword);
+    // Get search query for unedited camera patterns
+    const searchQuery = getSearchQuery();
     
     // Log the search request
     logger.info('Performing YouTube search', {
