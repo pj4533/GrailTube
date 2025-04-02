@@ -162,7 +162,7 @@ export default function Home() {
                 {isSearchLoading ? (
                   <Icon.Spinner className="h-5 w-5" />
                 ) : (
-                  <Icon.Dice className="h-5 w-5" />
+                  <Icon.RerollDice className="h-5 w-5" />
                 )}
               </button>
             </h2>

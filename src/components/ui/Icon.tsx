@@ -76,12 +76,51 @@ export const Icon = {
     </svg>
   ),
   
-  Dice: ({ className = "h-4 w-4" }: IconProps) => (
+  Die: ({ className = "h-4 w-4" }: IconProps) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.111 4.889a1.5 1.5 0 00-2.121 0L4.889 16.89a1.5 1.5 0 000 2.121l.101.101a1.5 1.5 0 002.12 0L19.111 7.111a1.5 1.5 0 000-2.222z" />
-      <circle cx="7.5" cy="7.5" r="1" fill="currentColor" />
-      <circle cx="12" cy="12" r="1" fill="currentColor" />
-      <circle cx="16.5" cy="16.5" r="1" fill="currentColor" />
+      <rect x="4" y="4" width="16" height="16" rx="2" strokeWidth={2} />
+      <circle cx="8" cy="8" r="1.5" fill="currentColor" />
+      <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+      <circle cx="16" cy="16" r="1.5" fill="currentColor" />
+      <circle cx="8" cy="16" r="1.5" fill="currentColor" />
+      <circle cx="16" cy="8" r="1.5" fill="currentColor" />
+    </svg>
+  ),
+  
+  DiceCube: ({ className = "h-4 w-4" }: IconProps) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 7l8-4 8 4m0 0l-8 4m-8-4l8 4m8 0v10l-8 4m0 0l-8-4m8 4V11" />
+      <circle cx="12" cy="11" r="1" fill="currentColor" />
+      <circle cx="8" cy="9" r="1" fill="currentColor" />
+      <circle cx="16" cy="9" r="1" fill="currentColor" />
+      <circle cx="12" cy="7" r="1" fill="currentColor" />
+      <circle cx="12" cy="16" r="1" fill="currentColor" />
+      <circle cx="8" cy="13.5" r="1" fill="currentColor" />
+    </svg>
+  ),
+  
+  DiceRoll: ({ className = "h-4 w-4" }: IconProps) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+      <circle cx="9" cy="15" r="1" fill="currentColor" />
+      <circle cx="12" cy="15" r="1" fill="currentColor" />
+      <circle cx="15" cy="15" r="1" fill="currentColor" />
+    </svg>
+  ),
+  
+  Refresh: ({ className = "h-4 w-4" }: IconProps) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+    </svg>
+  ),
+  
+  RerollDice: ({ className = "h-4 w-4" }: IconProps) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <rect x="5" y="5" width="14" height="14" rx="2" strokeWidth={1.8} strokeLinejoin="round" />
+      <circle cx="8.5" cy="8.5" r="1.3" fill="currentColor" />
+      <circle cx="15.5" cy="15.5" r="1.3" fill="currentColor" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M19 4l2 2-2 2" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M21 6H18.5C14.5 6 10.5 10 10.5 14" />
     </svg>
   )
 };
