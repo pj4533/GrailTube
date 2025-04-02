@@ -44,14 +44,8 @@ export async function fetchVideoBatch(apiKey: string, batchIds: string[], signal
  */
 export function parseVideoDetails(items: any[]): Video[] {
   return items.map(item => {
-    // Additional information about the video
-    const isLiveStream = !!item.liveStreamingDetails;
-    const isUpcoming = item.liveStreamingDetails?.scheduledStartTime && 
-                     !item.liveStreamingDetails?.actualEndTime;
+    // Duration information
     const duration = item.contentDetails?.duration || '';
-    
-    // Check license
-    const isLicensed = item.status?.license === 'youtube' ? false : true;
     
     return {
       id: item.id,
@@ -62,11 +56,7 @@ export function parseVideoDetails(items: any[]): Video[] {
       viewCount: parseInt(item.statistics.viewCount || '0', 10),
       channelTitle: item.snippet.channelTitle,
       channelId: item.snippet.channelId,
-      categoryId: item.snippet.categoryId,
-      isLiveStream,
-      isUpcoming,
-      duration,
-      isLicensed
+      duration
     };
   });
 }

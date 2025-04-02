@@ -1,12 +1,8 @@
 import axios from 'axios';
 import { 
-  getSearchCacheKey, 
   getLargeTimeWindow, 
   performYouTubeSearch,
-  getSearchQuery,
-  getRandomSearchTerm,
   getCombinedCameraPatterns,
-  searchTerms,
   cameraFilenamePatterns
 } from '@/lib/youtubeSearch';
 import { SearchType, TimeWindow } from '@/types';
@@ -22,22 +18,6 @@ jest.mock('@/lib/youtubeTypes', () => ({
 }));
 
 describe('YouTube Search', () => {
-  describe('getSearchQuery', () => {
-    it('should return combined camera patterns', () => {
-      const result = getSearchQuery();
-      expect(result).toBe(getCombinedCameraPatterns());
-      // Verify it contains pipe-separated camera patterns
-      expect(result.includes('|')).toBe(true);
-    });
-  });
-
-  describe('getRandomSearchTerm', () => {
-    it('should return a term from the search terms array', () => {
-      const result = getRandomSearchTerm();
-      expect(searchTerms).toContain(result);
-    });
-  });
-
   describe('getCombinedCameraPatterns', () => {
     it('should combine camera patterns with OR operator', () => {
       const result = getCombinedCameraPatterns();
@@ -51,20 +31,6 @@ describe('YouTube Search', () => {
       expect(result.includes('MOV_')).toBe(true);
       expect(result.includes('VID_')).toBe(true);
       expect(result.includes('MVI_')).toBe(true);
-    });
-  });
-
-  describe('getSearchCacheKey', () => {
-    it('should generate cache key with time window and search type', () => {
-      const timeWindow: TimeWindow = {
-        startDate: new Date('2023-01-01T00:00:00Z'),
-        endDate: new Date('2023-01-02T00:00:00Z'),
-        durationMinutes: 1440 // 24 hours
-      };
-      
-      const key = getSearchCacheKey(timeWindow, SearchType.Unedited);
-      
-      expect(key).toBe('unedited_2023-01-01T00:00:00.000Z_2023-01-02T00:00:00.000Z');
     });
   });
 
@@ -129,13 +95,6 @@ describe('YouTube Search', () => {
         throw error;
       });
       
-      // Mock the search query function to return predictable values for testing
-      jest.mock('@/lib/youtubeSearch', () => ({
-        ...jest.requireActual('@/lib/youtubeSearch'),
-        getSearchQuery: (searchType: SearchType) => {
-          return 'IMG_|DSC_|DCIM|MOV_|VID_|MVI_';
-        }
-      }));
     });
 
     it('should call YouTube API with correct parameters', async () => {

@@ -270,10 +270,6 @@ describe('YouTube Video Details', () => {
         }
       });
       
-      // Mock the filterExcludedCategories function to return the input
-      jest.mock('@/lib/youtubeFilters', () => ({
-        filterExcludedCategories: jest.fn().mockImplementation(items => items)
-      }));
       
       // Just verify that the function doesn't throw an error
       const result = await processVideoDetails(apiKey, videoIds, cache, 50);

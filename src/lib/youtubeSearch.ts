@@ -5,30 +5,11 @@ import { apiStats, handleYouTubeApiError } from './youtubeTypes';
 import logger from './logger';
 
 /**
- * Search terms and patterns for different search types
+ * Camera filename patterns for unedited videos
  */
-export const searchTerms: string[] = [
-  'random', 'interesting', 'cool', 'fun', 'amazing', 
-  'wow', 'look', 'check', 'see', 'watch', 'observe',
-  'nature', 'outdoor', 'adventure', 'daily', 'life',
-  'hobby', 'craft', 'diy', 'homemade', 'amateur',
-  'family', 'kids', 'pet', 'dog', 'cat', 'animal',
-  'travel', 'trip', 'journey', 'vacation', 'holiday',
-  'food', 'cooking', 'recipe', 'baking', 'meal',
-  'game', 'play', 'fun', 'adventure', 'explore'
-];
-
 export const cameraFilenamePatterns: string[] = [
   'IMG_', 'DSC_', 'DCIM', 'MOV_', 'VID_', 'MVI_'
 ];
-
-/**
- * Get a random search term to diversify results
- */
-export function getRandomSearchTerm(): string {
-  const randomIndex = Math.floor(Math.random() * searchTerms.length);
-  return searchTerms[randomIndex];
-}
 
 /**
  * Get camera filename patterns for unedited videos with OR operator
@@ -36,13 +17,6 @@ export function getRandomSearchTerm(): string {
  */
 export function getCombinedCameraPatterns(): string {
   return 'IMG_|DSC_|DCIM|MOV_|VID_|MVI_'; // Using OR operator with all available prefixes
-}
-
-/**
- * Get search query for camera patterns
- */
-export function getSearchQuery(): string {
-  return getCombinedCameraPatterns();
 }
 
 /**
@@ -64,13 +38,6 @@ export function getLargeTimeWindow(baseWindow: TimeWindow): TimeWindow {
   };
 }
 
-/**
- * Generate description for a time window and search type
- * (Keeping function for compatibility but no longer used for caching)
- */
-export function getSearchCacheKey(window: TimeWindow, searchType: SearchType): string {
-  return `${searchType}_${window.startDate.toISOString()}_${window.endDate.toISOString()}`;
-}
 
 /**
  * Perform YouTube search API call
@@ -87,8 +54,8 @@ export async function performYouTubeSearch(
     apiStats.searchApiCalls++;
     apiStats.totalApiCalls++;
     
-    // Get search query for unedited camera patterns
-    const searchQuery = getSearchQuery();
+    // Get camera filename patterns for search
+    const searchQuery = getCombinedCameraPatterns();
     
     // Log the search request
     logger.info('Performing YouTube search', {

@@ -3,7 +3,6 @@ import { YouTubeRateLimitError, apiStats, YouTubeServiceInterface } from './yout
 import { filterRareVideos as filterVideos, getViewStats as getVideoStats } from './youtubeFilters';
 import { 
   getLargeTimeWindow, 
-  getSearchCacheKey, 
   performYouTubeSearch 
 } from './youtubeSearch';
 import { 
@@ -107,7 +106,7 @@ class YouTubeApiService implements YouTubeServiceInterface {
   }
   
   /**
-   * Filter videos with less than 10 views and not streams or commercial content
+   * Filter videos with less than 10 views
    * Delegates to the filter utility
    */
   filterRareVideos(videos: Video[]): Video[] {
