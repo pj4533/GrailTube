@@ -31,7 +31,7 @@
 - Support AbortController signal for cancellable search requests
 - Filter videos by view count (less than 10 views)
 - Expanded camera filename patterns (IMG_, DSC_, DCIM, MOV_, VID_, MVI_) for better unedited footage detection
-- Use a 1-month timeframe for unedited video searches
+- Use a fixed 1-month timeframe for unedited video searches
 
 ## API and Data Guidelines
 - Use centralized error handling from src/lib/api.ts
@@ -88,18 +88,21 @@
   - **VideoPlayer.tsx**: Video player modal for watching videos
 - **/src/hooks**: Custom React hooks for data fetching and state
   - **useYouTubeSearch.ts**: Manages YouTube search for unedited videos
+  - **useYouTubeSearchState.ts**: Manages core search state and AbortController
+  - **useYouTubeSearchHelpers.ts**: Implements search logic functions
   - **useSavedVideos.ts**: Handles saved video operations
   - **useAsync.ts**: Generic async operation hook
+  - **useMounted.ts**: Tracks component mount state to prevent memory leaks
 - **/src/lib**: Utilities and services
   - **/src/lib/models**: Database models and data access
   - YouTube service modules:
     - **youtube.ts**: Main facade/entry point
-    - **youtubeService.ts**: Core service implementation
-    - **youtubeSearch.ts**: Search-specific functionality 
-    - **youtubeVideoDetails.ts**: Video details functionality
-    - **youtubeFilters.ts**: Filtering logic
-    - **youtubeTypes.ts**: Type definitions
-- **/src/types**: TypeScript type definitions including SearchType enum (though currently only Unedited is used)
+    - **youtubeService.ts**: Core service implementation with AbortController support
+    - **youtubeSearch.ts**: Search-specific functionality with camera filename patterns 
+    - **youtubeVideoDetails.ts**: Video details functionality with caching
+    - **youtubeFilters.ts**: Filtering for videos with fewer than 10 views
+    - **youtubeTypes.ts**: Type definitions and API stats tracking
+- **/src/types**: TypeScript type definitions including SearchType enum (only Unedited type is implemented)
 - **/src/__tests__**: Test files organized by domain (components, hooks, lib)
 
 ## Testing Guidelines

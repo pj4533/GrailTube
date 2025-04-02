@@ -30,9 +30,9 @@ GrailTube is a web application that helps you discover rare YouTube videos with 
 - Displays when you discovered videos and how many views they had at that time
 - Displays statistics on video view distributions (0 views, <10 views, <100 views, <1000 views)
 - Automatically tries multiple time periods to find rare content
-- Filters out commercial content, movie/TV trailers, and livestreams
 - Displays search timeframe information for better context
-- Enhanced unedited footage detection with expanded camera filename patterns
+- Enhanced unedited footage detection with expanded camera filename patterns (IMG_, DSC_, DCIM, MOV_, VID_, MVI_)
+- Uses a fixed 1-month timeframe for unedited video searches
 - Caches video details to reduce API usage while ensuring unique search results
 - Comprehensive logging system for debugging and performance tracking
 - Error handling with graceful recovery for network and database issues
@@ -91,10 +91,10 @@ GrailTube is a web application that helps you discover rare YouTube videos with 
 
 1. The app opens in "Saved Videos" mode by default.
 2. To find new videos, click the "Find Videos" tab in the navigation bar.
-3. In the "Find Videos" view, the application searches for unedited footage using camera filename patterns.
+3. In the "Find Videos" view, the application searches for unedited footage using camera filename patterns (IMG_, DSC_, DCIM, MOV_, VID_, MVI_).
 4. Click the "Search" button to begin the search.
-5. GrailTube selects a 1-month time window from YouTube's history.
-6. It searches for videos uploaded during that time period.
+5. GrailTube selects a random 1-month time window from YouTube's history.
+6. It searches for videos uploaded during that time period with camera filename patterns.
 7. It filters for videos with fewer than 10 views.
 8. It displays view count statistics for all found videos.
 9. Click any video thumbnail to watch it directly in the app.

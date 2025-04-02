@@ -80,18 +80,22 @@ Reusable UI components are composed to build more complex interfaces:
 
 ### Data Access Layer (`/src/hooks`)
 
-- **Search Hook**: `useYouTubeSearch` - manages YouTube search state and search types
+- **Search Hooks**:
+  - `useYouTubeSearch` - manages YouTube search state for unedited videos
+  - `useYouTubeSearchState` - manages core state for search operations
+  - `useYouTubeSearchHelpers` - implements helper functions for search logic
 - **Saved Videos Hook**: `useSavedVideos` - manages database interaction for saved videos
 - **Async Hook**: `useAsync` - general-purpose hook for async operations with lifecycle management
+- **Mount Hook**: `useMounted` - prevents memory leaks by tracking component mount state
 
 ### Services Layer (`/src/lib`)
 
 - **YouTube Service**: Modular service for YouTube API interactions
   - `youtube.ts`: Main facade/entry point
   - `youtubeService.ts`: Core service implementation with AbortController signal support
-  - `youtubeSearch.ts`: Search-specific functionality with expanded camera filename patterns
+  - `youtubeSearch.ts`: Search-specific functionality with expanded camera filename patterns (IMG_, DSC_, DCIM, MOV_, VID_, MVI_)
   - `youtubeVideoDetails.ts`: Video detail retrieval with caching
-  - `youtubeFilters.ts`: Filtering logic for videos
+  - `youtubeFilters.ts`: Filter for videos with fewer than 10 views
   - `youtubeTypes.ts`: Types and interfaces
 - **API Utilities**: 
   - `api.ts` - Shared HTTP client and error handling
@@ -112,8 +116,9 @@ Reusable UI components are composed to build more complex interfaces:
 ### Types (`/src/types`)
 
 - Core type definitions shared across the application
-- `SearchType` enum with three modes (though currently only `Unedited` is used):
+- `SearchType` enum with just one mode:
   - `Unedited`: Finds raw, unedited footage using camera filename patterns
+- Previously had other search types that were removed from the codebase
 
 ## Data Flow
 
