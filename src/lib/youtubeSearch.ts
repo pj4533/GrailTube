@@ -34,11 +34,10 @@ export function getRandomSearchTerm(): string {
 }
 
 /**
- * Get a random camera filename pattern for unedited videos
+ * Get combined camera filename patterns for unedited videos using OR operators
  */
-export function getRandomCameraPattern(): string {
-  const randomIndex = Math.floor(Math.random() * cameraFilenamePatterns.length);
-  return cameraFilenamePatterns[randomIndex];
+export function getCombinedCameraPatterns(): string {
+  return cameraFilenamePatterns.join('|');
 }
 
 /**
@@ -49,7 +48,7 @@ export function getSearchQuery(searchType: SearchType, userKeyword?: string): st
     case SearchType.RandomTime:
       return getRandomSearchTerm();
     case SearchType.Unedited:
-      return getRandomCameraPattern();
+      return getCombinedCameraPatterns();
     case SearchType.Keyword:
       return userKeyword || getRandomSearchTerm(); // Use provided keyword or fall back to random
     default:

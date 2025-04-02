@@ -5,7 +5,7 @@ import {
   performYouTubeSearch,
   getSearchQuery,
   getRandomSearchTerm,
-  getRandomCameraPattern,
+  getCombinedCameraPatterns,
   searchTerms,
   cameraFilenamePatterns
 } from '@/lib/youtubeSearch';
@@ -28,9 +28,11 @@ describe('YouTube Search', () => {
       expect(searchTerms).toContain(result);
     });
     
-    it('should return camera pattern for Unedited type', () => {
+    it('should return combined camera patterns for Unedited type', () => {
       const result = getSearchQuery(SearchType.Unedited);
-      expect(cameraFilenamePatterns).toContain(result);
+      expect(result).toBe(getCombinedCameraPatterns());
+      // Verify it contains pipe-separated camera patterns
+      expect(result.includes('|')).toBe(true);
     });
     
     it('should use provided keyword for Keyword type', () => {
@@ -57,10 +59,16 @@ describe('YouTube Search', () => {
     });
   });
 
-  describe('getRandomCameraPattern', () => {
-    it('should return a pattern from the camera patterns array', () => {
-      const result = getRandomCameraPattern();
-      expect(cameraFilenamePatterns).toContain(result);
+  describe('getCombinedCameraPatterns', () => {
+    it('should combine all camera patterns with OR operator', () => {
+      const result = getCombinedCameraPatterns();
+      // Should join all patterns with pipe character
+      expect(result).toBe(cameraFilenamePatterns.join('|'));
+      
+      // Verify it contains all patterns
+      cameraFilenamePatterns.forEach(pattern => {
+        expect(result.includes(pattern)).toBe(true);
+      });
     });
   });
 
