@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { SavedVideo, Video } from '@/types';
+import { SavedVideo, Video, PaginationMetadata } from '@/types';
 import apiClient from '@/lib/apiClient';
 import useAsync from './useAsync';
 import useMounted from './useMounted';
@@ -8,15 +8,23 @@ import { ERROR_MESSAGES } from '@/lib/constants';
 import { createErrorHandler } from '@/lib/errorHandlers';
 
 /**
- * Hook for managing saved videos
+ * Hook for managing saved videos with pagination
  * Uses the apiClient and useAsync for consistent data fetching patterns
  */
 export function useSavedVideos() {
+  // Track current page
+  const [page, setPage] = useState(1);
+  const [limit] = useState(20); // Default limit of 20 items per page
+
   // Fetch saved videos function defined outside of useAsync to maintain reference
-  const fetchSavedVideosAsync = useCallback(async () => {
-    logger.debug('useSavedVideos: Fetching saved videos');
+  const fetchSavedVideosAsync = useCallback(async (pageNum: number = page, itemsPerPage: number = limit) => {
+    logger.debug('useSavedVideos: Fetching saved videos', { page: pageNum, limit: itemsPerPage });
+    
     // Use path without /api prefix since apiClient already adds it
-    const response = await apiClient.get<{ videos: SavedVideo[] }>('/saved-videos');
+    const response = await apiClient.get<{ 
+      videos: SavedVideo[], 
+      pagination: PaginationMetadata 
+    }>(`/saved-videos?page=${pageNum}&limit=${itemsPerPage}`);
     
     if (response.error) {
       logger.error('useSavedVideos: Error fetching videos', response.error);
@@ -24,10 +32,19 @@ export function useSavedVideos() {
     }
     
     logger.debug('useSavedVideos: Fetched videos successfully', { 
-      count: response.data?.videos?.length || 0 
+      count: response.data?.videos?.length || 0,
+      pagination: response.data?.pagination
     });
-    return response.data || { videos: [] };
-  }, []);
+    
+    return response.data || { videos: [], pagination: { 
+      page: pageNum, 
+      limit: itemsPerPage,
+      totalCount: 0,
+      totalPages: 0,
+      hasNextPage: false,
+      hasPrevPage: false
+    } };
+  }, [page, limit]);
 
   // Use the centralized useMounted hook for mount state tracking
   const isMounted = useMounted('useSavedVideos');
@@ -37,16 +54,17 @@ export function useSavedVideos() {
     data: savedVideosData,
     isLoading, 
     error,
-    execute: fetchSavedVideos,
+    execute: fetchVideos,
     setData: setSavedVideosData
-  } = useAsync<{ videos: SavedVideo[] }>(
-    fetchSavedVideosAsync,
+  } = useAsync<{ videos: SavedVideo[], pagination: PaginationMetadata }>(
+    () => fetchSavedVideosAsync(page, limit),
     { 
       immediate: true,
       onSuccess: (data) => {
         if (isMounted.current) {
           logger.debug('useSavedVideos: Successfully fetched videos in callback', { 
-            count: data?.videos?.length || 0 
+            count: data?.videos?.length || 0,
+            pagination: data?.pagination
           });
         }
       },
@@ -57,11 +75,58 @@ export function useSavedVideos() {
       }
     }
   );
+  
+  // Refetch when page changes
+  useEffect(() => {
+    if (isMounted.current) {
+      fetchVideos();
+    }
+  }, [page, fetchVideos, isMounted]);
+
+  // Function to fetch a specific page
+  const fetchSavedVideos = useCallback((pageNum: number = page) => {
+    if (pageNum !== page) {
+      setPage(pageNum);
+    } else {
+      fetchVideos();
+    }
+  }, [fetchVideos, page]);
+
+  // Pagination navigation functions
+  const goToNextPage = useCallback(() => {
+    if (savedVideosData?.pagination?.hasNextPage) {
+      setPage(prevPage => prevPage + 1);
+    }
+  }, [savedVideosData?.pagination?.hasNextPage]);
+
+  const goToPrevPage = useCallback(() => {
+    if (savedVideosData?.pagination?.hasPrevPage) {
+      setPage(prevPage => prevPage - 1);
+    }
+  }, [savedVideosData?.pagination?.hasPrevPage]);
+
+  const goToPage = useCallback((pageNum: number) => {
+    if (pageNum >= 1 && pageNum <= (savedVideosData?.pagination?.totalPages || 1)) {
+      setPage(pageNum);
+    }
+  }, [savedVideosData?.pagination?.totalPages]);
 
   // Derived state wrapped in useMemo to maintain reference stability
   const savedVideos = useMemo(() => {
     return savedVideosData?.videos || [];
   }, [savedVideosData]);
+  
+  // Extract pagination data
+  const pagination = useMemo(() => {
+    return savedVideosData?.pagination || {
+      page: 1,
+      limit,
+      totalCount: 0,
+      totalPages: 0,
+      hasNextPage: false,
+      hasPrevPage: false
+    };
+  }, [savedVideosData, limit]);
 
   // Save a video
   const saveVideo = useCallback(async (video: Video) => {
@@ -154,11 +219,16 @@ export function useSavedVideos() {
 
   return {
     savedVideos,
+    pagination,
+    currentPage: page,
     isLoading,
     error: error || null,
     saveVideo,
     removeVideo,
     isVideoSaved,
-    refreshSavedVideos: fetchSavedVideos
+    refreshSavedVideos: fetchSavedVideos,
+    goToNextPage,
+    goToPrevPage,
+    goToPage
   };
 }

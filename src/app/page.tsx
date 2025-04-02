@@ -14,6 +14,7 @@ import ErrorDisplay from '@/components/ui/ErrorDisplay';
 import EmptyState from '@/components/ui/EmptyState';
 import Button from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
+import Pagination from '@/components/ui/Pagination';
 import styles from '@/lib/styles';
 import { formatTimeWindow } from '@/lib/utils';
 
@@ -42,11 +43,13 @@ export default function Home() {
   // Saved videos hook
   const {
     savedVideos,
+    pagination,
     isLoading: isSavedVideosLoading,
     error: savedVideosError,
     saveVideo,
     removeVideo,
     isVideoSaved,
+    goToPage
   } = useSavedVideos();
 
   const handleVideoClick = (videoId: string) => {
@@ -189,14 +192,26 @@ export default function Home() {
             ) : savedVideos.length === 0 ? (
               <EmptyState message="No videos have been saved yet. Click &quot;Find Videos&quot; to discover rare gems!" />
             ) : (
-              <VideoGrid 
-                videos={savedVideos} 
-                onVideoClick={handleVideoClick}
-                onRemoveVideo={removeVideo}
-                isVideoSaved={() => true}
-                showSaveButtons={true}
-                isSavedVideosView={true}
-              />
+              <>
+                <VideoGrid 
+                  videos={savedVideos} 
+                  onVideoClick={handleVideoClick}
+                  onRemoveVideo={removeVideo}
+                  isVideoSaved={() => true}
+                  showSaveButtons={true}
+                  isSavedVideosView={true}
+                />
+
+                {/* Pagination controls */}
+                <div className="mt-6">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-500">
+                      Showing {savedVideos.length} of {pagination.totalCount} videos
+                    </div>
+                    <Pagination pagination={pagination} onPageChange={goToPage} />
+                  </div>
+                </div>
+              </>
             )}
           </div>
         )}

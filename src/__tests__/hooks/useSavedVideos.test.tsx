@@ -104,7 +104,17 @@ describe('useSavedVideos Hook', () => {
     
     // Default mock implementation for successful API responses
     (apiClient.get as jest.Mock).mockResolvedValue({
-      data: { videos: mockSavedVideos },
+      data: { 
+        videos: mockSavedVideos,
+        pagination: {
+          page: 1,
+          limit: 20,
+          totalCount: 2,
+          totalPages: 1,
+          hasNextPage: false,
+          hasPrevPage: false
+        }
+      },
       error: null
     });
     
@@ -120,8 +130,20 @@ describe('useSavedVideos Hook', () => {
   });
 
   it('fetches saved videos on mount', async () => {
+    const mockPagination = {
+      page: 1,
+      limit: 20,
+      totalCount: 2,
+      totalPages: 1,
+      hasNextPage: false,
+      hasPrevPage: false
+    };
+    
     (useAsync as jest.Mock).mockImplementationOnce(() => ({
-      data: { videos: mockSavedVideos },
+      data: { 
+        videos: mockSavedVideos,
+        pagination: mockPagination
+      },
       isLoading: false,
       error: "",
       execute: jest.fn(),
@@ -135,6 +157,7 @@ describe('useSavedVideos Hook', () => {
     
     // Should have videos immediately due to our mock
     expect(result.current.savedVideos).toEqual(mockSavedVideos);
+    expect(result.current.pagination).toEqual(mockPagination);
     expect(result.current.isLoading).toBe(false);
     expect(result.current.error).toBe(null);
   });
@@ -157,15 +180,38 @@ describe('useSavedVideos Hook', () => {
     
     expect(result.current.isLoading).toBe(false);
     expect(result.current.savedVideos).toEqual([]);
+    expect(result.current.pagination).toEqual({
+      page: 1,
+      limit: 20,
+      totalCount: 0,
+      totalPages: 0,
+      hasNextPage: false,
+      hasPrevPage: false
+    });
     expect(result.current.error).toBe(errorMessage);
   });
 
   it('saves a video successfully', async () => {
     // Mock successful API calls
-    const executeAsync = jest.fn().mockResolvedValue({ videos: mockSavedVideos });
+    const mockPagination = {
+      page: 1,
+      limit: 20,
+      totalCount: 2,
+      totalPages: 1,
+      hasNextPage: false,
+      hasPrevPage: false
+    };
+    
+    const executeAsync = jest.fn().mockResolvedValue({ 
+      videos: mockSavedVideos,
+      pagination: mockPagination
+    });
     
     (useAsync as jest.Mock).mockImplementationOnce(() => ({
-      data: { videos: mockSavedVideos },
+      data: { 
+        videos: mockSavedVideos,
+        pagination: mockPagination
+      },
       isLoading: false,
       error: "",
       execute: executeAsync,
@@ -195,8 +241,20 @@ describe('useSavedVideos Hook', () => {
       error: errorMessage
     });
     
+    const mockPagination = {
+      page: 1,
+      limit: 20,
+      totalCount: 2,
+      totalPages: 1,
+      hasNextPage: false,
+      hasPrevPage: false
+    };
+    
     (useAsync as jest.Mock).mockImplementationOnce(() => ({
-      data: { videos: mockSavedVideos },
+      data: { 
+        videos: mockSavedVideos,
+        pagination: mockPagination
+      },
       isLoading: false,
       error: "",
       execute: jest.fn(),
@@ -221,11 +279,29 @@ describe('useSavedVideos Hook', () => {
 
   it('removes a video successfully', async () => {
     // Setup mock with implementation for setSavedVideosData
-    const executeAsync = jest.fn().mockResolvedValue({ videos: mockSavedVideos.slice(1) }); // Return videos except the first one
+    const mockPagination = {
+      page: 1,
+      limit: 20,
+      totalCount: 1, // One less after removal
+      totalPages: 1,
+      hasNextPage: false,
+      hasPrevPage: false
+    };
+    
+    const executeAsync = jest.fn().mockResolvedValue({ 
+      videos: mockSavedVideos.slice(1), // Return videos except the first one
+      pagination: mockPagination
+    }); 
     const setDataMock = jest.fn();
     
     (useAsync as jest.Mock).mockImplementationOnce(() => ({
-      data: { videos: mockSavedVideos },
+      data: { 
+        videos: mockSavedVideos,
+        pagination: {
+          ...mockPagination,
+          totalCount: 2 // Initially 2 videos
+        }
+      },
       isLoading: false,
       error: "",
       execute: executeAsync,
@@ -251,8 +327,20 @@ describe('useSavedVideos Hook', () => {
   });
 
   it('checks if a video is saved correctly', async () => {
+    const mockPagination = {
+      page: 1,
+      limit: 20,
+      totalCount: 2,
+      totalPages: 1,
+      hasNextPage: false,
+      hasPrevPage: false
+    };
+    
     (useAsync as jest.Mock).mockImplementationOnce(() => ({
-      data: { videos: mockSavedVideos },
+      data: { 
+        videos: mockSavedVideos,
+        pagination: mockPagination
+      },
       isLoading: false,
       error: "",
       execute: jest.fn(),
@@ -269,5 +357,67 @@ describe('useSavedVideos Hook', () => {
     
     // Check a video that is not saved
     expect(result.current.isVideoSaved('nonexistent')).toBe(false);
+  });
+  
+  it('navigates between pages correctly', async () => {
+    // Setup initial state with page 1
+    const page1Pagination = {
+      page: 1,
+      limit: 20,
+      totalCount: 42,
+      totalPages: 3,
+      hasNextPage: true,
+      hasPrevPage: false
+    };
+    
+    const page2Pagination = {
+      page: 2,
+      limit: 20,
+      totalCount: 42,
+      totalPages: 3,
+      hasNextPage: true,
+      hasPrevPage: true
+    };
+    
+    const executeAsyncMock = jest.fn().mockImplementation(async () => ({
+      videos: mockSavedVideos,
+      pagination: page2Pagination
+    }));
+    
+    (useAsync as jest.Mock).mockImplementation(() => ({
+      data: {
+        videos: mockSavedVideos,
+        pagination: page1Pagination
+      },
+      isLoading: false,
+      error: "",
+      execute: executeAsyncMock,
+      reset: jest.fn(),
+      setData: jest.fn(),
+      setError: jest.fn(),
+      setLoading: jest.fn()
+    }));
+    
+    const { result } = renderHook(() => useSavedVideos());
+    
+    // Initially we're on page 1
+    expect(result.current.pagination.page).toBe(1);
+    
+    // Go to next page
+    await act(async () => {
+      result.current.goToNextPage();
+    });
+    
+    // executeAsync should have been called to fetch the next page
+    expect(executeAsyncMock).toHaveBeenCalled();
+    
+    // Going to a specific page 
+    await act(async () => {
+      result.current.goToPage(3);
+    });
+    
+    // executeAsync is called for each state change and render
+    // We're not concerned with the exact number of calls, just that it's called
+    expect(executeAsyncMock).toHaveBeenCalled();
   });
 });

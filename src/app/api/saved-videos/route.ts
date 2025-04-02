@@ -47,18 +47,54 @@ async function ensureInitialized() {
 }
 
 /**
- * GET /api/saved-videos - Retrieve all saved videos
+ * GET /api/saved-videos - Retrieve saved videos with pagination
+ * Query parameters:
+ * - page: Page number (1-based)
+ * - limit: Items per page
  */
-export async function GET() {
+export async function GET(request: Request) {
   logger.debug('API route: GET /api/saved-videos called');
   try {
     await ensureInitialized();
     
-    logger.debug('API route: Fetching all saved videos');
-    const videos = await VideoModel.getAll();
+    // Parse query parameters
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '1', 10);
+    const limit = parseInt(url.searchParams.get('limit') || '20', 10);
     
-    logger.debug('API route: Returning videos', { count: videos.length });
-    return NextResponse.json({ videos });
+    logger.debug('API route: Fetching paginated saved videos', { page, limit });
+    
+    // Get paginated videos and total count in parallel for efficiency
+    const [videos, totalCount] = await Promise.all([
+      VideoModel.getPaginated(page, limit),
+      VideoModel.getCount()
+    ]);
+    
+    // Calculate pagination metadata
+    const totalPages = Math.ceil(totalCount / limit);
+    const hasNextPage = page < totalPages;
+    const hasPrevPage = page > 1;
+    
+    logger.debug('API route: Returning paginated videos', { 
+      count: videos.length, 
+      totalCount,
+      page,
+      totalPages,
+      hasNextPage,
+      hasPrevPage
+    });
+    
+    return NextResponse.json({
+      videos,
+      pagination: {
+        page,
+        limit,
+        totalCount,
+        totalPages,
+        hasNextPage,
+        hasPrevPage
+      }
+    });
   } catch (error) {
     logger.error('API route: Error in GET /api/saved-videos', error);
     const { error: errorMessage, status } = handleApiError(error, 'fetching saved videos');

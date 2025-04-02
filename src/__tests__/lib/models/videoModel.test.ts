@@ -209,4 +209,98 @@ describe('VideoModel', () => {
       expect(result).toBe(false);
     });
   });
+  
+  describe('getCount', () => {
+    it('should return the total count of videos', async () => {
+      (query as jest.Mock).mockResolvedValueOnce([{ total: 42 }]);
+      
+      const result = await VideoModel.getCount();
+      
+      expect(result).toBe(42);
+      expect(query).toHaveBeenCalledWith('SELECT COUNT(*) as total FROM saved_videos');
+    });
+    
+    it('should return 0 when query returns non-array', async () => {
+      (query as jest.Mock).mockResolvedValueOnce(null);
+      
+      const result = await VideoModel.getCount();
+      
+      expect(result).toBe(0);
+    });
+    
+    it('should throw when query fails', async () => {
+      const testError = new Error('Count query failed');
+      (query as jest.Mock).mockRejectedValueOnce(testError);
+      
+      await expect(VideoModel.getCount()).rejects.toThrow('Count query failed');
+    });
+  });
+  
+  describe('getPaginated', () => {
+    it('should return paginated results with default values', async () => {
+      const mockDbResponse = [
+        {
+          id: 1,
+          video_id: 'abc123',
+          title: 'Test Video',
+          description: 'Description',
+          thumbnailUrl: 'https://example.com/thumb.jpg',
+          channelTitle: 'Test Channel',
+          publishedAt: new Date('2023-01-01'),
+          view_count_at_discovery: 1000,
+          discovered_at: new Date('2023-01-02'),
+          duration: 'PT2M30S'
+        }
+      ];
+      
+      (query as jest.Mock).mockResolvedValueOnce(mockDbResponse);
+      
+      const result = await VideoModel.getPaginated();
+      
+      expect(query).toHaveBeenCalledWith(
+        expect.stringContaining('LIMIT 20 OFFSET 0')
+      );
+      
+      expect(result).toHaveLength(1);
+      expect(result[0].title).toBe('Test Video');
+      expect(result[0].publishedAt).toBe(new Date('2023-01-01').toISOString());
+    });
+    
+    it('should calculate correct offset for page > 1', async () => {
+      const mockDbResponse = [];
+      (query as jest.Mock).mockResolvedValueOnce(mockDbResponse);
+      
+      await VideoModel.getPaginated(3, 10);
+      
+      expect(query).toHaveBeenCalledWith(
+        expect.stringContaining('LIMIT 10 OFFSET 20') // Page 3, limit 10, offset (3-1)*10=20
+      );
+    });
+    
+    it('should handle invalid page and limit values', async () => {
+      const mockDbResponse = [];
+      (query as jest.Mock).mockResolvedValueOnce(mockDbResponse);
+      
+      await VideoModel.getPaginated(-1, -5);
+      
+      expect(query).toHaveBeenCalledWith(
+        expect.stringContaining('LIMIT 1 OFFSET 0') // Should use minimum valid values
+      );
+    });
+    
+    it('should return empty array when query returns non-array', async () => {
+      (query as jest.Mock).mockResolvedValueOnce(null);
+      
+      const result = await VideoModel.getPaginated(2, 10);
+      
+      expect(result).toEqual([]);
+    });
+    
+    it('should throw when query fails', async () => {
+      const testError = new Error('Pagination query failed');
+      (query as jest.Mock).mockRejectedValueOnce(testError);
+      
+      await expect(VideoModel.getPaginated(2, 10)).rejects.toThrow('Pagination query failed');
+    });
+  });
 });

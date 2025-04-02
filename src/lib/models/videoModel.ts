@@ -23,7 +23,81 @@ export const VideoModel = {
     }
   },
   /**
-   * Get all saved videos, ordered by most recently discovered
+   * Get total count of saved videos
+   */
+  async getCount(): Promise<number> {
+    logger.debug('VideoModel: Getting count of saved videos');
+    
+    try {
+      const result = await query('SELECT COUNT(*) as total FROM saved_videos');
+      
+      if (!result || !Array.isArray(result) || result.length === 0) {
+        logger.warn('VideoModel: Count query did not return expected result', { result });
+        return 0;
+      }
+      
+      return (result[0] as any).total;
+    } catch (error) {
+      logger.error('VideoModel: Error getting video count', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get saved videos with pagination, ordered by most recently discovered
+   * @param page Page number (1-based)
+   * @param limit Number of items per page
+   */
+  async getPaginated(page: number = 1, limit: number = 20): Promise<SavedVideo[]> {
+    // Ensure positive values and set defaults
+    const pageNumber = Math.max(1, page);
+    const pageSize = Math.max(1, limit);
+    const offset = (pageNumber - 1) * pageSize;
+    
+    logger.debug('VideoModel: Getting paginated saved videos', { page: pageNumber, limit: pageSize, offset });
+    
+    try {
+      // Use explicit numbers in the query to avoid prepared statement issues
+      const results = await query(`
+        SELECT 
+          id,
+          video_id,
+          title,
+          description,
+          thumbnail_url AS thumbnailUrl,
+          channel_title AS channelTitle,
+          channel_id AS channelId,
+          published_at AS publishedAt,
+          view_count_at_discovery,
+          discovered_at,
+          duration
+        FROM saved_videos 
+        ORDER BY discovered_at DESC
+        LIMIT ${pageSize} OFFSET ${offset}
+      `);
+      
+      // Check if we got results
+      if (!results || !Array.isArray(results)) {
+        logger.warn('VideoModel: getPaginated query did not return an array', { results });
+        return [];
+      }
+      
+      logger.debug('VideoModel: Retrieved paginated saved videos', { count: results.length, page: pageNumber, limit: pageSize });
+      
+      // Convert MySQL datetime strings to ISO format for consistency
+      return (results as any[]).map(video => ({
+        ...video,
+        publishedAt: new Date(video.publishedAt).toISOString(),
+        discovered_at: new Date(video.discovered_at).toISOString()
+      }));
+    } catch (error) {
+      logger.error('VideoModel: Error retrieving paginated videos', error);
+      throw error;
+    }
+  },
+  
+  /**
+   * Get all saved videos, ordered by most recently discovered (kept for backwards compatibility)
    */
   async getAll(): Promise<SavedVideo[]> {
     logger.debug('VideoModel: Getting all saved videos');

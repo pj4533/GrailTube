@@ -38,3 +38,12 @@ export enum SearchType {
   Unedited = 'unedited'
   // Previously had RandomTime and Keyword types that were removed
 }
+
+export interface PaginationMetadata {
+  page: number;
+  limit: number;
+  totalCount: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
