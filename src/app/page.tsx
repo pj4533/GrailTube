@@ -15,6 +15,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import Button from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import styles from '@/lib/styles';
+import { formatTimeWindow } from '@/lib/utils';
 
 // Type for app modes
 type AppMode = 'savedVideos' | 'search';
@@ -147,7 +148,7 @@ export default function Home() {
         {hasFoundVideos && (
           <div className="mb-8">
             <h2 className={`${styles.layout.sectionHeader} flex items-center justify-between`}>
-              <span>Recently Discovered Unedited Videos</span>
+              <span>Results for {currentWindow && formatTimeWindow(currentWindow)}</span>
               <button
                 onClick={() => performReroll()}
                 disabled={isSearchLoading}
