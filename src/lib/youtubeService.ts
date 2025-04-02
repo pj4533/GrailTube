@@ -141,8 +141,8 @@ class YouTubeApiService implements YouTubeServiceInterface {
 const youtubeApiService = new YouTubeApiService();
 
 // Export methods for use elsewhere
-export const searchVideosInTimeWindow = (window: TimeWindow, searchType?: SearchType): Promise<string[]> => 
-  youtubeApiService.searchVideosInTimeWindow(window, searchType);
+export const searchVideosInTimeWindow = (window: TimeWindow, searchType?: SearchType, signal?: AbortSignal): Promise<string[]> => 
+  youtubeApiService.searchVideosInTimeWindow(window, searchType, signal);
 
 export const getVideoDetails = (videoIds: string[]): Promise<Video[]> => 
   youtubeApiService.getVideoDetails(videoIds);
