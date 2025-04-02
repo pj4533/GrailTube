@@ -19,7 +19,6 @@ import { STATUS_MESSAGE_DELAY_MS } from '@/lib/constants';
 export const executeSearch = async (
   timeWindow: TimeWindow,
   searchType: SearchType,
-  keyword: string | undefined,
   isCancelled: boolean,
   setStatusMessage: (message: string | null) => void,
   onReroll: () => Promise<void>

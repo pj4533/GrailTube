@@ -45,15 +45,14 @@ describe('YouTube Search', () => {
   });
 
   describe('getCombinedCameraPatterns', () => {
-    it('should combine all camera patterns with OR operator', () => {
+    it('should combine camera patterns with OR operator', () => {
       const result = getCombinedCameraPatterns();
-      // Should join all patterns with pipe character
-      expect(result).toBe(cameraFilenamePatterns.join('|'));
+      // Should be a specific subset of patterns
+      expect(result).toBe('IMG_|DSC_');
       
-      // Verify it contains all patterns
-      cameraFilenamePatterns.forEach(pattern => {
-        expect(result.includes(pattern)).toBe(true);
-      });
+      // Verify it contains these specific patterns
+      expect(result.includes('IMG_')).toBe(true);
+      expect(result.includes('DSC_')).toBe(true);
     });
   });
 

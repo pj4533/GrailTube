@@ -15,11 +15,12 @@ describe('Icon Component', () => {
     'ChevronDown',
     'Trash',
     'Eye',
-    'Spinner'
+    'Spinner',
+    'RerollDice'
   ];
 
   iconComponents.forEach(iconName => {
-    it(`should render ${iconName} icon with default class`, () => {
+    it(`should render ${iconName} icon`, () => {
       // @ts-ignore - dynamic access to Icon components
       const IconComponent = Icon[iconName];
       const { container } = render(<IconComponent />);
@@ -27,11 +28,12 @@ describe('Icon Component', () => {
       const svg = container.querySelector('svg');
       expect(svg).toBeInTheDocument();
       
-      // Check if default class is applied
+      // Check if font awesome class is applied
+      expect(svg).toHaveClass('svg-inline--fa');
+      
+      // Spinner should have animate-spin class
       if (iconName === 'Spinner') {
-        expect(svg).toHaveClass('h-4 w-4 animate-spin');
-      } else {
-        expect(svg).toHaveClass('h-4 w-4');
+        expect(svg).toHaveClass('animate-spin');
       }
     });
 
@@ -43,34 +45,26 @@ describe('Icon Component', () => {
       const svg = container.querySelector('svg');
       expect(svg).toBeInTheDocument();
       expect(svg).toHaveClass('custom-class');
-      expect(svg).not.toHaveClass('h-4 w-4');
     });
   });
 
-  // Test specific icon attributes to ensure correct SVG paths
-  it('should render Search icon with correct path', () => {
+  // Test specific icon mappings to Font Awesome icons
+  it('should render Search icon as magnifying glass', () => {
     const { container } = render(<Icon.Search />);
-    const path = container.querySelector('path');
-    expect(path).toHaveAttribute('d', 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z');
+    const svg = container.querySelector('svg');
+    expect(svg).toHaveClass('fa-magnifying-glass');
   });
 
-  it('should render BookmarkOutline icon with correct path', () => {
+  it('should render BookmarkOutline icon as bookmark', () => {
     const { container } = render(<Icon.BookmarkOutline />);
-    const path = container.querySelector('path');
-    expect(path).toHaveAttribute('d', 'M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z');
+    const svg = container.querySelector('svg');
+    expect(svg).toHaveClass('fa-bookmark');
   });
 
-  it('should render Spinner icon with correct circle and path', () => {
+  it('should render Spinner icon as spinner', () => {
     const { container } = render(<Icon.Spinner />);
-    const circle = container.querySelector('circle');
-    const path = container.querySelector('path');
-    
-    expect(circle).toHaveAttribute('cx', '12');
-    expect(circle).toHaveAttribute('cy', '12');
-    expect(circle).toHaveAttribute('r', '10');
-    expect(circle).toHaveClass('opacity-25');
-    
-    expect(path).toHaveAttribute('d', 'M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z');
-    expect(path).toHaveClass('opacity-75');
+    const svg = container.querySelector('svg');
+    expect(svg).toHaveClass('fa-spinner');
+    expect(svg).toHaveClass('animate-spin');
   });
 });

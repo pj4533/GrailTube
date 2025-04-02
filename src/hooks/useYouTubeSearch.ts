@@ -37,7 +37,6 @@ export function useYouTubeSearch() {
       const searchResults = await executeSearch(
         timeWindow,
         searchType,
-        undefined, // No keyword needed for Unedited search
         isCancelled,
         setStatusMessage,
         performReroll

@@ -117,9 +117,9 @@ describe('SearchStatus Component', () => {
     );
 
     expect(formatTimeWindow).toHaveBeenCalledWith(mockTimeWindow);
-    expect(screen.getByText(/searching for rare videos in/i)).toBeInTheDocument();
+    expect(screen.getByText(/searching for unedited videos in/i)).toBeInTheDocument();
     expect(screen.getByText('Mock formatted time window')).toBeInTheDocument();
-    expect(screen.getByTestId('search-type-indicator')).toBeInTheDocument();
+    // SearchTypeIndicator is no longer used in this component
   });
 
   it('displays search results when videos are found', () => {
@@ -134,7 +134,7 @@ describe('SearchStatus Component', () => {
       />
     );
 
-    expect(screen.getByText(/found 2 rare videos/i)).toBeInTheDocument();
+    expect(screen.getByText(/found 2 rare unedited videos/i)).toBeInTheDocument();
     expect(screen.getByText('Mock formatted time window')).toBeInTheDocument();
   });
 
@@ -210,7 +210,6 @@ describe('SearchStatus Component', () => {
     );
 
     expect(screen.getByText(/found 2 rare unedited videos/i)).toBeInTheDocument();
-    const indicator = screen.getByTestId('search-type-indicator');
-    expect(indicator).toHaveAttribute('data-search-type', SearchType.Unedited);
+    // SearchTypeIndicator is no longer used directly in this component
   });
 });
