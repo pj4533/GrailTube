@@ -133,8 +133,8 @@ export default function Home() {
       
       {/* Main Content */}
       <main className={`flex-1 ${styles.layout.container} py-6`}>
-        {/* Show search status during loading */}
-        {isSearchModeNoResults && (
+        {/* Show search status during loading or reroll */}
+        {(isSearchModeNoResults || isSearchLoading) && (
           <SearchStatus
             isLoading={isSearchLoading}
             videos={searchResults}

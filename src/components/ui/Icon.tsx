@@ -116,11 +116,12 @@ export const Icon = {
   
   RerollDice: ({ className = "h-4 w-4" }: IconProps) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <rect x="5" y="5" width="14" height="14" rx="2" strokeWidth={1.8} strokeLinejoin="round" />
-      <circle cx="8.5" cy="8.5" r="1.3" fill="currentColor" />
-      <circle cx="15.5" cy="15.5" r="1.3" fill="currentColor" />
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M19 4l2 2-2 2" />
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M21 6H18.5C14.5 6 10.5 10 10.5 14" />
+      <rect x="5" y="5" width="6" height="6" rx="1" strokeWidth={1.5} strokeLinejoin="round" />
+      <circle cx="8" cy="8" r="1" fill="currentColor" />
+      <rect x="13" y="5" width="6" height="6" rx="1" strokeWidth={1.5} strokeLinejoin="round" />
+      <circle cx="16" cy="8" r="1" fill="currentColor" />
+      <rect x="9" y="13" width="6" height="6" rx="1" strokeWidth={1.5} strokeLinejoin="round" />
+      <circle cx="12" cy="16" r="1" fill="currentColor" />
     </svg>
   )
 };
