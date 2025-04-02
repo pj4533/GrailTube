@@ -65,7 +65,8 @@ export function getLargeTimeWindow(baseWindow: TimeWindow): TimeWindow {
 }
 
 /**
- * Generate cache key for a time window and search type
+ * Generate description for a time window and search type
+ * (Keeping function for compatibility but no longer used for caching)
  */
 export function getSearchCacheKey(window: TimeWindow, searchType: SearchType): string {
   return `${searchType}_${window.startDate.toISOString()}_${window.endDate.toISOString()}`;

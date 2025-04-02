@@ -20,9 +20,8 @@ class YouTubeApiService implements YouTubeServiceInterface {
   private readonly maxResultsPerRequest: number;
   private readonly maxIdsPerRequest: number;
   
-  // Simple in-memory cache
+  // Only keep video cache for API efficiency
   private videoCache: Record<string, Video> = {};
-  private searchCache: Record<string, string[]> = {};
   
   constructor() {
     this.apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY || '';
@@ -51,18 +50,8 @@ class YouTubeApiService implements YouTubeServiceInterface {
       console.log('Adjusted search window to start at YouTube founding date');
     }
     
-    // Simple cache key for unedited search
-    const cacheKey = getSearchCacheKey(searchWindow, searchType);
-    
-    // Check if we already have this search cached
-    if (this.searchCache[cacheKey]) {
-      console.log(`Using cached search results for ${cacheKey}`);
-      apiStats.cachedSearches++;
-      return this.searchCache[cacheKey];
-    }
-    
     try {
-      // Perform the search
+      // Perform the search with no caching
       const videoIds = await performYouTubeSearch(
         this.apiKey, 
         searchWindow, 
@@ -70,9 +59,6 @@ class YouTubeApiService implements YouTubeServiceInterface {
         this.maxResultsPerRequest,
         signal
       );
-      
-      // Cache the results
-      this.searchCache[cacheKey] = videoIds;
       
       return videoIds;
     } catch (error) {
