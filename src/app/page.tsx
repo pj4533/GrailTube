@@ -101,9 +101,7 @@ export default function Home() {
                   data-testid="saved-videos-tab"
                 >
                   <div className="flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                    </svg>
+                    <Icon.BookmarkOutline className="h-4 w-4 mr-2" />
                     <span>Saved Videos</span>
                   </div>
                 </button>
@@ -118,9 +116,7 @@ export default function Home() {
                   data-testid="find-videos-tab"
                 >
                   <div className="flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+                    <Icon.Search className="h-4 w-4 mr-2" />
                     <span>Find Videos</span>
                   </div>
                 </button>
