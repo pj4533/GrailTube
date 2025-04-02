@@ -28,7 +28,8 @@
 - Use caching mechanisms to reduce API quota usage
 - Track API call statistics for transparency
 - Always handle rate limiting and quota errors gracefully
-- Filter out commercial content, live streams, and misleading content 
+- Filter out commercial content, live streams, and misleading content
+- Use a 1-month timeframe for unedited video searches
 
 ## API and Data Guidelines
 - Use centralized error handling from src/lib/api.ts
@@ -77,13 +78,13 @@
   - **page.tsx**: Main application with tabbed navigation and video display
 - **/src/components**: Reusable UI components
   - **/src/components/ui**: Shared UI primitives and patterns
-  - **SearchTypeIndicator.tsx**: Displays the current search type
+  - **SearchTypeIndicator.tsx**: Displays the current search type (currently fixed to Unedited)
   - **SearchStatus.tsx**: Shows search status and progress
   - **VideoCard.tsx**: Card component for displaying video information
   - **VideoGrid.tsx**: Grid layout for multiple video cards
   - **VideoPlayer.tsx**: Video player modal for watching videos
 - **/src/hooks**: Custom React hooks for data fetching and state
-  - **useYouTubeSearch.ts**: Manages YouTube search with multiple search types
+  - **useYouTubeSearch.ts**: Manages YouTube search for unedited videos
   - **useSavedVideos.ts**: Handles saved video operations
   - **useAsync.ts**: Generic async operation hook
 - **/src/lib**: Utilities and services
@@ -93,10 +94,9 @@
     - **youtubeService.ts**: Core service implementation
     - **youtubeSearch.ts**: Search-specific functionality 
     - **youtubeVideoDetails.ts**: Video details functionality
-    - **youtubeError.ts**: Error handling
     - **youtubeFilters.ts**: Filtering logic
     - **youtubeTypes.ts**: Type definitions
-- **/src/types**: TypeScript type definitions including SearchType enum (RandomTime, Unedited, Keyword)
+- **/src/types**: TypeScript type definitions including SearchType enum (though currently only Unedited is used)
 - **/src/__tests__**: Test files organized by domain (components, hooks, lib)
 
 ## Testing Guidelines

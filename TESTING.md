@@ -86,7 +86,7 @@ The project has successfully implemented comprehensive test coverage:
 - API client and utility functions have thorough test coverage
 - Code coverage thresholds (>70%) are met and enforced (currently at >88% statement coverage)
 
-**Note:** There are some TypeScript type errors in the test files that don't affect test execution. These are primarily related to test fixtures and mocks. Tests run successfully despite these type warnings.
+**Note:** There may be some TypeScript type errors in the test files that don't affect test execution. These are primarily related to test fixtures and mocks. Tests run successfully despite these type warnings. The test suite may need to be updated to reflect recent changes to the codebase, particularly regarding the search timeframe which has been updated to 1 month.
 
 ## Test Utilities
 

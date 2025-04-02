@@ -93,7 +93,6 @@ Reusable UI components are composed to build more complex interfaces:
   - `youtubeVideoDetails.ts`: Video detail retrieval
   - `youtubeFilters.ts`: Filtering logic for videos
   - `youtubeTypes.ts`: Types and interfaces
-  - `youtubeError.ts`: Error handling for YouTube services
 - **API Utilities**: 
   - `api.ts` - Shared HTTP client and error handling
   - `apiClient.ts` - Standardized client for API communication
@@ -113,10 +112,8 @@ Reusable UI components are composed to build more complex interfaces:
 ### Types (`/src/types`)
 
 - Core type definitions shared across the application
-- `SearchType` enum with three modes:
-  - `RandomTime`: Searches videos from random time periods in YouTube history
+- `SearchType` enum with three modes (though currently only `Unedited` is used):
   - `Unedited`: Finds raw, unedited footage using camera filename patterns
-  - `Keyword`: Searches for videos matching custom search terms
 
 ## Data Flow
 
