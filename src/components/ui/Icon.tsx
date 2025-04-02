@@ -116,12 +116,33 @@ export const Icon = {
   
   RerollDice: ({ className = "h-4 w-4" }: IconProps) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <rect x="5" y="5" width="6" height="6" rx="1" strokeWidth={1.5} strokeLinejoin="round" />
-      <circle cx="8" cy="8" r="1" fill="currentColor" />
-      <rect x="13" y="5" width="6" height="6" rx="1" strokeWidth={1.5} strokeLinejoin="round" />
-      <circle cx="16" cy="8" r="1" fill="currentColor" />
-      <rect x="9" y="13" width="6" height="6" rx="1" strokeWidth={1.5} strokeLinejoin="round" />
-      <circle cx="12" cy="16" r="1" fill="currentColor" />
+      {/* Main die (larger, in motion) */}
+      <g transform="rotate(-15, 12, 12)">
+        <rect x="7" y="7" width="10" height="10" rx="1.5" strokeWidth={1.5} strokeLinejoin="round" />
+        <circle cx="10" cy="10" r="1.2" fill="currentColor" />
+        <circle cx="14" cy="14" r="1.2" fill="currentColor" />
+        <circle cx="10" cy="14" r="1.2" fill="currentColor" />
+        <circle cx="14" cy="10" r="1.2" fill="currentColor" />
+        <circle cx="12" cy="12" r="1.2" fill="currentColor" />
+      </g>
+      
+      {/* Second die (smaller) */}
+      <rect x="4" y="14" width="6" height="6" rx="1" strokeWidth={1.5} strokeLinejoin="round" />
+      <circle cx="7" cy="17" r="1" fill="currentColor" />
+      
+      {/* Curved motion/reroll arrow */}
+      <path 
+        d="M18.5 9.5c1.5-1.5 1.5-3.5 0-5h-2.5" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+        strokeWidth={1.5} 
+      />
+      <path 
+        d="M18.5 4.5l-2 1.5 2 1.5" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+        strokeWidth={1.5} 
+      />
     </svg>
   )
 };
