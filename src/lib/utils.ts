@@ -1,6 +1,6 @@
 import { format, addMinutes, subMinutes, subDays } from 'date-fns';
 import { TimeWindow, SearchType } from '@/types';
-import { YOUTUBE_FOUNDING_DATE } from './constants';
+import { YOUTUBE_FOUNDING_DATE, UNEDITED_WINDOW_DAYS } from './constants';
 
 // Format date for display
 export function formatDate(date: string): string {
@@ -46,6 +46,8 @@ export function formatTimeWindow(window: TimeWindow): string {
     periodDescription = "96-hour period";
   } else if (duration === 10080) { // 7 days in minutes = 10080
     periodDescription = "1-week period";
+  } else if (duration === 43200) { // 30 days in minutes = 43200
+    periodDescription = "1-month period";
   } else if (duration === 86400) { // 60 days in minutes = 86400
     periodDescription = "2-month period";
   } else {
@@ -67,8 +69,8 @@ function createTimeWindow(centerTime: Date, durationMinutes: number): TimeWindow
 
 // Create initial time window for unedited search
 export function createInitialTimeWindow(centerDate: Date, isUnedited: boolean = true): TimeWindow {
-  // Always use 7 days for unedited videos
-  const durationMinutes = 10080; // 7 days in minutes (UNEDITED_WINDOW_DAYS * 24 * 60)
+  // Calculate duration in minutes from days constant
+  const durationMinutes = UNEDITED_WINDOW_DAYS * 24 * 60;
   
   return createTimeWindow(centerDate, durationMinutes);
 }
