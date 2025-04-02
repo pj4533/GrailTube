@@ -82,6 +82,16 @@ export function useYouTubeSearch() {
    */
   const performReroll = async (): Promise<void> => {
     try {
+      // Set loading state and clear videos to show search status screen
+      setIsLoading(true);
+      setVideos([]);
+      setError(null);
+      setStatusMessage(null);
+      setIsCancelled(false);
+      
+      // Create a new abort controller for this search
+      createAbortController();
+      
       // Check if the search has been cancelled
       if (isCancelled) {
         return;
