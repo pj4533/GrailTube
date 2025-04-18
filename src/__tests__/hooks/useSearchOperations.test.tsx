@@ -57,8 +57,11 @@ describe('useSearchOperations', () => {
     handleError: jest.fn(),
     addSearchedDate: jest.fn(),
     hasSearchedDate: jest.fn().mockReturnValue(false),
+    addSearchedWindow: jest.fn(),
+    hasOverlappingWindow: jest.fn().mockReturnValue(false),
     resetSearchedDates: jest.fn(),
     getSearchedDatesCount: jest.fn().mockReturnValue(5),
+    getSearchedWindowsCount: jest.fn().mockReturnValue(2),
     getTotalPossibleDates: jest.fn().mockReturnValue(100)
   };
 
@@ -218,6 +221,7 @@ describe('useSearchOperations', () => {
       expect(mockActions.setRerollCount).toHaveBeenCalledWith(1); // increment from 0
       expect(mockActions.addSearchedDate).toHaveBeenCalled();
       expect(mockActions.setCurrentWindow).toHaveBeenCalledWith(mockTimeWindow);
+      expect(mockActions.addSearchedWindow).toHaveBeenCalled();
       expect(executeSearch).toHaveBeenCalledWith(
         mockTimeWindow,
         SearchType.Unedited,
@@ -314,6 +318,8 @@ describe('useSearchOperations', () => {
       expect(mockActions.resetState).toHaveBeenCalled();
       expect(mockActions.addSearchedDate).toHaveBeenCalledWith('2023-01');
       expect(mockActions.setCurrentWindow).toHaveBeenCalledWith(mockTimeWindow);
+      expect(mockActions.addSearchedWindow).toHaveBeenCalled();
+      expect(mockActions.addSearchedWindow).toHaveBeenCalledWith(mockTimeWindow);
       expect(mockActions.setStatusMessage).toHaveBeenCalledWith(expect.stringContaining('Starting search'));
       expect(executeSearch).toHaveBeenCalledWith(
         mockTimeWindow,
