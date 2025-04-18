@@ -243,44 +243,28 @@ describe('useSearchOperations', () => {
       expect(executeSearch).not.toHaveBeenCalled();
     });
 
-    it('should reset search dates if all possible dates have been searched', async () => {
-      // Make it look like we've searched all available dates
-      mockActions.getSearchedDatesCount.mockReturnValueOnce(100);
-      mockActions.getTotalPossibleDates.mockReturnValueOnce(100);
-      
+    // Note: This functionality has changed with the new implementation
+    // Now we generate non-overlapping windows instead
+    it('should set status message about finding a new time period', async () => {
       const { result } = renderSearchOperationsHook();
       
       await result.current.performReroll();
       
-      expect(mockActions.resetSearchedDates).toHaveBeenCalled();
-      expect(mockActions.setStatusMessage).toHaveBeenCalledWith(expect.stringContaining("Searched all available dates"));
+      expect(mockActions.setStatusMessage).toHaveBeenCalledWith(expect.stringContaining("Reroll"));
+      expect(mockActions.setStatusMessage).toHaveBeenCalledWith(expect.stringContaining("Finding"));
     });
 
-    it('should try multiple times to get an unsearched date', async () => {
-      // Make it return true for first date but false for second
-      mockActions.hasSearchedDate
-        .mockReturnValueOnce(true)  // First attempt - already searched
-        .mockReturnValueOnce(false); // Second attempt - not searched
+    it('should try non-overlapping windows using hasOverlappingWindow check', async () => {
+      mockActions.hasOverlappingWindow
+        .mockReturnValueOnce(true)  // First window attempt overlaps
+        .mockReturnValueOnce(false); // Second attempt doesn't overlap
       
       const { result } = renderSearchOperationsHook();
       
       await result.current.performReroll();
       
-      // Called twice by loop to find unsearched date
-      expect(getRandomYearMonth).toHaveBeenCalledTimes(2);
-      expect(mockActions.addSearchedDate).toHaveBeenCalledTimes(1);
-    });
-
-    it('should reset searched dates if too many attempts to find unsearched date', async () => {
-      // Always return that the date has been searched
-      mockActions.hasSearchedDate.mockReturnValue(true);
-      
-      const { result } = renderSearchOperationsHook();
-      
-      await result.current.performReroll();
-      
-      // Should reach max attempts and reset dates
-      expect(mockActions.resetSearchedDates).toHaveBeenCalled();
+      expect(mockActions.hasOverlappingWindow).toHaveBeenCalled();
+      expect(mockActions.addSearchedWindow).toHaveBeenCalled();
     });
 
     it('should handle AbortError without showing an error', async () => {
