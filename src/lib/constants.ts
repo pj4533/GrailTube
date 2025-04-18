@@ -14,8 +14,6 @@ export const RANDOM_TIME_WINDOW_DAYS = 4; // 96 hours
 export const UNEDITED_WINDOW_DAYS = 30; // 1 month
 export const KEYWORD_WINDOW_DAYS = 60; // 2 months
 
-// Reroll settings
-export const MAX_REROLLS = 7;  // Maximum number of rerolls before giving up
 
 // Error messages
 export const ERROR_MESSAGES = {

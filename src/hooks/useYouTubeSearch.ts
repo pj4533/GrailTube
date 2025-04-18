@@ -3,7 +3,6 @@ import {
   createInitialTimeWindow
 } from '@/lib/utils';
 import { TimeWindow, SearchType } from '@/types';
-import { MAX_REROLLS } from '@/lib/constants';
 import { useYouTubeSearchState } from './useYouTubeSearchState';
 import { executeSearch, prepareNewSearch, processSearchResults } from './useYouTubeSearchHelpers';
 import { apiStats } from '@/lib/youtube';
@@ -100,12 +99,7 @@ export function useYouTubeSearch() {
       const newRerollCount = rerollCount + 1;
       setRerollCount(newRerollCount);
       
-      // Check if we've reached the maximum number of rerolls
-      if (newRerollCount > MAX_REROLLS) {
-        setError(`After ${MAX_REROLLS} different time periods, couldn't find any videos with zero views. Try again later!`);
-        setIsLoading(false);
-        return;
-      }
+      // No maximum reroll limit - keep trying different time periods
       
       const { newWindow } = prepareNewSearch(
         newRerollCount,
