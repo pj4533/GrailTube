@@ -6,7 +6,7 @@
 
 ## Overview
 
-GrailTube is a web application that helps you discover rare YouTube videos with fewer than 10 views. It searches for unedited footage uploaded during a specific time window from YouTube's past and shows you the ones that have been largely unwatched.
+GrailTube is a web application that helps you discover unedited YouTube videos with fewer than 10 views. It searches for unedited footage uploaded during a specific time window from YouTube's past and shows you the ones that have been largely unwatched.
 
 ## Table of Contents
 

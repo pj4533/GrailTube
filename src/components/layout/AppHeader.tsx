@@ -27,7 +27,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
               <h1 className={styles.text.title}>GrailTube</h1>
               <div className="ml-4 relative hidden md:block">
                 <p className="text-sm text-gray-300">
-                  Discover rare YouTube videos sorted by view count
+                  Discover unedited YouTube videos sorted by view count
                 </p>
               </div>
             </div>
