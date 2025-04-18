@@ -82,7 +82,7 @@ const SearchContent: React.FC<SearchContentProps> = ({
           
           {/* Search results count */}
           <div className="mt-4 text-sm text-gray-500">
-            Found {searchResults.length} unedited videos with less than 10 views
+            Found {searchResults.length} unedited videos sorted by view count
           </div>
         </div>
       )}

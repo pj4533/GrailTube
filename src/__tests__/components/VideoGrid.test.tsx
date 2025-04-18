@@ -122,7 +122,7 @@ describe('VideoGrid Component', () => {
     );
     
     expect(screen.getByTestId('empty-state')).toBeInTheDocument();
-    expect(screen.getByText('No videos with less than 10 views found. Try again!')).toBeInTheDocument();
+    expect(screen.getByText('No videos found. Try another search timeframe!')).toBeInTheDocument();
   });
 
   it('displays empty state with saved videos message when in saved view', () => {

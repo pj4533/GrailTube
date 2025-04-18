@@ -27,7 +27,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
               <h1 className={styles.text.title}>GrailTube</h1>
               <div className="ml-4 relative hidden md:block">
                 <p className="text-sm text-gray-300">
-                  Discover rare YouTube videos with &lt;10 views
+                  Discover rare YouTube videos sorted by view count
                 </p>
                 <a 
                   href="https://github.com/pj4533/GrailTube"
@@ -35,9 +35,9 @@ const AppHeader: React.FC<AppHeaderProps> = ({
                   rel="noopener noreferrer"
                   className="absolute text-gray-300 hover:text-white transition-colors"
                   aria-label="GitHub Repository"
-                  style={{ top: '-2px', right: '-20px' }}
+                  style={{ top: '-4px', right: '-24px' }}
                 >
-                  <Icon.GitHub className="h-4 w-4" />
+                  <Icon.GitHub className="h-6 w-6" />
                 </a>
               </div>
             </div>

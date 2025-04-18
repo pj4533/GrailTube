@@ -31,7 +31,7 @@ export default function VideoGrid({
         message={
           isSavedVideosView 
             ? "No videos have been saved yet. Find some rare gems!"
-            : "No videos with less than 10 views found. Try again!"
+            : "No videos found. Try another search timeframe!"
         }
       />
     );
