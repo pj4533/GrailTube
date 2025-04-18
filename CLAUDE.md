@@ -5,7 +5,7 @@
 - **Dev Server**: `npm run dev`
 - **Lint**: `npm run lint`
 - **Type Check**: `npx tsc --noEmit`
-- **Run Tests**: `npm test`
+- **Run Tests**: `npm test -- --runInBand` (use --runInBand to see all test failures clearly)
 - **Run Tests with Watch Mode**: `npm run test:watch`
 - **Run Tests with Coverage**: `npm run test:coverage`
 - **Run Tests in CI Environment**: `npm run test:ci`
@@ -107,6 +107,7 @@
 
 ## Testing Guidelines
 - Use Jest and React Testing Library for unit tests
+- ALWAYS use the `--runInBand` flag when running tests: `npm test -- --runInBand` to clearly see all test failures
 - Organize tests to mirror the source directory structure
 - Test components, hooks, and utilities independently
 - Mock external dependencies (API calls, DB operations)
