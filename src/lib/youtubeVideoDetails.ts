@@ -62,30 +62,20 @@ export function parseVideoDetails(items: any[]): Video[] {
 }
 
 /**
- * Process video details including batching, filtering, and caching
+ * Process video details including batching and filtering
  */
 export async function processVideoDetails(
   apiKey: string,
   videoIds: string[],
-  videoCache: Record<string, Video>,
   maxIdsPerRequest: number,
   signal?: AbortSignal
 ): Promise<Video[]> {
   if (!videoIds.length) return [];
   
-  // Filter out video IDs that are already cached
-  const uncachedIds = videoIds.filter(id => !videoCache[id]);
-  
-  // If all videos are cached, return from cache
-  if (uncachedIds.length === 0) {
-    apiStats.cachedVideoDetails += videoIds.length;
-    return videoIds.map(id => videoCache[id]);
-  }
-  
   // Split IDs into batches
   const batches = [];
-  for (let i = 0; i < uncachedIds.length; i += maxIdsPerRequest) {
-    batches.push(uncachedIds.slice(i, i + maxIdsPerRequest));
+  for (let i = 0; i < videoIds.length; i += maxIdsPerRequest) {
+    batches.push(videoIds.slice(i, i + maxIdsPerRequest));
   }
   
   try {
@@ -94,7 +84,7 @@ export async function processVideoDetails(
     const batchResults = await Promise.all(batchPromises);
     const allItems = batchResults.flat();
     
-    // Parse and return video details
+    // Return video details
     return allItems;
   } catch (error) {
     // If this is a rate limit error, propagate it up
@@ -103,7 +93,6 @@ export async function processVideoDetails(
     }
     
     console.error('Error getting video details:', error);
-    // Return any cached videos we have for non-rate-limit errors
-    return videoIds.map(id => videoCache[id]).filter(Boolean);
+    return [];
   }
 }

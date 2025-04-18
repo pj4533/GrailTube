@@ -193,35 +193,23 @@ describe('YouTube Video Details', () => {
   });
 
   describe('processVideoDetails', () => {
-    it('should fetch details for uncached videos only', async () => {
+    it('should fetch details for all videos', async () => {
       const videoIds = ['video1', 'video2', 'video3'];
-      const cache: Record<string, Video> = {
-        'video1': {
-          id: 'video1',
-          title: 'Cached Video',
-          description: 'Cached description',
-          publishedAt: '2023-01-01T00:00:00Z',
-          channelTitle: 'Cached Channel',
-          viewCount: 10,
-          thumbnailUrl: 'http://example.com/cached.jpg'
-        }
-      };
       
-      await processVideoDetails(apiKey, videoIds, cache, 50);
+      await processVideoDetails(apiKey, videoIds, 50);
       
-      // Should only fetch video2 and video3
+      // Should fetch all videos
       expect(axios.get).toHaveBeenCalledWith(expect.any(String), {
         params: expect.objectContaining({
-          id: 'video2,video3'
+          id: 'video1,video2,video3'
         })
       });
     });
 
     it('should process videos in batches', async () => {
       const videoIds = ['video1', 'video2', 'video3', 'video4', 'video5'];
-      const cache = {};
       
-      await processVideoDetails(apiKey, videoIds, cache, 2); // Max 2 IDs per request
+      await processVideoDetails(apiKey, videoIds, 2); // Max 2 IDs per request
       
       // Should make 3 API calls with batched IDs
       expect(axios.get).toHaveBeenCalledTimes(3);
@@ -236,20 +224,8 @@ describe('YouTube Video Details', () => {
       });
     });
 
-    it('should merge API results with cached results', async () => {
+    it('should return API results', async () => {
       const videoIds = ['video1', 'video2'];
-      const cache = {
-        'video1': {
-          id: 'video1',
-          title: 'Cached Video',
-          description: 'Cached description',
-          publishedAt: '2023-01-01T00:00:00Z',
-          channelTitle: 'Cached Channel',
-          viewCount: 10,
-          thumbnailUrl: 'http://example.com/cached.jpg',
-          duration: 'PT3M'
-        }
-      };
       
       // Modify the mockApiResponse items to include required properties
       const mockItems = mockApiResponse.data.items.map(item => ({
@@ -261,26 +237,14 @@ describe('YouTube Video Details', () => {
       // Mock response for video2
       (axios.get as jest.Mock).mockResolvedValue({
         data: {
-          items: [mockItems[1]] // Only video2
+          items: mockItems
         }
       });
       
-      
       // Just verify that the function doesn't throw an error
-      const result = await processVideoDetails(apiKey, videoIds, cache, 50);
+      const result = await processVideoDetails(apiKey, videoIds, 50);
       expect(result).toBeDefined();
-    });
-
-    it('should skip API call if all videos are cached', async () => {
-      const videoIds = ['video1', 'video2'];
-      const cache = {
-        'video1': {} as Video,
-        'video2': {} as Video
-      };
-      
-      await processVideoDetails(apiKey, videoIds, cache, 50);
-      
-      expect(axios.get).not.toHaveBeenCalled();
+      expect(result).toHaveLength(2);
     });
   });
 });

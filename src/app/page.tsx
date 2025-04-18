@@ -235,15 +235,13 @@ export default function Home() {
         )}
 
         {/* API Stats Display - only show in search mode */}
-        {appMode === 'search' && (apiStats.totalApiCalls > 0 || apiStats.cachedSearches > 0 || apiStats.cachedVideoDetails > 0) && (
+        {appMode === 'search' && apiStats.totalApiCalls > 0 && (
           <div className={`mt-8 ${styles.layout.panel}`}>
             <h3 className={`${styles.text.body} font-semibold mb-2 text-gray-700`}>API Statistics</h3>
             <ApiStatsDisplay 
               searchApiCalls={apiStats.searchApiCalls}
               videoDetailApiCalls={apiStats.videoDetailApiCalls}
               totalApiCalls={apiStats.totalApiCalls}
-              cachedSearches={apiStats.cachedSearches}
-              cachedVideoDetails={apiStats.cachedVideoDetails}
             />
           </div>
         )}

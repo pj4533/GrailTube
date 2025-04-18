@@ -12,15 +12,12 @@ import {
 
 /**
  * YouTube API Service - Core implementation
- * Encapsulates all YouTube API interactions with caching
+ * Encapsulates all YouTube API interactions
  */
 class YouTubeApiService implements YouTubeServiceInterface {
   private readonly apiKey: string;
   private readonly maxResultsPerRequest: number;
   private readonly maxIdsPerRequest: number;
-  
-  // Only keep video cache for API efficiency
-  private videoCache: Record<string, Video> = {};
   
   constructor() {
     this.apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY || '';
@@ -75,33 +72,25 @@ class YouTubeApiService implements YouTubeServiceInterface {
    */
   async getVideoDetails(videoIds: string[], signal?: AbortSignal): Promise<Video[]> {
     try {
-      // Process video details with batching and caching
+      // Process video details with batching
       const videoItems = await processVideoDetails(
         this.apiKey,
         videoIds,
-        this.videoCache,
         this.maxIdsPerRequest,
         signal
       );
       
-      // Parse and cache the videos
+      // Parse the videos
       const videos = parseVideoDetails(videoItems);
       
-      // Update cache with new videos
-      videos.forEach(video => {
-        this.videoCache[video.id] = video;
-      });
-      
-      // Return all videos (including previously cached ones)
-      return videoIds.map(id => this.videoCache[id]).filter(Boolean);
+      return videos;
     } catch (error) {
       if (error instanceof YouTubeRateLimitError) {
         throw error;
       }
       
       console.error('Error getting video details:', error);
-      // Return any cached videos we have for non-rate-limit errors
-      return videoIds.map(id => this.videoCache[id]).filter(Boolean);
+      return [];
     }
   }
   

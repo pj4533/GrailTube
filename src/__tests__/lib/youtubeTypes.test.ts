@@ -116,16 +116,12 @@ describe('YouTubeTypes', () => {
       apiStats.searchApiCalls = 5;
       apiStats.videoDetailApiCalls = 10;
       apiStats.totalApiCalls = 15;
-      apiStats.cachedSearches = 3;
-      apiStats.cachedVideoDetails = 7;
       
       apiStats.reset();
       
       expect(apiStats.searchApiCalls).toBe(0);
       expect(apiStats.videoDetailApiCalls).toBe(0);
       expect(apiStats.totalApiCalls).toBe(0);
-      expect(apiStats.cachedSearches).toBe(0);
-      expect(apiStats.cachedVideoDetails).toBe(0);
     });
   });
 });

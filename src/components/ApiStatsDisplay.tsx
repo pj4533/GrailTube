@@ -2,16 +2,12 @@ interface ApiStatsProps {
   searchApiCalls: number;
   videoDetailApiCalls: number;
   totalApiCalls: number;
-  cachedSearches: number;
-  cachedVideoDetails: number;
 }
 
 export default function ApiStatsDisplay({
   searchApiCalls,
   videoDetailApiCalls,
-  totalApiCalls,
-  cachedSearches,
-  cachedVideoDetails
+  totalApiCalls
 }: ApiStatsProps) {
   return (
     <div className="mt-4 text-xs text-gray-500 bg-gray-100 p-3 rounded">
@@ -25,12 +21,6 @@ export default function ApiStatsDisplay({
         
         <div>Total API calls:</div>
         <div className="font-semibold">{totalApiCalls}</div>
-        
-        <div>Cached searches:</div>
-        <div>{cachedSearches}</div>
-        
-        <div>Cached video details:</div>
-        <div>{cachedVideoDetails}</div>
       </div>
     </div>
   );

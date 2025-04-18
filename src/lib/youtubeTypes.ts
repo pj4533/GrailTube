@@ -56,14 +56,10 @@ export const apiStats = {
   searchApiCalls: 0,
   videoDetailApiCalls: 0,
   totalApiCalls: 0,
-  cachedSearches: 0,
-  cachedVideoDetails: 0,
   reset: () => {
     apiStats.searchApiCalls = 0;
     apiStats.videoDetailApiCalls = 0;
     apiStats.totalApiCalls = 0;
-    apiStats.cachedSearches = 0;
-    apiStats.cachedVideoDetails = 0;
   }
 };
 
