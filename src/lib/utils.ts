@@ -29,7 +29,65 @@ export function formatDuration(isoDuration: string | undefined): string {
   }
 }
 
+/**
+ * Generate a random year-month string in YYYY-MM format
+ * from YouTube's founding date to yesterday
+ */
+export function getRandomYearMonth(): string {
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth();
+  
+  // YouTube founding: April 2005
+  const startYear = 2005;
+  const startMonth = 3; // April is month 3 (0-indexed)
+  
+  // Generate a random year between start year and current year
+  const randomYear = startYear + Math.floor(Math.random() * (currentYear - startYear + 1));
+  
+  // Determine month range based on the selected year
+  let minMonth = 0;
+  let maxMonth = 11;
+  
+  if (randomYear === startYear) {
+    minMonth = startMonth; // If it's 2005, start from April
+  }
+  
+  if (randomYear === currentYear) {
+    maxMonth = currentMonth; // If it's current year, only go up to current month
+  }
+  
+  // Generate a random month in the valid range
+  const randomMonth = minMonth + Math.floor(Math.random() * (maxMonth - minMonth + 1));
+  
+  // Return in YYYY-MM format
+  return `${randomYear}-${(randomMonth + 1).toString().padStart(2, '0')}`;
+}
+
+/**
+ * Get a random date from a specific year and month
+ */
+export function getDateFromYearMonth(yearMonth: string): Date {
+  const [year, month] = yearMonth.split('-').map(Number);
+  
+  // Determine the number of days in the month
+  const daysInMonth = new Date(year, month, 0).getDate();
+  
+  // Generate a random day in the month
+  const randomDay = 1 + Math.floor(Math.random() * daysInMonth);
+  
+  // Create the date with a random time
+  const date = new Date(year, month - 1, randomDay); // month-1 because months are 0-indexed in JS
+  
+  // Set a random time
+  date.setHours(Math.floor(Math.random() * 24));
+  date.setMinutes(Math.floor(Math.random() * 60));
+  
+  return date;
+}
+
 // Get a random date between YouTube's founding and today
+// This is kept for backward compatibility
 export function getRandomPastDate(): Date {
   const end = subDays(new Date(), 1); // Yesterday
   const randomTimestamp = YOUTUBE_FOUNDING_DATE.getTime() + Math.random() * (end.getTime() - YOUTUBE_FOUNDING_DATE.getTime());

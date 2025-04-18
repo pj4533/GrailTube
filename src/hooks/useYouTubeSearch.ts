@@ -1,5 +1,6 @@
 import { 
-  getRandomPastDate,
+  getRandomYearMonth,
+  getDateFromYearMonth,
   createInitialTimeWindow
 } from '@/lib/utils';
 import { TimeWindow, SearchType } from '@/types';
@@ -99,14 +100,44 @@ export function useYouTubeSearch() {
       const newRerollCount = rerollCount + 1;
       setRerollCount(newRerollCount);
       
-      // No maximum reroll limit - keep trying different time periods
+      // Check if we've searched all possible year-month combinations
+      const totalDates = actions.getTotalPossibleDates();
+      const searchedCount = actions.getSearchedDatesCount();
       
-      const { newWindow } = prepareNewSearch(
-        newRerollCount,
-        setStatusMessage
-      );
+      if (searchedCount >= totalDates) {
+        // We've searched all possible dates, reset the history
+        actions.resetSearchedDates();
+        setStatusMessage("Searched all available dates. Starting over with fresh dates!");
+      }
       
+      // Get a random year-month that hasn't been searched before
+      let yearMonth;
+      let attempts = 0;
+      const maxAttempts = 50; // Prevent infinite loops
+      
+      do {
+        yearMonth = getRandomYearMonth();
+        attempts++;
+        
+        // If we've made too many attempts, reset the searched dates
+        if (attempts >= maxAttempts) {
+          actions.resetSearchedDates();
+          break;
+        }
+      } while (actions.hasSearchedDate(yearMonth));
+      
+      // Add this year-month to our tracked dates
+      actions.addSearchedDate(yearMonth);
+      
+      // Get a random date within the selected month
+      const randomDate = getDateFromYearMonth(yearMonth);
+      
+      // Create a time window centered on this date
+      const newWindow = createInitialTimeWindow(randomDate, true);
       setCurrentWindow(newWindow);
+      
+      // Update status to show which period we're searching
+      setStatusMessage(`Searching ${yearMonth} (${searchedCount + 1}/${totalDates} months explored)...`);
       
       // Search with the new window
       await performSearch(newWindow);
@@ -129,10 +160,23 @@ export function useYouTubeSearch() {
     resetState();
     
     try {
-      // Get a random date and create initial time window for Unedited search
-      const randomDate = getRandomPastDate();
+      // Get a random year-month that hasn't been searched before
+      const yearMonth = getRandomYearMonth();
+      
+      // Add this year-month to our tracked dates
+      actions.addSearchedDate(yearMonth);
+      
+      // Get a random date within the selected month
+      const randomDate = getDateFromYearMonth(yearMonth);
+      
+      // Create a time window centered on this date
       const initialWindow = createInitialTimeWindow(randomDate, true);
       setCurrentWindow(initialWindow);
+      
+      // Update status to show which period we're searching
+      const totalDates = actions.getTotalPossibleDates();
+      const searchedCount = actions.getSearchedDatesCount();
+      setStatusMessage(`Starting search in ${yearMonth} (1/${totalDates} months explored)...`);
       
       // Start the search process
       await performSearch(initialWindow);
