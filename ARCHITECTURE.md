@@ -171,13 +171,13 @@ This section provides a detailed breakdown of the YouTube search algorithm used 
    - Batches requests in groups of up to 50 videos to minimize API calls
    - Caches video details to reduce API usage in future searches
 
-5. **Filtering Process**
-   - Filters videos based on view count (<10 views)
+5. **Filtering and Sorting Process**
+   - No longer filters videos based on view count
    - Calculates view statistics (0 views, <10 views, <100 views, <1000 views)
-   - Sorts results by view count (lowest first)
+   - Sorts results by view count (lowest first) to prioritize rare videos
 
 6. **Handling No Results**
-   - If no videos are found or none have <10 views, automatically "rerolls" to a new time period
+   - If no videos are found, automatically "rerolls" to a new time period
    - Attempts up to 7 rerolls before giving up
    - Shows status messages to inform the user about the search progress
 
@@ -190,7 +190,7 @@ This section provides a detailed breakdown of the YouTube search algorithm used 
 
 - Camera patterns are combined with OR operator: `IMG_|DSC_|DCIM|MOV_|VID_|MVI_`
 - All time windows are exactly 30 days (defined in `constants.ts` as `UNEDITED_WINDOW_DAYS`)
-- View count filtering uses a strict "less than 10" comparison
+- No filtering by view count (previously used "less than 10" comparison)
 - API call statistics are tracked and displayed to users for transparency
 - Search operations are cancellable at any point without leaving API requests pending
 

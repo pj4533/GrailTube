@@ -33,10 +33,11 @@ export default function SearchStatus({
         <div className="text-center mb-8">
           {!isLoading && videos.length > 0 ? (
             <p className="text-gray-600">
-              Found {videos.length} rare unedited videos (less than 10 views) uploaded during{' '}
+              Found {videos.length} unedited videos uploaded during{' '}
               <span className="font-semibold">
                 {formatTimeWindow(currentWindow)}
               </span>
+              {' '}(sorted by view count)
             </p>
           ) : (
             <p className="text-gray-600">

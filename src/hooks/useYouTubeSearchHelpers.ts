@@ -82,7 +82,8 @@ export const executeSearch = async (
     // Get view statistics
     const stats = getViewStats(videoDetails);
     
-    // Filter for videos with less than 10 views
+    // Previously filtered for videos with less than 10 views
+    // Now includes all videos, sorted by view count later
     const rareVideos = filterRareVideos(videoDetails);
     
     return { videoIds, videoDetails, stats, rareVideos };
@@ -120,11 +121,10 @@ export const processSearchResults = async (
   const { stats, rareVideos } = results;
   
   if (rareVideos.length === 0) {
-    // No videos with less than 10 views found
-    // Show the stats in the status message
+    // No videos found at all
     setStatusMessage(`Searching... (analyzing ${stats.totalVideos} videos)`);
     
-    // No rare videos found, reroll to a different date after showing stats
+    // No videos found, reroll to a different date after showing stats
     await delay(STATUS_MESSAGE_DELAY_MS * 2);
     
     // Check if cancelled during delay
@@ -135,8 +135,8 @@ export const processSearchResults = async (
     await onReroll();
     return null;
   } else {
-    // Success! We found rare videos with <10 views
-    // Sort by viewCount (lowest first)
+    // Success! We found videos with camera filename patterns
+    // Sort by viewCount (lowest first) to prioritize the rarest videos
     const sortedVideos = [...rareVideos].sort((a, b) => a.viewCount - b.viewCount);
     return sortedVideos;
   }

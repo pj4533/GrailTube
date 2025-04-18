@@ -134,7 +134,7 @@ describe('SearchStatus Component', () => {
       />
     );
 
-    expect(screen.getByText(/found 2 rare unedited videos/i)).toBeInTheDocument();
+    expect(screen.getByText(/found 2 unedited videos/i)).toBeInTheDocument();
     expect(screen.getByText('Mock formatted time window')).toBeInTheDocument();
   });
 
@@ -208,6 +208,6 @@ describe('SearchStatus Component', () => {
       />
     );
 
-    expect(screen.getByText(/found 2 rare unedited videos/i)).toBeInTheDocument();
+    expect(screen.getByText(/found 2 unedited videos/i)).toBeInTheDocument();
   });
 });

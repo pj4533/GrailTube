@@ -1,16 +1,13 @@
 import { Video, ViewStats } from '@/types';
 
 /**
- * Filter videos with less than 10 views only
+ * Previously filtered videos with less than 10 views only
+ * Now returns all videos (no view count filtering) to provide more results
+ * Videos will still be sorted by view count later to prioritize the rarest ones
  */
 export function filterRareVideos(videos: Video[]): Video[] {
-  return videos.filter(video => {
-    // Must have less than 10 views
-    if (video.viewCount >= 10) return false;
-    
-    // Include this video (passed view count check)
-    return true;
-  });
+  // Return all videos without filtering by view count
+  return videos;
 }
 
 /**

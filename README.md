@@ -23,8 +23,8 @@ GrailTube is a web application that helps you discover rare YouTube videos with 
 
 ## Features
 
-- Discovers rare YouTube videos with fewer than 10 views
-- Focuses on unedited footage using camera filename patterns
+- Discovers YouTube videos with unusual camera filenames (likely unedited footage)
+- Sorts videos by view count to prioritize rare content (putting lowest views first)
 - Shows video thumbnails, titles, channel information, and view counts
 - Saves your favorite rare videos to a MySQL database
 - Displays when you discovered videos and how many views they had at that time

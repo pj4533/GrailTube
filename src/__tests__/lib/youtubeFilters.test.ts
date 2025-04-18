@@ -14,7 +14,7 @@ describe('YouTube Filters', () => {
   });
 
   describe('filterRareVideos', () => {
-    it('should filter videos with less than 10 views', () => {
+    it('should now return all videos without filtering by view count', () => {
       const videos = [
         createMockVideo({ id: 'video1', viewCount: 0 }),
         createMockVideo({ id: 'video2', viewCount: 5 }),
@@ -25,8 +25,9 @@ describe('YouTube Filters', () => {
 
       const result = filterRareVideos(videos);
       
-      expect(result).toHaveLength(3); // Only videos with <10 views
-      expect(result.map(v => v.id)).toEqual(['video1', 'video2', 'video3']);
+      // Now returns all videos, doesn't filter by view count
+      expect(result).toHaveLength(5);
+      expect(result.map(v => v.id)).toEqual(['video1', 'video2', 'video3', 'video4', 'video5']);
     });
 
     it('should handle empty input', () => {

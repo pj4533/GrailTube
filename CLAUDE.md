@@ -29,7 +29,7 @@
 - Track API call statistics for transparency and display timeframe information
 - Always handle rate limiting and quota errors gracefully
 - Support AbortController signal for cancellable search requests
-- Filter videos by view count (less than 10 views)
+- Sort videos by view count (lowest first) to prioritize rare content
 - Expanded camera filename patterns (IMG_, DSC_, DCIM, MOV_, VID_, MVI_) for better unedited footage detection
 - Use a fixed 1-month timeframe for unedited video searches
 
