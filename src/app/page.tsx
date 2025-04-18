@@ -167,14 +167,20 @@ export default function Home() {
               <button
                 onClick={() => performReroll()}
                 disabled={isSearchLoading}
-                className={`rounded-full p-1.5 transition-colors ${isSearchLoading ? 'bg-gray-200 text-gray-400' : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'}`}
+                className={`rounded-full px-3 py-1.5 transition-colors flex items-center ${isSearchLoading ? 'bg-gray-200 text-gray-400' : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'}`}
                 title="Find different videos"
                 data-testid="reroll-button"
               >
                 {isSearchLoading ? (
-                  <Icon.Spinner className="h-5 w-5" />
+                  <>
+                    <Icon.Spinner className="h-5 w-5 mr-2" />
+                    <span className="font-semibold">Finding...</span>
+                  </>
                 ) : (
-                  <Icon.RerollDice className="h-5 w-5" />
+                  <>
+                    <Icon.RerollDice className="h-5 w-5 mr-2" />
+                    <span className="font-semibold">Find more...</span>
+                  </>
                 )}
               </button>
             </h2>
