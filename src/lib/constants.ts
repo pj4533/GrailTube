@@ -14,7 +14,6 @@ export const RANDOM_TIME_WINDOW_DAYS = 4; // 96 hours
 export const UNEDITED_WINDOW_DAYS = 30; // 1 month
 export const KEYWORD_WINDOW_DAYS = 60; // 2 months
 
-
 // Error messages
 export const ERROR_MESSAGES = {
   RATE_LIMIT: 'YouTube API rate limit reached. Please try again later.',
@@ -25,4 +24,7 @@ export const ERROR_MESSAGES = {
   INVALID_SEARCH: 'Invalid search parameters. Please try again.',
 };
 
-
+// Admin functionality
+export const ADMIN_STORAGE_KEY = 'grailtube_admin_state';
+export const ADMIN_TOKEN_COOKIE = 'grailtube_admin_token';
+export const ADMIN_TOKEN_EXPIRY_DAYS = 7; // Admin token expires after 7 days

@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { VideoModel } from '@/lib/models/videoModel';
 import { handleApiError } from '@/lib/api';
 import { initDatabase } from '@/lib/db';
+import { cookies } from 'next/headers';
+import { ADMIN_TOKEN_COOKIE } from '@/lib/constants';
 import logger from '@/lib/logger';
 
 // Track initialization status
@@ -29,7 +31,16 @@ async function ensureInitialized() {
 }
 
 /**
+ * Verify admin authentication status
+ */
+function isAuthenticated(): boolean {
+  const adminToken = cookies().get(ADMIN_TOKEN_COOKIE);
+  return !!adminToken?.value;
+}
+
+/**
  * DELETE /api/saved-videos/[id] - Remove a saved video
+ * Requires admin authentication
  */
 export async function DELETE(
   request: Request,
@@ -38,6 +49,15 @@ export async function DELETE(
   logger.debug('API route: DELETE /api/saved-videos/[id] called', { id: params.id });
   
   try {
+    // Check admin authentication
+    if (!isAuthenticated()) {
+      logger.warn('Unauthorized attempt to delete video', { id: params.id });
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+    
     // Initialize database connection
     await ensureInitialized();
     const videoId = params.id;
@@ -58,3 +78,6 @@ export async function DELETE(
     return NextResponse.json({ error: errorMessage }, { status });
   }
 }
+
+// Make this route dynamic to avoid static generation errors
+export const dynamic = 'force-dynamic';

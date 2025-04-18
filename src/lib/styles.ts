@@ -17,7 +17,7 @@ export const cardStyles = {
 // Button styles are handled by the Button component, but these are for direct class use
 export const buttonStyles = {
   iconButton: 'p-2 rounded-full shadow-md transition-colors duration-200',
-  saveButton: 'bg-blue-500 hover:bg-blue-600 text-white',
+  saveButton: 'bg-emerald-500 hover:bg-emerald-600 text-white',
   removeButton: 'bg-red-500 hover:bg-red-600 text-white',
   disabled: 'opacity-50 cursor-not-allowed',
 };

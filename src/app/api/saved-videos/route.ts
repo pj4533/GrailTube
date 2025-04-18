@@ -131,3 +131,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: errorMessage }, { status });
   }
 }
+
+// Make this route dynamic to avoid static generation errors with database operations
+export const dynamic = 'force-dynamic';

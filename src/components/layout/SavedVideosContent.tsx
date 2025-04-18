@@ -6,6 +6,7 @@ import ErrorDisplay from '@/components/ui/ErrorDisplay';
 import EmptyState from '@/components/ui/EmptyState';
 import VideoGrid from '@/components/VideoGrid';
 import Pagination from '@/components/ui/Pagination';
+import { useAdmin } from '@/hooks/useAdmin';
 
 interface SavedVideosContentProps {
   savedVideos: SavedVideo[];
@@ -29,6 +30,7 @@ const SavedVideosContent: React.FC<SavedVideosContentProps> = ({
   removeVideo,
   goToPage
 }) => {
+  const { isAdmin } = useAdmin();
   return (
     <div className="mb-8">
       <h2 className={styles.layout.sectionHeader}>Community Saved Videos</h2>
@@ -44,11 +46,17 @@ const SavedVideosContent: React.FC<SavedVideosContentProps> = ({
           <VideoGrid 
             videos={savedVideos} 
             onVideoClick={handleVideoClick}
-            onRemoveVideo={removeVideo}
+            onRemoveVideo={isAdmin ? removeVideo : undefined}
             isVideoSaved={() => true}
-            showSaveButtons={true}
+            showSaveButtons={isAdmin}
             isSavedVideosView={true}
           />
+          
+          {isAdmin && (
+            <div className="mt-4 p-3 bg-green-100 border border-green-300 rounded-md text-green-800 text-sm">
+              <p><strong>Admin mode active:</strong> You can now delete saved videos.</p>
+            </div>
+          )}
 
           {/* Pagination controls */}
           <div className="mt-6">
