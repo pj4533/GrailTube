@@ -1,4 +1,6 @@
-import { ApiError, createApiResponse, fetchApi, handleApiError } from '@/lib/api';
+import { ApiError, createApiResponse, fetchApi, handleApiError, isRateLimitError } from '@/lib/api';
+import { YouTubeRateLimitError } from '@/lib/youtubeTypes';
+import { AxiosError } from 'axios';
 
 // Mock fetch
 global.fetch = jest.fn();
@@ -139,6 +141,65 @@ describe('API Utilities', () => {
       });
     });
   });
+  
+  describe('isRateLimitError', () => {
+    it('should identify quota exceeded errors', () => {
+      const quotaError = {
+        response: {
+          status: 403,
+          data: {
+            error: {
+              errors: [{ reason: 'quotaExceeded' }]
+            }
+          }
+        }
+      } as AxiosError;
+      
+      expect(isRateLimitError(quotaError)).toBe(true);
+    });
+    
+    it('should identify rate limit exceeded errors', () => {
+      const rateLimitError = {
+        response: {
+          status: 403,
+          data: {
+            error: {
+              errors: [{ reason: 'rateLimitExceeded' }]
+            }
+          }
+        }
+      } as AxiosError;
+      
+      expect(isRateLimitError(rateLimitError)).toBe(true);
+    });
+    
+    it('should identify HTTP 429 errors as rate limit errors', () => {
+      const error429 = {
+        response: {
+          status: 429,
+          data: {}
+        }
+      } as AxiosError;
+      
+      expect(isRateLimitError(error429)).toBe(true);
+    });
+    
+    it('should handle errors without response data', () => {
+      const noDataError = {
+        response: {
+          status: 403
+        }
+      } as AxiosError;
+      
+      expect(isRateLimitError(noDataError)).toBe(false);
+    });
+    
+    it('should handle errors without response', () => {
+      const noResponseError = {} as AxiosError;
+      
+      expect(isRateLimitError(noResponseError)).toBe(false);
+    });
+  });
 
   describe('handleApiError', () => {
     it('should handle ApiError instances', () => {
@@ -181,6 +242,43 @@ describe('API Utilities', () => {
         'Error in CustomContext:',
         expect.anything()
       );
+    });
+    
+    it('should handle YouTube rate limit errors for API routes', () => {
+      const axiosError = {
+        isAxiosError: true,
+        response: {
+          status: 403,
+          data: {
+            error: {
+              errors: [{ reason: 'quotaExceeded' }]
+            }
+          }
+        }
+      };
+      
+      const result = handleApiError(axiosError, 'API');
+      
+      expect(result).toEqual({
+        error: 'YouTube API quota exceeded. Please try again later.',
+        status: 429
+      });
+    });
+    
+    it('should throw YouTubeRateLimitError for service layer', () => {
+      const axiosError = {
+        isAxiosError: true,
+        response: {
+          status: 403,
+          data: {
+            error: {
+              errors: [{ reason: 'quotaExceeded' }]
+            }
+          }
+        }
+      };
+      
+      expect(() => handleApiError(axiosError, 'YouTube Service')).toThrow(YouTubeRateLimitError);
     });
   });
 });
