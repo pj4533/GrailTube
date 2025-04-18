@@ -207,3 +207,17 @@ This section provides a detailed breakdown of the YouTube search algorithm used 
 2. **Performance Optimization**: Further enhance caching strategies for frequent queries
 3. **Internationalization**: Prepare for multi-language support
 4. **Accessibility**: Enhance accessibility features for broader user support
+5. **Test Coverage Improvements**: Continue improving test coverage, particularly for layout components
+
+## Package Versions
+
+The application uses the following key package versions:
+- Next.js: 14.0.3
+- React: 18.x
+- TypeScript: 5.x
+- Jest: 29.7.0
+- React Testing Library: 16.2.0
+- Tailwind CSS: 3.3.0
+- MySQL2: 3.14.0
+- Axios: 1.6.0
+- Date-fns: 2.30.0

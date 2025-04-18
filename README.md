@@ -38,7 +38,7 @@ GrailTube is a web application that helps you discover rare YouTube videos with 
 - Error handling with graceful recovery for network and database issues
 - Allows you to watch videos directly within the app
 - Modern tabbed interface with "Saved Videos" and "Find Videos" sections
-- Fully tested with >70% test coverage using Jest and React Testing Library
+- Fully tested with >77% test coverage using Jest and React Testing Library
 
 ## Installation
 
@@ -106,9 +106,10 @@ GrailTube is a web application that helps you discover rare YouTube videos with 
 - **Build the project**: `npm run build`
 - **Run type checking**: `npx tsc --noEmit`
 - **Run linting**: `npm run lint`
-- **Run tests**: `npm test`
+- **Run tests**: `npm test -- --runInBand`
 - **Run tests with watch mode**: `npm run test:watch`
 - **Run tests with coverage report**: `npm run test:coverage`
+- **Run tests in CI environment**: `npm run test:ci`
 
 For more information on the testing approach, see [TESTING.md](TESTING.md).
 
@@ -127,15 +128,16 @@ For a detailed explanation of the architecture, see [ARCHITECTURE.md](ARCHITECTU
 
 ## Technologies
 
-- Next.js 14 with App Router
-- TypeScript
-- React Hooks
-- MySQL database
-- Tailwind CSS
+- Next.js 14.0.3 with App Router
+- TypeScript 5.x
+- React 18.x with Hooks
+- MySQL 3.14.0 database
+- Tailwind CSS 3.3.0
 - YouTube Data API v3
-- Jest & React Testing Library
-- Axios
-- Date-fns
+- Jest 29.7.0 & React Testing Library 16.2.0
+- Axios 1.6.0
+- Date-fns 2.30.0
+- Font Awesome icons
 
 ## License
 

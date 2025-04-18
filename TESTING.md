@@ -84,7 +84,11 @@ The project has successfully implemented comprehensive test coverage:
 - Custom hooks have tests for success and error paths
 - YouTube service modules are fully tested
 - API client and utility functions have thorough test coverage
-- Code coverage thresholds (>70%) are met and enforced (currently at >88% statement coverage)
+- Code coverage thresholds (>70%) are met and enforced with current metrics:
+  - Statements: 77.46%
+  - Branches: 78.53%
+  - Functions: 78.48%
+  - Lines: 78.68%
 
 **Note:** The test suite has been updated to reflect the current state of the codebase, including:
 

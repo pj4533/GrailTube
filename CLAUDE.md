@@ -7,7 +7,7 @@
 - **Type Check**: `npx tsc --noEmit`
 - **Run Tests**: `npm test -- --runInBand` (use --runInBand to see all test failures clearly)
 - **Run Tests with Watch Mode**: `npm run test:watch`
-- **Run Tests with Coverage**: `npm run test:coverage`
+- **Run Tests with Coverage**: `npm run test:coverage` (current coverage: >77%)
 - **Run Tests in CI Environment**: `npm run test:ci`
 
 ## Code Style
