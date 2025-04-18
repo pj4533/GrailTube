@@ -29,16 +29,6 @@ const AppHeader: React.FC<AppHeaderProps> = ({
                 <p className="text-sm text-gray-300">
                   Discover rare YouTube videos sorted by view count
                 </p>
-                <a 
-                  href="https://github.com/pj4533/GrailTube"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="absolute text-gray-300 hover:text-white transition-colors"
-                  aria-label="GitHub Repository"
-                  style={{ top: '-4px', right: '-24px' }}
-                >
-                  <Icon.GitHub className="h-6 w-6" />
-                </a>
               </div>
             </div>
             
@@ -73,6 +63,19 @@ const AppHeader: React.FC<AppHeaderProps> = ({
                   <span>Find Videos</span>
                 </div>
               </button>
+              
+              <a
+                href="https://github.com/pj4533/GrailTube"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${styles.nav.tabBase} -mb-[1px] text-gray-400 border-transparent hover:text-gray-200 hover:border-gray-400`}
+                data-testid="github-tab"
+                aria-label="GitHub Repository"
+              >
+                <div className="flex items-center px-2">
+                  <Icon.GitHub className="h-5 w-5" />
+                </div>
+              </a>
             </div>
           </div>
         </div>
