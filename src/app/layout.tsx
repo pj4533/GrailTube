@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'GrailTube - Discover Ultra-Rare YouTube Videos',
-  description: 'Find YouTube videos with less than 5 views uploaded during random 10-minute windows in the past.',
+  description: 'Find unedited YouTube videos from camera footage.',
 };
 
 export default function RootLayout({
