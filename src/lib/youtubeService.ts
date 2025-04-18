@@ -15,14 +15,22 @@ import {
  * Encapsulates all YouTube API interactions
  */
 class YouTubeApiService implements YouTubeServiceInterface {
-  private readonly apiKey: string;
+  private apiKey: string;
   private readonly maxResultsPerRequest: number;
   private readonly maxIdsPerRequest: number;
   
   constructor() {
-    this.apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY || '';
+    // API key will be provided dynamically when making requests
+    this.apiKey = '';
     this.maxResultsPerRequest = 50;
     this.maxIdsPerRequest = 50;
+  }
+  
+  /**
+   * Set the API key to use for requests
+   */
+  setApiKey(key: string) {
+    this.apiKey = key;
   }
   
   /**
@@ -115,6 +123,9 @@ class YouTubeApiService implements YouTubeServiceInterface {
 const youtubeApiService = new YouTubeApiService();
 
 // Export methods for use elsewhere
+export const setApiKey = (key: string): void => 
+  youtubeApiService.setApiKey(key);
+
 export const searchVideosInTimeWindow = (window: TimeWindow, searchType?: SearchType, signal?: AbortSignal): Promise<string[]> => 
   youtubeApiService.searchVideosInTimeWindow(window, searchType, signal);
 

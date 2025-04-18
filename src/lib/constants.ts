@@ -28,3 +28,6 @@ export const ERROR_MESSAGES = {
 export const ADMIN_STORAGE_KEY = 'grailtube_admin_state';
 export const ADMIN_TOKEN_COOKIE = 'grailtube_admin_token';
 export const ADMIN_TOKEN_EXPIRY_DAYS = 7; // Admin token expires after 7 days
+
+// YouTube API key storage
+export const YOUTUBE_API_KEY_STORAGE = 'grailtube_youtube_api_key';

@@ -13,7 +13,8 @@ import {
   faSpinner, 
   faDice, 
   faBookmark,
-  faLock
+  faLock,
+  faKey
 } from '@fortawesome/free-solid-svg-icons';
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
 
@@ -79,6 +80,10 @@ export const Icon = {
   
   Lock: ({ className = "" }: IconProps) => (
     <FontAwesomeIcon icon={faLock} className={className} />
+  ),
+  
+  Key: ({ className = "" }: IconProps) => (
+    <FontAwesomeIcon icon={faKey} className={className} />
   )
 };
 

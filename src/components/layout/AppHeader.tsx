@@ -1,6 +1,7 @@
 import React from 'react';
 import { Icon } from '@/components/ui/Icon';
 import styles from '@/lib/styles';
+import ApiKeyButton from '@/components/ApiKeyButton';
 
 interface AppHeaderProps {
   appMode: 'savedVideos' | 'search';
@@ -63,6 +64,10 @@ const AppHeader: React.FC<AppHeaderProps> = ({
                   <span>Find Videos</span>
                 </div>
               </button>
+              
+              <div className={`${styles.nav.tabBase} -mb-[1px]`}>
+                <ApiKeyButton />
+              </div>
               
               <a
                 href="https://github.com/pj4533/GrailTube"

@@ -1,11 +1,21 @@
 import React from 'react';
 import { render, RenderOptions } from '@testing-library/react';
+import { AdminProvider } from '@/hooks/useAdmin';
 
-// Custom render function that could include providers if needed
+// Create a wrapper with all providers
+const AllProviders = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <AdminProvider>
+      {children}
+    </AdminProvider>
+  );
+};
+
+// Custom render function with providers
 const customRender = (
   ui: React.ReactElement,
   options?: Omit<RenderOptions, 'wrapper'>
-) => render(ui, { ...options });
+) => render(ui, { wrapper: AllProviders, ...options });
 
 // Mock hook responses for testing components
 export const createMockUseAsyncResponse = (overrides = {}) => ({
