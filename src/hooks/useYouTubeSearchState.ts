@@ -32,8 +32,11 @@ export interface SearchStateActions {
   handleError: (error: any, context: string) => void;
   addSearchedDate: (yearMonth: string) => void;
   hasSearchedDate: (yearMonth: string) => boolean;
+  addSearchedWindow: (window: TimeWindow) => void;
+  hasOverlappingWindow: (window: TimeWindow) => boolean;
   resetSearchedDates: () => void;
   getSearchedDatesCount: () => number;
+  getSearchedWindowsCount: () => number;
   getTotalPossibleDates: () => number;
 }
 
@@ -62,10 +65,14 @@ export function useYouTubeSearchState(): {
   // Use extracted hooks
   const { 
     searchedDates,
+    searchedWindows,
     addSearchedDate,
+    addSearchedWindow,
     hasSearchedDate,
+    hasOverlappingWindow,
     resetSearchedDates,
     getSearchedDatesCount,
+    getSearchedWindowsCount,
     getTotalPossibleDates
   } = useSearchedDates();
   
@@ -131,8 +138,11 @@ export function useYouTubeSearchState(): {
       handleError,
       addSearchedDate,
       hasSearchedDate,
+      addSearchedWindow,
+      hasOverlappingWindow,
       resetSearchedDates,
       getSearchedDatesCount,
+      getSearchedWindowsCount,
       getTotalPossibleDates
     },
     createAbortController,

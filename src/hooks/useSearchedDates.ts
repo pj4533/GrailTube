@@ -1,29 +1,49 @@
 import { useState, useEffect } from 'react';
+import { TimeWindow } from '@/types';
 
-// Local storage key for searched year/month combinations
+// Local storage keys
 const SEARCHED_DATES_KEY = 'grailtube_searched_dates';
+const SEARCHED_WINDOWS_KEY = 'grailtube_searched_windows';
 
 /**
- * Hook to manage searched date combinations
+ * Interface for storing time window information in a compressed format
+ */
+interface StoredTimeWindow {
+  start: number; // timestamp
+  end: number;   // timestamp
+}
+
+/**
+ * Hook to manage searched date combinations and time windows
  * Handles local storage persistence and provides helper methods
  */
 export function useSearchedDates() {
   // Track searched year/month combinations in state
   const [searchedDates, setSearchedDates] = useState<Set<string>>(new Set());
   
+  // Track searched time windows in state 
+  const [searchedWindows, setSearchedWindows] = useState<StoredTimeWindow[]>([]);
+  
   // Load searched dates from localStorage on component mount
   useEffect(() => {
     try {
       // Handle localStorage access safely for SSR and tests
       if (typeof window !== 'undefined') {
+        // Load year-month combinations
         const savedDates = localStorage.getItem(SEARCHED_DATES_KEY);
         if (savedDates) {
           setSearchedDates(new Set(JSON.parse(savedDates)));
         }
+        
+        // Load time windows
+        const savedWindows = localStorage.getItem(SEARCHED_WINDOWS_KEY);
+        if (savedWindows) {
+          setSearchedWindows(JSON.parse(savedWindows));
+        }
       }
     } catch (error) {
       console.error('Error loading searched dates from localStorage:', error);
-      // If there's an error, we'll start with an empty set
+      // If there's an error, we'll start with empty data
     }
   }, []);
   
@@ -43,6 +63,20 @@ export function useSearchedDates() {
     }
   }, [searchedDates]);
   
+  // Save searched windows to localStorage whenever they change
+  useEffect(() => {
+    if (searchedWindows.length > 0) {
+      try {
+        // Handle localStorage access safely for SSR and tests
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(SEARCHED_WINDOWS_KEY, JSON.stringify(searchedWindows));
+        }
+      } catch (error) {
+        console.error('Error saving searched windows to localStorage:', error);
+      }
+    }
+  }, [searchedWindows]);
+  
   /**
    * Add a year-month combination to the set of searched dates
    */
@@ -55,6 +89,18 @@ export function useSearchedDates() {
   };
   
   /**
+   * Add a time window to the list of searched windows
+   */
+  const addSearchedWindow = (window: TimeWindow): void => {
+    const storedWindow: StoredTimeWindow = {
+      start: window.startDate.getTime(),
+      end: window.endDate.getTime()
+    };
+    
+    setSearchedWindows(prev => [...prev, storedWindow]);
+  };
+  
+  /**
    * Check if a year-month combination has already been searched
    */
   const hasSearchedDate = (yearMonth: string): boolean => {
@@ -62,16 +108,32 @@ export function useSearchedDates() {
   };
   
   /**
-   * Reset the set of searched dates
+   * Check if a given time window overlaps with any previously searched windows
+   */
+  const hasOverlappingWindow = (window: TimeWindow): boolean => {
+    const start = window.startDate.getTime();
+    const end = window.endDate.getTime();
+    
+    return searchedWindows.some(storedWindow => {
+      // Check for overlap: 
+      // (start1 <= end2 && end1 >= start2) means the two intervals overlap
+      return (start <= storedWindow.end && end >= storedWindow.start);
+    });
+  };
+  
+  /**
+   * Reset the set of searched dates and windows
    */
   const resetSearchedDates = (): void => {
     setSearchedDates(new Set());
+    setSearchedWindows([]);
     try {
       if (typeof window !== 'undefined') {
         localStorage.removeItem(SEARCHED_DATES_KEY);
+        localStorage.removeItem(SEARCHED_WINDOWS_KEY);
       }
     } catch (error) {
-      console.error('Error clearing searched dates from localStorage:', error);
+      console.error('Error clearing searched data from localStorage:', error);
     }
   };
   
@@ -80,6 +142,13 @@ export function useSearchedDates() {
    */
   const getSearchedDatesCount = (): number => {
     return searchedDates.size;
+  };
+  
+  /**
+   * Get the number of searched time windows
+   */
+  const getSearchedWindowsCount = (): number => {
+    return searchedWindows.length;
   };
   
   /**
@@ -101,10 +170,14 @@ export function useSearchedDates() {
   
   return {
     searchedDates,
+    searchedWindows,
     addSearchedDate,
+    addSearchedWindow,
     hasSearchedDate,
+    hasOverlappingWindow,
     resetSearchedDates,
     getSearchedDatesCount,
+    getSearchedWindowsCount,
     getTotalPossibleDates
   };
 }

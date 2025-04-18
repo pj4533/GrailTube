@@ -2,12 +2,17 @@ import { useCallback, useRef } from 'react';
 import { 
   getRandomYearMonth,
   getDateFromYearMonth,
-  createInitialTimeWindow
+  createInitialTimeWindow,
+  getRandomPastDate
 } from '@/lib/utils';
 import { TimeWindow, SearchType } from '@/types';
 import { executeSearch, processSearchResults } from './useYouTubeSearchHelpers';
 import { apiStats } from '@/lib/youtube';
 import { SearchState, SearchStateActions } from './useYouTubeSearchState';
+import { UNEDITED_WINDOW_DAYS } from '@/lib/constants';
+
+// Maximum attempts to find a non-overlapping window
+const MAX_WINDOW_GENERATION_ATTEMPTS = 50;
 
 /**
  * Hook that encapsulates YouTube search operations
@@ -25,12 +30,73 @@ export function useSearchOperations(
   const {
     setIsLoading, setVideos, setCurrentWindow, setStatusMessage,
     setError, setRerollCount, setViewStats, 
-    setIsCancelled, resetState, handleError
+    setIsCancelled, resetState, handleError,
+    addSearchedDate, hasSearchedDate,
+    addSearchedWindow, hasOverlappingWindow
   } = actions;
 
   // Use refs to solve the circular dependency issue
   const performSearchRef = useRef<(timeWindow: TimeWindow) => Promise<void>>();
   const performRerollRef = useRef<() => Promise<void>>();
+  
+  /**
+   * Generate a non-overlapping time window
+   * Returns a unique window that doesn't overlap with any previously searched windows
+   */
+  const generateNonOverlappingWindow = useCallback((): TimeWindow | null => {
+    let attempts = 0;
+    
+    // Try to find a window that doesn't overlap with any previous windows
+    while (attempts < MAX_WINDOW_GENERATION_ATTEMPTS) {
+      // Get a random year-month
+      let yearMonth;
+      let yearMonthAttempts = 0;
+      const maxYearMonthAttempts = 20;
+      
+      // Try to find a year-month that hasn't been searched
+      do {
+        yearMonth = getRandomYearMonth();
+        yearMonthAttempts++;
+        
+        if (yearMonthAttempts >= maxYearMonthAttempts) {
+          // If we can't find an unused year-month after several attempts, 
+          // we'll try with a completely random date instead
+          break;
+        }
+      } while (hasSearchedDate(yearMonth));
+      
+      // Once we have a year-month (or gave up finding an unused one)
+      // Create a window either from the year-month or from a completely random date
+      let centerDate: Date;
+      let newWindow: TimeWindow;
+      
+      if (yearMonthAttempts < maxYearMonthAttempts) {
+        // We found an unused year-month, so create a window from it
+        centerDate = getDateFromYearMonth(yearMonth);
+        newWindow = createInitialTimeWindow(centerDate, true);
+        // Also track that we used this year-month
+        addSearchedDate(yearMonth);
+      } else {
+        // We couldn't find an unused year-month, so pick a completely random date
+        // This gives us more flexibility to find non-overlapping windows
+        centerDate = getRandomPastDate();
+        newWindow = createInitialTimeWindow(centerDate, true);
+      }
+      
+      // Check if this window overlaps with any previous windows
+      if (!hasOverlappingWindow(newWindow)) {
+        // Success! We found a non-overlapping window
+        return newWindow;
+      }
+      
+      attempts++;
+    }
+    
+    // If we've tried too many times and still can't find a non-overlapping window,
+    // we'll have to give up and accept some overlap
+    const randomDate = getRandomPastDate();
+    return createInitialTimeWindow(randomDate, true);
+  }, [hasSearchedDate, addSearchedDate, hasOverlappingWindow]);
 
   /**
    * Reroll function implementation - will be assigned to ref
@@ -56,44 +122,28 @@ export function useSearchOperations(
       const newRerollCount = rerollCount + 1;
       setRerollCount(newRerollCount);
       
-      // Check if we've searched all possible year-month combinations
-      const totalDates = actions.getTotalPossibleDates();
-      const searchedCount = actions.getSearchedDatesCount();
+      // Generate a new non-overlapping window
+      setStatusMessage(`Reroll #${newRerollCount}: Finding a new time period to search...`);
+      const newWindow = generateNonOverlappingWindow();
       
-      if (searchedCount >= totalDates) {
-        // We've searched all possible dates, reset the history
-        actions.resetSearchedDates();
-        setStatusMessage("Searched all available dates. Starting over with fresh dates!");
+      if (!newWindow) {
+        setError("Failed to generate a new search window. Please try again.");
+        setIsLoading(false);
+        return;
       }
       
-      // Get a random year-month that hasn't been searched before
-      let yearMonth;
-      let attempts = 0;
-      const maxAttempts = 50; // Prevent infinite loops
-      
-      do {
-        yearMonth = getRandomYearMonth();
-        attempts++;
-        
-        // If we've made too many attempts, reset the searched dates
-        if (attempts >= maxAttempts) {
-          actions.resetSearchedDates();
-          break;
-        }
-      } while (actions.hasSearchedDate(yearMonth));
-      
-      // Add this year-month to our tracked dates
-      actions.addSearchedDate(yearMonth);
-      
-      // Get a random date within the selected month
-      const randomDate = getDateFromYearMonth(yearMonth);
-      
-      // Create a time window centered on this date
-      const newWindow = createInitialTimeWindow(randomDate, true);
+      // Set the new window and track it
       setCurrentWindow(newWindow);
+      addSearchedWindow(newWindow);
+      
+      // Format date range for display
+      const startDate = newWindow.startDate.toLocaleDateString();
+      const endDate = newWindow.endDate.toLocaleDateString();
+      const windowDays = UNEDITED_WINDOW_DAYS;
+      const windowsCount = actions.getSearchedWindowsCount();
       
       // Update status to show which period we're searching
-      setStatusMessage(`Searching ${yearMonth} (${searchedCount + 1}/${totalDates} months explored)...`);
+      setStatusMessage(`Searching ${windowDays}-day window from ${startDate} to ${endDate} (window #${windowsCount})`);
       
       // Search with the new window
       await performSearchRef.current?.(newWindow);
@@ -182,30 +232,35 @@ export function useSearchOperations(
     resetState();
     
     try {
-      // Get a random year-month that hasn't been searched before
-      const yearMonth = getRandomYearMonth();
+      // Generate a non-overlapping window
+      setStatusMessage('Finding a unique time period to search...');
+      const initialWindow = generateNonOverlappingWindow();
       
-      // Add this year-month to our tracked dates
-      actions.addSearchedDate(yearMonth);
+      if (!initialWindow) {
+        setError("Failed to generate a search window. Please try again.");
+        setIsLoading(false);
+        return;
+      }
       
-      // Get a random date within the selected month
-      const randomDate = getDateFromYearMonth(yearMonth);
-      
-      // Create a time window centered on this date
-      const initialWindow = createInitialTimeWindow(randomDate, true);
+      // Set the window and track it
       setCurrentWindow(initialWindow);
+      addSearchedWindow(initialWindow);
+      
+      // Format date range for display
+      const startDate = initialWindow.startDate.toLocaleDateString();
+      const endDate = initialWindow.endDate.toLocaleDateString();
+      const windowDays = UNEDITED_WINDOW_DAYS;
+      const windowsCount = actions.getSearchedWindowsCount();
       
       // Update status to show which period we're searching
-      const totalDates = actions.getTotalPossibleDates();
-      const searchedCount = actions.getSearchedDatesCount();
-      setStatusMessage(`Starting search in ${yearMonth} (1/${totalDates} months explored)...`);
+      setStatusMessage(`Starting search in ${windowDays}-day window from ${startDate} to ${endDate} (window #${windowsCount})`);
       
       // Start the search process
       await performSearch(initialWindow);
     } catch (err) {
       handleError(err, 'initial search');
     }
-  }, [resetState, actions, setCurrentWindow, setStatusMessage, performSearch, handleError]);
+  }, [resetState, actions, setCurrentWindow, setStatusMessage, setError, setIsLoading, addSearchedWindow, performSearch, handleError, generateNonOverlappingWindow]);
   
   /**
    * Cancel the current search operation
