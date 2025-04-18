@@ -7,29 +7,20 @@ interface SearchTypeIndicatorProps {
 }
 
 /**
- * A component for displaying the unedited videos search type with consistent styling
+ * A simple badge component for displaying the unedited videos search type
  */
 export const SearchTypeIndicator: React.FC<SearchTypeIndicatorProps> = ({
   size = 'md',
   className = '',
 }) => {
-  // Base classes for the badge
-  const baseClasses = 'inline-flex items-center font-medium rounded-full';
-  
-  // Size classes
-  const sizeClasses = {
-    sm: 'px-2 py-0.5 text-xs',
-    md: 'px-3 py-1 text-sm',
-  }[size];
-  
-  const colorClasses = 'bg-emerald-100 text-emerald-800';
-  const IconComponent = Icon.Camera;
-  const labelText = 'Unedited Videos';
+  const baseClasses = 'inline-flex items-center font-medium rounded-full bg-emerald-100 text-emerald-800';
+  const sizeClasses = size === 'sm' ? 'px-2 py-0.5 text-xs' : 'px-3 py-1 text-sm';
+  const iconSize = size === 'sm' ? 'h-3 w-3' : 'h-4 w-4';
 
   return (
-    <span className={`${baseClasses} ${sizeClasses} ${colorClasses} ${className}`}>
-      <IconComponent className={`${size === 'sm' ? 'h-3 w-3' : 'h-4 w-4'} mr-1`} />
-      {labelText}
+    <span className={`${baseClasses} ${sizeClasses} ${className}`}>
+      <Icon.Camera className={`${iconSize} mr-1`} />
+      Unedited Videos
     </span>
   );
 };

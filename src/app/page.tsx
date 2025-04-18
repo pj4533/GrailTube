@@ -154,7 +154,6 @@ export default function Home() {
             statusMessage={statusMessage}
             error={searchError}
             viewStats={viewStats}
-            searchType={searchType}
             onCancelSearch={cancelSearch}
           />
         )}

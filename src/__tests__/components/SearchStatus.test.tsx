@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import SearchStatus from '@/components/SearchStatus';
-import { SearchType, TimeWindow, ViewStats, Video } from '@/types';
+import { TimeWindow, ViewStats, Video } from '@/types';
 import { formatTimeWindow } from '@/lib/utils';
 
 // Mock dependencies
@@ -196,7 +196,7 @@ describe('SearchStatus Component', () => {
     expect(screen.getByText('100')).toBeInTheDocument(); // totalVideos
   });
 
-  it('properly handles unedited search type text', () => {
+  it('properly handles unedited videos text', () => {
     render(
       <SearchStatus
         isLoading={false}
@@ -205,11 +205,9 @@ describe('SearchStatus Component', () => {
         statusMessage={null}
         error={null}
         viewStats={null}
-        searchType={SearchType.Unedited}
       />
     );
 
     expect(screen.getByText(/found 2 rare unedited videos/i)).toBeInTheDocument();
-    // SearchTypeIndicator is no longer used directly in this component
   });
 });

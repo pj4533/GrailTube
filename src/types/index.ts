@@ -32,7 +32,6 @@ export interface TimeWindow {
 
 export enum SearchType {
   Unedited = 'unedited'
-  // Previously had RandomTime and Keyword types that were removed
 }
 
 export interface PaginationMetadata {

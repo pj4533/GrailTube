@@ -1,4 +1,4 @@
-import { TimeWindow, Video, ViewStats, SearchType } from '@/types';
+import { TimeWindow, Video, ViewStats } from '@/types';
 import { formatTimeWindow } from '@/lib/utils';
 import { Icon } from './ui/Icon';
 import LoadingIndicator from './ui/LoadingIndicator';
@@ -12,7 +12,6 @@ interface SearchStatusProps {
   statusMessage: string | null;
   error: string | null;
   viewStats: ViewStats | null;
-  searchType?: SearchType;
   onCancelSearch?: () => void;
 }
 
@@ -26,7 +25,6 @@ export default function SearchStatus({
   statusMessage, 
   error,
   viewStats,
-  searchType = SearchType.Unedited,
   onCancelSearch
 }: SearchStatusProps) {
   return (
