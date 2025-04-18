@@ -3,20 +3,14 @@
 import { useState } from 'react';
 import { useYouTubeSearch } from '@/hooks/useYouTubeSearch';
 import { useSavedVideos } from '@/hooks/useSavedVideos';
-import { Video, SearchType } from '@/types';
-import SearchStatus from '@/components/SearchStatus';
-import ApiStatsDisplay from '@/components/ApiStatsDisplay';
-import VideoGrid from '@/components/VideoGrid';
 import VideoPlayer from '@/components/VideoPlayer';
-import SearchTypeIndicator from '@/components/SearchTypeIndicator';
-import LoadingIndicator from '@/components/ui/LoadingIndicator';
-import ErrorDisplay from '@/components/ui/ErrorDisplay';
-import EmptyState from '@/components/ui/EmptyState';
-import Button from '@/components/ui/Button';
-import { Icon } from '@/components/ui/Icon';
-import Pagination from '@/components/ui/Pagination';
 import styles from '@/lib/styles';
-import { formatTimeWindow } from '@/lib/utils';
+
+// Import extracted components
+import AppHeader from '@/components/layout/AppHeader';
+import SearchContent from '@/components/layout/SearchContent';
+import SavedVideosContent from '@/components/layout/SavedVideosContent';
+import Footer from '@/components/layout/Footer';
 
 // Type for app modes
 type AppMode = 'savedVideos' | 'search';
@@ -79,179 +73,46 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Top Navigation Bar */}
-      <nav className={styles.nav.container}>
-        <div className={styles.nav.innerContainer}>
-          <div className="flex flex-col">
-            {/* Logo and Tabs in same row */}
-            <div className="flex items-center justify-between pb-3">
-              {/* Left side: Logo and description */}
-              <div className="flex items-center">
-                <h1 className={styles.text.title}>GrailTube</h1>
-                <div className="ml-4 relative hidden md:block">
-                  <p className="text-sm text-gray-300">
-                    Discover rare YouTube videos with &lt;10 views
-                  </p>
-                  <a 
-                    href="https://github.com/pj4533/GrailTube"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="absolute text-gray-300 hover:text-white transition-colors"
-                    aria-label="GitHub Repository"
-                    style={{ top: '-2px', right: '-20px' }}
-                  >
-                    <Icon.GitHub className="h-4 w-4" />
-                  </a>
-                </div>
-              </div>
-              
-              {/* Right side: Tab Navigation */}
-              <div className="flex">
-                <button
-                  onClick={handleBackToSaved}
-                  className={`${styles.nav.tabBase} -mb-[1px] ${
-                    appMode === 'savedVideos'
-                      ? styles.nav.tabActive
-                      : styles.nav.tabInactive
-                  }`}
-                  data-testid="saved-videos-tab"
-                >
-                  <div className="flex items-center">
-                    <Icon.BookmarkOutline className="h-4 w-4 mr-2" />
-                    <span>Saved Videos</span>
-                  </div>
-                </button>
-                
-                <button
-                  onClick={handleSwitchToSearch}
-                  className={`${styles.nav.tabBase} -mb-[1px] ${
-                    appMode === 'search'
-                      ? styles.nav.tabActive
-                      : styles.nav.tabInactive
-                  }`}
-                  data-testid="find-videos-tab"
-                >
-                  <div className="flex items-center">
-                    <Icon.Search className="h-4 w-4 mr-2" />
-                    <span>Find Videos</span>
-                  </div>
-                </button>
-              </div>
-            </div>
-            
-          </div>
-        </div>
-      </nav>
+      <AppHeader 
+        appMode={appMode}
+        handleBackToSaved={handleBackToSaved}
+        handleSwitchToSearch={handleSwitchToSearch}
+      />
       
-      {/* Main Content */}
       <main className={`flex-1 ${styles.layout.container} py-6`}>
-        {/* Show search status during loading or reroll */}
-        {(isSearchModeNoResults || isSearchLoading) && (
-          <SearchStatus
-            isLoading={isSearchLoading}
-            videos={searchResults}
+        {appMode === 'search' && (
+          <SearchContent
+            isSearchLoading={isSearchLoading}
+            searchResults={searchResults}
             currentWindow={currentWindow}
             statusMessage={statusMessage}
-            error={searchError}
+            searchError={searchError}
             viewStats={viewStats}
-            onCancelSearch={cancelSearch}
+            apiStats={apiStats}
+            hasFoundVideos={hasFoundVideos}
+            isSearchModeNoResults={isSearchModeNoResults}
+            handleVideoClick={handleVideoClick}
+            saveVideo={saveVideo}
+            isVideoSaved={isVideoSaved}
+            cancelSearch={cancelSearch}
+            performReroll={performReroll}
           />
         )}
 
-        {/* Show search results */}
-        {hasFoundVideos && (
-          <div className="mb-8">
-            <h2 className={`${styles.layout.sectionHeader} flex items-center justify-between`}>
-              <span>Results for {currentWindow && formatTimeWindow(currentWindow)}</span>
-              <button
-                onClick={() => performReroll()}
-                disabled={isSearchLoading}
-                className={`rounded-full px-3 py-1.5 transition-colors flex items-center ${isSearchLoading ? 'bg-gray-200 text-gray-400' : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'}`}
-                title="Find different videos"
-                data-testid="reroll-button"
-              >
-                {isSearchLoading ? (
-                  <>
-                    <Icon.Spinner className="h-5 w-5 mr-2" />
-                    <span className="font-semibold">Finding...</span>
-                  </>
-                ) : (
-                  <>
-                    <Icon.RerollDice className="h-5 w-5 mr-2" />
-                    <span className="font-semibold">Find more...</span>
-                  </>
-                )}
-              </button>
-            </h2>
-            <VideoGrid 
-              videos={searchResults} 
-              onVideoClick={handleVideoClick} 
-              onSaveVideo={saveVideo}
-              isVideoSaved={isVideoSaved}
-              showSaveButtons={true}
-            />
-            
-            {/* Search results count */}
-            <div className="mt-4 text-sm text-gray-500">
-              Found {searchResults.length} unedited videos with less than 10 views
-            </div>
-          </div>
-        )}
-
-        {/* Show saved videos */}
         {appMode === 'savedVideos' && (
-          <div className="mb-8">
-            <h2 className={styles.layout.sectionHeader}>Community Saved Videos</h2>
-            {isSavedVideosLoading ? (
-              <LoadingIndicator message="Loading saved videos..." />
-            ) : savedVideosError ? (
-              <ErrorDisplay message={savedVideosError} />
-            ) : savedVideos.length === 0 ? (
-              <EmptyState message="No videos have been saved yet. Click &quot;Find Videos&quot; to discover rare gems!" />
-            ) : (
-              <>
-                <VideoGrid 
-                  videos={savedVideos} 
-                  onVideoClick={handleVideoClick}
-                  onRemoveVideo={removeVideo}
-                  isVideoSaved={() => true}
-                  showSaveButtons={true}
-                  isSavedVideosView={true}
-                />
-
-                {/* Pagination controls */}
-                <div className="mt-6">
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-500">
-                      Showing {savedVideos.length} of {pagination.totalCount} videos
-                    </div>
-                    <Pagination pagination={pagination} onPageChange={goToPage} />
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-        )}
-
-        {/* API Stats Display - only show in search mode */}
-        {appMode === 'search' && apiStats.totalApiCalls > 0 && (
-          <div className={`mt-8 ${styles.layout.panel}`}>
-            <h3 className={`${styles.text.body} font-semibold mb-2 text-gray-700`}>API Statistics</h3>
-            <ApiStatsDisplay 
-              searchApiCalls={apiStats.searchApiCalls}
-              videoDetailApiCalls={apiStats.videoDetailApiCalls}
-              totalApiCalls={apiStats.totalApiCalls}
-            />
-          </div>
+          <SavedVideosContent
+            savedVideos={savedVideos}
+            pagination={pagination}
+            isLoading={isSavedVideosLoading}
+            error={savedVideosError}
+            handleVideoClick={handleVideoClick}
+            removeVideo={removeVideo}
+            goToPage={goToPage}
+          />
         )}
       </main>
       
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-4">
-        <div className="container mx-auto px-4 text-center text-sm">
-          <p>GrailTube - Discover rare YouTube videos with less than 10 views</p>
-        </div>
-      </footer>
+      <Footer />
 
       {/* Video player modal */}
       {selectedVideoId && (
