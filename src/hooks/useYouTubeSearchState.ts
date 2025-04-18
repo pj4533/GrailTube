@@ -69,9 +69,12 @@ export function useYouTubeSearchState(): {
   // Load searched dates from localStorage on component mount
   useEffect(() => {
     try {
-      const savedDates = localStorage.getItem(SEARCHED_DATES_KEY);
-      if (savedDates) {
-        setSearchedDates(new Set(JSON.parse(savedDates)));
+      // Handle localStorage access safely for SSR and tests
+      if (typeof window !== 'undefined') {
+        const savedDates = localStorage.getItem(SEARCHED_DATES_KEY);
+        if (savedDates) {
+          setSearchedDates(new Set(JSON.parse(savedDates)));
+        }
       }
     } catch (error) {
       console.error('Error loading searched dates from localStorage:', error);
@@ -83,9 +86,12 @@ export function useYouTubeSearchState(): {
   useEffect(() => {
     if (searchedDates.size > 0) {
       try {
-        // Convert Set to Array before stringifying
-        const searchedDatesArray = Array.from(searchedDates);
-        localStorage.setItem(SEARCHED_DATES_KEY, JSON.stringify(searchedDatesArray));
+        // Handle localStorage access safely for SSR and tests
+        if (typeof window !== 'undefined') {
+          // Convert Set to Array before stringifying
+          const searchedDatesArray = Array.from(searchedDates);
+          localStorage.setItem(SEARCHED_DATES_KEY, JSON.stringify(searchedDatesArray));
+        }
       } catch (error) {
         console.error('Error saving searched dates to localStorage:', error);
       }
@@ -146,7 +152,9 @@ export function useYouTubeSearchState(): {
   const resetSearchedDates = (): void => {
     setSearchedDates(new Set());
     try {
-      localStorage.removeItem(SEARCHED_DATES_KEY);
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(SEARCHED_DATES_KEY);
+      }
     } catch (error) {
       console.error('Error clearing searched dates from localStorage:', error);
     }
