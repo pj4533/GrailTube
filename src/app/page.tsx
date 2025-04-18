@@ -88,9 +88,21 @@ export default function Home() {
               {/* Left side: Logo and description */}
               <div className="flex items-center">
                 <h1 className={styles.text.title}>GrailTube</h1>
-                <p className="ml-4 text-sm hidden md:block text-gray-300">
-                  Discover rare YouTube videos with &lt;10 views
-                </p>
+                <div className="ml-4 relative hidden md:block">
+                  <p className="text-sm text-gray-300">
+                    Discover rare YouTube videos with &lt;10 views
+                  </p>
+                  <a 
+                    href="https://github.com/pj4533/GrailTube"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute text-gray-300 hover:text-white transition-colors"
+                    aria-label="GitHub Repository"
+                    style={{ top: '-2px', right: '-20px' }}
+                  >
+                    <Icon.GitHub className="h-4 w-4" />
+                  </a>
+                </div>
               </div>
               
               {/* Right side: Tab Navigation */}

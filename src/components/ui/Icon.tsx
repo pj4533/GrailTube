@@ -14,6 +14,7 @@ import {
   faDice, 
   faBookmark 
 } from '@fortawesome/free-solid-svg-icons';
+import { faGithub } from '@fortawesome/free-brands-svg-icons';
 
 interface IconProps {
   className?: string;
@@ -69,6 +70,10 @@ export const Icon = {
 
   RerollDice: ({ className = "" }: IconProps) => (
     <FontAwesomeIcon icon={faDice} className={className} />
+  ),
+  
+  GitHub: ({ className = "" }: IconProps) => (
+    <FontAwesomeIcon icon={faGithub} className={className} />
   )
 };
 
