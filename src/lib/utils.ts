@@ -87,11 +87,26 @@ export function getDateFromYearMonth(yearMonth: string): Date {
 }
 
 // Get a random date between YouTube's founding and today
-// This is kept for backward compatibility
 export function getRandomPastDate(): Date {
-  const end = subDays(new Date(), 1); // Yesterday
-  const randomTimestamp = YOUTUBE_FOUNDING_DATE.getTime() + Math.random() * (end.getTime() - YOUTUBE_FOUNDING_DATE.getTime());
-  return new Date(randomTimestamp);
+  // Use crypto.getRandomValues for true randomness if available
+  if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+    const array = new Uint32Array(1);
+    window.crypto.getRandomValues(array);
+    // Normalize to 0-1 range
+    const randomValue = array[0] / (0xFFFFFFFF + 1);
+    
+    const end = subDays(new Date(), 1); // Yesterday
+    const randomTimestamp = YOUTUBE_FOUNDING_DATE.getTime() + randomValue * (end.getTime() - YOUTUBE_FOUNDING_DATE.getTime());
+    return new Date(randomTimestamp);
+  } else {
+    // For non-browser environments (like SSR), use a timestamp-seeded random value
+    const seed = Date.now() % 10000; // Use last 4 digits of current timestamp as seed
+    const randomValue = (Math.sin(seed) * 10000) % 1;
+    
+    const end = subDays(new Date(), 1); // Yesterday
+    const randomTimestamp = YOUTUBE_FOUNDING_DATE.getTime() + randomValue * (end.getTime() - YOUTUBE_FOUNDING_DATE.getTime());
+    return new Date(randomTimestamp);
+  }
 }
 
 // Format a time window for display

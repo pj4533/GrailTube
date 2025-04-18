@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { 
   getRandomYearMonth,
   getDateFromYearMonth,
@@ -28,62 +28,14 @@ export function useSearchOperations(
     setIsCancelled, resetState, handleError
   } = actions;
 
-  /**
-   * Perform a search on a single time window and reroll if no videos found
-   */
-  const performSearch = useCallback(async (timeWindow: TimeWindow): Promise<void> => {
-    try {
-      // Check if the search has been cancelled
-      if (isCancelled) {
-        return;
-      }
-      
-      const searchResults = await executeSearch(
-        timeWindow,
-        searchType,
-        isCancelled,
-        setStatusMessage,
-        performReroll
-      );
-      
-      // If search was cancelled or no results found that required reroll
-      if (!searchResults) {
-        return;
-      }
-      
-      const { stats, rareVideos } = searchResults;
-      
-      // Update view stats
-      setViewStats(stats);
-      
-      // Process the search results
-      const processedVideos = await processSearchResults(
-        searchResults,
-        isCancelled,
-        setStatusMessage,
-        performReroll
-      );
-      
-      if (processedVideos) {
-        setVideos(processedVideos);
-        setStatusMessage(null);
-        setIsLoading(false);
-      }
-    } catch (error) {
-      // Check if this is an abort error (from the AbortController)
-      if (error instanceof DOMException && error.name === 'AbortError') {
-        // This is expected when the search is cancelled, don't show an error
-        return;
-      }
-      
-      handleError(error, 'search');
-    }
-  }, [isCancelled, searchType, setStatusMessage, setViewStats, setVideos, setIsLoading, handleError]);
+  // Use refs to solve the circular dependency issue
+  const performSearchRef = useRef<(timeWindow: TimeWindow) => Promise<void>>();
+  const performRerollRef = useRef<() => Promise<void>>();
 
   /**
-   * Start a completely new search with a random time period
+   * Reroll function implementation - will be assigned to ref
    */
-  const performReroll = useCallback(async (): Promise<void> => {
+  performRerollRef.current = async (): Promise<void> => {
     try {
       // Set loading state and clear videos to show search status screen
       setIsLoading(true);
@@ -144,7 +96,7 @@ export function useSearchOperations(
       setStatusMessage(`Searching ${yearMonth} (${searchedCount + 1}/${totalDates} months explored)...`);
       
       // Search with the new window
-      await performSearch(newWindow);
+      await performSearchRef.current?.(newWindow);
     } catch (error) {
       // Check if this is an abort error
       if (error instanceof DOMException && error.name === 'AbortError') {
@@ -154,8 +106,73 @@ export function useSearchOperations(
       
       handleError(error, 'reroll');
     }
-  }, [isCancelled, rerollCount, setIsLoading, setVideos, setError, setStatusMessage, setIsCancelled, 
-      createAbortController, setRerollCount, actions, setCurrentWindow, performSearch, handleError]);
+  };
+
+  /**
+   * Search function implementation - will be assigned to ref
+   */
+  performSearchRef.current = async (timeWindow: TimeWindow): Promise<void> => {
+    try {
+      // Check if the search has been cancelled
+      if (isCancelled) {
+        return;
+      }
+      
+      const searchResults = await executeSearch(
+        timeWindow,
+        searchType,
+        isCancelled,
+        setStatusMessage,
+        async () => await performRerollRef.current?.()
+      );
+      
+      // If search was cancelled or no results found that required reroll
+      if (!searchResults) {
+        return;
+      }
+      
+      const { stats, rareVideos } = searchResults;
+      
+      // Update view stats
+      setViewStats(stats);
+      
+      // Process the search results
+      const processedVideos = await processSearchResults(
+        searchResults,
+        isCancelled,
+        setStatusMessage,
+        async () => await performRerollRef.current?.()
+      );
+      
+      if (processedVideos) {
+        setVideos(processedVideos);
+        setStatusMessage(null);
+        setIsLoading(false);
+      }
+    } catch (error) {
+      // Check if this is an abort error (from the AbortController)
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        // This is expected when the search is cancelled, don't show an error
+        return;
+      }
+      
+      handleError(error, 'search');
+    }
+  };
+
+  /**
+   * Perform a search on a single time window and reroll if no videos found
+   */
+  const performSearch = useCallback(async (timeWindow: TimeWindow): Promise<void> => {
+    await performSearchRef.current?.(timeWindow);
+  }, []);
+
+  /**
+   * Start a completely new search with a random time period
+   */
+  const performReroll = useCallback(async (): Promise<void> => {
+    await performRerollRef.current?.();
+  }, []);
 
   /**
    * Start search from a random date with Unedited search type
