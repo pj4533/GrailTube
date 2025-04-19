@@ -15,9 +15,9 @@ GrailTube is a web application that helps you discover unedited YouTube videos w
 - [Installation](#installation)
 - [Usage](#usage)
 - [Development](#development)
-  - [Testing](TESTING.md)
+  - [Testing](docs/TESTING.md)
 - [Architecture](#architecture)
-  - [Detailed Architecture](ARCHITECTURE.md)
+  - [Detailed Architecture](docs/ARCHITECTURE.md)
 - [Technologies](#technologies)
 - [License](#license)
 
@@ -39,6 +39,7 @@ GrailTube is a web application that helps you discover unedited YouTube videos w
 - Allows you to watch videos directly within the app
 - Modern tabbed interface with "Saved Videos" and "Find Videos" sections
 - Fully tested with >77% test coverage using Jest and React Testing Library
+- Detailed documentation in the docs directory, including camera filename pattern reference
 
 ## Installation
 
@@ -101,6 +102,8 @@ GrailTube is a web application that helps you discover unedited YouTube videos w
 10. Save interesting videos by clicking the bookmark icon.
 11. Switch back to "Saved Videos" tab to view your collection.
 
+For more information on the camera filename patterns used, see [raw_footage_filename_search.md](docs/raw_footage_filename_search.md).
+
 ## Development
 
 - **Build the project**: `npm run build`
@@ -111,7 +114,7 @@ GrailTube is a web application that helps you discover unedited YouTube videos w
 - **Run tests with coverage report**: `npm run test:coverage`
 - **Run tests in CI environment**: `npm run test:ci`
 
-For more information on the testing approach, see [TESTING.md](TESTING.md).
+For more information on the testing approach, see [TESTING.md](docs/TESTING.md).
 
 ## Architecture
 
@@ -124,7 +127,7 @@ The application follows a clean architecture with separation of concerns:
 - **Adapters**: Type conversion and data transformation
 - **Utilities**: Shared helper functions and constants
 
-For a detailed explanation of the architecture, see [ARCHITECTURE.md](ARCHITECTURE.md).
+For a detailed explanation of the architecture, see [ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Technologies
 

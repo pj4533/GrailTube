@@ -32,6 +32,7 @@
 - Sort videos by view count (lowest first) to prioritize rare content
 - Expanded camera filename patterns (IMG_, DSC_, DCIM, MOV_, VID_, MVI_) for better unedited footage detection
 - Use a fixed 1-month timeframe for unedited video searches
+- See docs/raw_footage_filename_search.md for reference on the camera filename patterns
 
 ## API and Data Guidelines
 - Use centralized error handling from src/lib/api.ts
@@ -77,6 +78,10 @@
 - Provide clear status messages during operations
 
 ## Project Structure
+- **/docs**: Documentation files
+  - **ARCHITECTURE.md**: Detailed explanation of the application architecture
+  - **TESTING.md**: Information about the testing approach
+  - **raw_footage_filename_search.md**: Reference for camera filename patterns
 - **/src/app**: Next.js app router pages and API routes
   - **page.tsx**: Main application with tabbed navigation and video display
 - **/src/components**: Reusable UI components
